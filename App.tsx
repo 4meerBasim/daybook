@@ -1,20 +1,34 @@
+import { useColorScheme } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { useFonts } from 'expo-font';
+import { fontAssets } from './src/theme/fonts';
+import { ThemeProvider, useTheme } from './src/theme/ThemeProvider';
+import { StoreProvider } from './src/state/store';
+import { Root } from './src/navigation/Root';
 
 export default function App() {
+  const [fontsLoaded] = useFonts(fontAssets);
+  const systemDark = useColorScheme() === 'dark';
+
+  if (!fontsLoaded) return null;
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <ThemeProvider systemDark={systemDark}>
+          <StoreProvider>
+            <ThemedStatusBar />
+            <Root />
+          </StoreProvider>
+        </ThemeProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+function ThemedStatusBar() {
+  const { dark } = useTheme();
+  return <StatusBar style={dark ? 'light' : 'dark'} />;
+}
