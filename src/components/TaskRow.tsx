@@ -43,7 +43,6 @@ export function TaskRow({
 }: TaskRowProps) {
   const { c, ui, mono, rtl, reduced } = useTheme();
   const [textWidth, setTextWidth] = useState(0);
-  const [pressed, setPressed] = useState(false);
 
   const strike = useSharedValue(done ? 1 : 0);
   const dry = useSharedValue(done ? 1 : 0);
@@ -81,15 +80,13 @@ export function TaskRow({
   return (
     <Pressable
       onPress={handlePress}
-      onPressIn={() => setPressed(true)}
-      onPressOut={() => setPressed(false)}
       android_ripple={null}
       accessibilityRole="checkbox"
       accessibilityState={{ checked: done }}
       accessibilityLabel={title}
       accessibilityActions={accessibilityActions}
       onAccessibilityAction={onAccessibilityAction}
-      style={[
+      style={({ pressed }) => [
         {
           flex: 1,
           flexDirection: row(rtl),

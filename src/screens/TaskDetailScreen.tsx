@@ -284,10 +284,14 @@ export function TaskDetailScreen({ onBack, onFocus }: { onBack: () => void; onFo
             >
               <PaperclipIcon size={20} color={c.ink3} />
             </View>
-            <Text style={[ui(13, 400, 18), { color: c.ink3, textAlign: align(rtl) }]}>
-              invoice-0918.pdf {'·'} 240 KB{'\n'}
-              {t.attachHint}
-            </Text>
+            <View>
+              <Text style={[ui(13, 400, 18), { color: c.ink3, textAlign: align(rtl) }]}>
+                invoice-0918.pdf {'·'} 240 KB
+              </Text>
+              <Text style={[ui(13, 400, 18), { color: c.ink3, textAlign: align(rtl) }]}>
+                {t.attachHint}
+              </Text>
+            </View>
           </View>
         </View>
       </ScrollView>

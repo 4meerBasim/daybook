@@ -108,7 +108,7 @@ export function TodayScreen({
               {t.habit1}
             </Text>
             <View style={{ flexDirection: row(rtl), alignItems: 'center' }}>
-              <StreakTallyIcon color={c.moss} />
+              <StreakTallyIcon color={c.moss} flip={rtl} />
               <Text style={[mono(12, 500), { color: c.moss }, marginStart(rtl, 6)]}>12</Text>
             </View>
           </View>

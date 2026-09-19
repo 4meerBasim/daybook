@@ -134,9 +134,9 @@ export function DragHandleIcon({ size = 24, color }: Props) {
   );
 }
 
-export function StreakTallyIcon({ color }: { color: string }) {
+export function StreakTallyIcon({ color, flip = false }: { color: string; flip?: boolean }) {
   return (
-    <Svg width={30} height={14} viewBox="0 0 30 14">
+    <Svg width={30} height={14} viewBox="0 0 30 14" style={flip ? { transform: [{ scaleX: -1 }] } : undefined}>
       <Path d="M3 1v12M8 1v12M13 1v12M18 1v12M1 12L20 2" stroke={color} fill="none" strokeWidth={1.5} strokeLinecap="round" />
       <Path d="M25 1v12M29 1v12" stroke={color} fill="none" strokeWidth={1.5} strokeLinecap="round" />
     </Svg>

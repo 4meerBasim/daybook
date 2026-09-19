@@ -13,7 +13,9 @@ The bar is absolutely positioned at `top: 11` and anchored to `left: -2` or `rig
 
 Completion state itself is the `done` map in `src/state/store.tsx`, keyed by task id.
 
-Static end-state renderings of the same stroke appear elsewhere: `ProjectScreen.tsx` draws the bar at full width for finished rows, and [[Page Closed]] and [[Search]] use plain `textDecorationLine: 'line-through'`.
+Static end-state renderings of the same stroke appear elsewhere: `ProjectScreen.tsx` draws the bar at full width for finished rows, and [[Page Closed]], [[Search]] and the subtasks on [[Task Detail]] use plain `textDecorationLine: 'line-through'`.
+
+That split is the design's, not an inconsistency to tidy away. Only the [[Today]] rows animate the stroke, and only those are given the absolutely positioned bar with a transitioning width; every other screen in the design uses `text-decoration: line-through` directly, because the row arrives already struck and has nothing to animate.
 
 ## Related
 - Page: [[Today]], [[Project Detail]], [[Page Closed]], [[Search]], [[Task Detail]]

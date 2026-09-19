@@ -20,7 +20,7 @@ export function PageClosedScreen({ onPlanTomorrow }: { onPlanTomorrow: () => voi
         <Text style={[display(40), { color: c.ink, textAlign: align(rtl) }]}>{t.today}</Text>
       </View>
 
-      <Ledger style={{ height: 336 }}>
+      <Ledger>
         <EmptyRules count={6} />
 
         <View

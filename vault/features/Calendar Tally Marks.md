@@ -10,7 +10,9 @@ Summary: Each day in the month grid carries hand-tally strokes under its number,
 
 Tapping a cell writes to `sel` on the shared store and the day list below re-renders from `dayPool()`; because `sel` is global rather than screen state, the selected day is remembered across visits.
 
-The grid itself flips with `row(rtl)` and its leading blank offset changes with locale (`ar ? 3 : 1`) so the month starts on the right weekday in both scripts.
+The grid itself flips with `row(rtl)` and its leading blank offset changes with locale (`ar ? 3 : 1`) so the month starts on the right weekday in both scripts. The marks themselves need no mirroring — they are plain verticals. Only the habit streak on [[Today]] draws the diagonal that binds a bundle of five, and that one does flip; see [[In-App RTL and Arabic Typography]].
+
+The design's prose describes "max 5, then a struck bundle", but its own render simply caps the count at five and draws no bundle, which is what is built here.
 
 ## Related
 - Page: [[Calendar]]

@@ -42,3 +42,6 @@ yarn-error.*
 
 # design source snapshot (reference only)
 .design/
+
+# obsidian per-user workspace state
+vault/.obsidian/workspace.json

@@ -16,6 +16,10 @@ Typography switches per script in `src/theme/fonts.ts`: display Newsreader → N
 
 Digit-bearing elements that must stay in order — the focus countdown and its session counter — are pinned with `writingDirection: 'ltr'`.
 
+The design's mirror list also names the tally bundle stroke, so `StreakTallyIcon` takes a `flip` prop and [[Today]]'s habit row passes `rtl`, mirroring the diagonal that binds the first five marks. The vertical marks of [[Calendar Tally Marks]] need no flip — they are symmetrical.
+
+Because the native layout direction stays LTR, a `Text` resolves its base direction from its first strong character, which gives Arabic strings RTL order for free and keeps Latin runs like `invoice-0918.pdf` intact. The one place that broke was [[Task Detail]]'s attachment caption, where the filename and the Arabic hint shared a single `Text` separated by a newline: the Latin filename won the base direction and dragged the Arabic line LTR with it. They are now two `Text` elements, which is the isolation the design asks for.
+
 Language is set from two places: the English / العربية pair on [[Onboarding]] and the Language row on [[Settings]].
 
 ## Related

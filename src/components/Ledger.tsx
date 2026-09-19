@@ -1,14 +1,14 @@
 import React from 'react';
-import { StyleProp, Text, View, ViewStyle } from 'react-native';
+import { Text, View } from 'react-native';
 import { useTheme } from '../theme/ThemeProvider';
 import { metrics, radius } from '../theme/tokens';
 import { insetStart, pad, row } from '../lib/rtl';
 import { CheckIcon } from './Icon';
 
-export function Ledger({ children, style }: { children?: React.ReactNode; style?: StyleProp<ViewStyle> }) {
+export function Ledger({ children }: { children?: React.ReactNode }) {
   const { c, rtl } = useTheme();
   return (
-    <View style={[{ position: 'relative', borderTopWidth: 1, borderTopColor: c.rule }, style]}>
+    <View style={{ position: 'relative', borderTopWidth: 1, borderTopColor: c.rule }}>
       <View
         pointerEvents="none"
         style={[
@@ -21,13 +21,7 @@ export function Ledger({ children, style }: { children?: React.ReactNode; style?
   );
 }
 
-export function LedgerRow({
-  children,
-  style,
-}: {
-  children?: React.ReactNode;
-  style?: StyleProp<ViewStyle>;
-}) {
+export function LedgerRow({ children }: { children?: React.ReactNode }) {
   const { c, rtl } = useTheme();
   return (
     <View
@@ -41,7 +35,6 @@ export function LedgerRow({
           borderBottomColor: c.rule,
         },
         pad(rtl, 16, metrics.gutter),
-        style,
       ]}
     >
       {children}

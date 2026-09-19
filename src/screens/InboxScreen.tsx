@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
 import { useTheme } from '../theme/ThemeProvider';
 import { metrics } from '../theme/tokens';
@@ -41,22 +41,8 @@ export function InboxScreen() {
                 {k.title}
               </Text>
               <View style={{ flexDirection: row(rtl), gap: 6 }}>
-                <Pressable
-                  hitSlop={metrics.hitSlop}
-                  android_ripple={null}
-                  accessibilityRole="button"
-                  accessibilityLabel={`${t.today} — ${k.title}`}
-                >
-                  <Chip label={t.today} outline height={28} />
-                </Pressable>
-                <Pressable
-                  hitSlop={metrics.hitSlop}
-                  android_ripple={null}
-                  accessibilityRole="button"
-                  accessibilityLabel={`${t.someday} — ${k.title}`}
-                >
-                  <Chip label={t.someday} outline height={28} />
-                </Pressable>
+                <Chip label={t.today} outline height={28} />
+                <Chip label={t.someday} outline height={28} />
               </View>
             </LedgerRow>
           ))}
