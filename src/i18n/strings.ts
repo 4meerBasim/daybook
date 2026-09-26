@@ -90,6 +90,18 @@ export const EN = {
   task3: 'Buy oat milk',
   task4: 'Call the plumber',
   task5: 'Book flights for Amman',
+  dentist: 'Dentist appointment',
+  weeklyReview: 'Weekly review',
+  carInsurance: 'Renew car insurance',
+  launchSite: 'Launch Studio website',
+  ammanHotel: 'Book Amman hotel',
+  ideaBoard: 'Idea: monthly reading board',
+  askSami: 'Ask Sami about taxes',
+  kitchenLamp: 'Fix kitchen lamp',
+  projectBrief: 'Project brief',
+  moodboards: 'Moodboards',
+  weekGroup: 'This week',
+  laterGroup: 'Later',
   yesterday: 'Yesterday',
   left: 'left',
   allDoneShort: 'all done',
@@ -189,6 +201,18 @@ export const AR: typeof EN = {
   task3: 'شراء حليب الشوفان',
   task4: 'الاتصال بالسباك',
   task5: 'حجز رحلات إلى عمّان',
+  dentist: 'موعد طبيب الأسنان',
+  weeklyReview: 'مراجعة أسبوعية',
+  carInsurance: 'تجديد التأمين',
+  launchSite: 'إطلاق موقع الاستوديو',
+  ammanHotel: 'حجز فندق عمّان',
+  ideaBoard: 'فكرة: لوحة قراءة شهرية',
+  askSami: 'سؤال سامي عن الضرائب',
+  kitchenLamp: 'إصلاح مصباح المطبخ',
+  projectBrief: 'ملخص المشروع',
+  moodboards: 'لوحات المزاج',
+  weekGroup: 'هذا الأسبوع',
+  laterGroup: 'لاحقاً',
   yesterday: 'أمس',
   left: 'متبقية',
   allDoneShort: 'أُنجز الكل',
@@ -198,3 +222,7 @@ export const AR: typeof EN = {
 };
 
 export type Strings = typeof EN;
+
+export type StringKey = {
+  [K in keyof Strings]: Strings[K] extends string ? K : never;
+}[keyof Strings];

@@ -3,8 +3,9 @@ import { Pressable, Text, View } from 'react-native';
 import { useTheme } from '../theme/ThemeProvider';
 import { metrics } from '../theme/tokens';
 import { align, insetStart, marginStart, pad, row } from '../lib/rtl';
+import { dayOfMonth, timeLabel } from '../lib/date';
 import { useStore } from '../state/store';
-import { load, dayPool } from '../data/seed';
+import { rowTitle } from '../db/schema';
 import { Screen, useHeaderTop } from '../components/Screen';
 import { TallyMarks } from '../components/TallyMarks';
 
@@ -12,23 +13,27 @@ type Cell = { n: number; count: number; today: boolean };
 
 export function CalendarScreen() {
   const { c, t, ar, rtl, display, ui, mono } = useTheme();
-  const { sel, setSel } = useStore();
+  const { month, sel, setSel } = useStore();
   const top = useHeaderTop();
+
+  const todayN = dayOfMonth(Date.now());
+  const load = new Map<number, number>();
+  for (const k of month) {
+    const d = dayOfMonth(k.dueDate);
+    load.set(d, (load.get(d) ?? 0) + 1);
+  }
 
   const offset = ar ? 3 : 1;
   const cells: (Cell | null)[] = [];
   for (let i = 0; i < offset; i++) cells.push(null);
-  for (let d = 1; d <= 30; d++) cells.push({ n: d, count: load[d] ?? 0, today: d === 18 });
+  for (let d = 1; d <= 30; d++) cells.push({ n: d, count: load.get(d) ?? 0, today: d === todayN });
   while (cells.length % 7 !== 0) cells.push(null);
 
   const weeks: (Cell | null)[][] = [];
   for (let i = 0; i < cells.length; i += 7) weeks.push(cells.slice(i, i + 7));
 
-  const selN = load[sel] ?? 0;
-  const pool = dayPool(t);
-  const selItems = sel === 18 ? pool.slice(0, 3) : pool.slice(0, Math.min(selN, 3));
-  const selDayLabel = (ar ? 'سبتمبر ' : 'September ') + sel;
-  const selCount = String(sel === 18 ? 3 : selN);
+  const selItems = month.filter((k) => dayOfMonth(k.dueDate) === sel);
+  const selDayLabel = `${t.month} ${sel}`;
 
   return (
     <Screen>
@@ -76,7 +81,7 @@ export function CalendarScreen() {
               {week.map((cell, ci) => {
                 if (!cell) return <View key={ci} style={{ flex: 1, height: 56 }} />;
                 const selected = cell.n === sel;
-                const fg = cell.today ? c.ver : cell.n < 18 ? c.ink3 : c.ink;
+                const fg = cell.today ? c.ver : cell.n < todayN ? c.ink3 : c.ink;
                 const tallyColor = cell.today ? c.ver : c.ink2;
                 return (
                   <Pressable
@@ -142,12 +147,12 @@ export function CalendarScreen() {
               {selDayLabel}
             </Text>
             <View style={{ flex: 1 }} />
-            <Text style={[mono(12, 500), { color: c.ink3 }]}>{selCount}</Text>
+            <Text style={[mono(12, 500), { color: c.ink3 }]}>{selItems.length}</Text>
           </View>
 
-          {selItems.map((k, i) => (
+          {selItems.map((k) => (
             <View
-              key={i}
+              key={k.id}
               style={[
                 {
                   flexDirection: row(rtl),
@@ -174,9 +179,11 @@ export function CalendarScreen() {
                 maxFontSizeMultiplier={1.6}
                 style={[ui(17), { flex: 1, color: c.ink, textAlign: align(rtl) }, marginStart(rtl, 16)]}
               >
-                {k.title}
+                {rowTitle(k, t)}
               </Text>
-              {k.meta ? <Text style={[mono(12, 500), { color: c.ink3 }]}>{k.meta}</Text> : null}
+              {timeLabel(k.dueDate) ? (
+                <Text style={[mono(12, 500), { color: c.ink3 }]}>{timeLabel(k.dueDate)}</Text>
+              ) : null}
             </View>
           ))}
 

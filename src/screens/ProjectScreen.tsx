@@ -3,7 +3,9 @@ import { LayoutChangeEvent, Pressable, ScrollView, Text, View } from 'react-nati
 import { useTheme } from '../theme/ThemeProvider';
 import { metrics } from '../theme/tokens';
 import { align, insetStart, marginStart, pad, row } from '../lib/rtl';
-import { project, ProjectItem } from '../data/seed';
+import { dayOfMonth, timeLabel } from '../lib/date';
+import { useStore } from '../state/store';
+import { rowTitle, type TaskRow } from '../db/schema';
 import { Screen, useHeaderTop } from '../components/Screen';
 import { Ledger, SectionLabel, EmptyRules } from '../components/Ledger';
 import { Chip } from '../components/Chip';
@@ -31,6 +33,8 @@ function Avatar({ initials, bg, first }: { initials: string; bg: string; first: 
     </View>
   );
 }
+
+type ProjectItem = { title: string; meta: string; done: boolean };
 
 function ProjectRow({ item }: { item: ProjectItem }) {
   const { c, ui, mono, rtl } = useTheme();
@@ -96,10 +100,16 @@ function ProjectRow({ item }: { item: ProjectItem }) {
   );
 }
 
+function rowMeta(task: TaskRow): string {
+  if (task.dueDate === null) return '';
+  return timeLabel(task.dueDate) || String(dayOfMonth(task.dueDate));
+}
+
 export function ProjectScreen() {
-  const { c, t, display, ui, mono, ar, rtl } = useTheme();
+  const { c, t, display, ui, mono, rtl } = useTheme();
+  const { project } = useStore();
   const top = useHeaderTop();
-  const rows = project(t, ar);
+  const doneCount = project.filter((k) => k.completedAt !== null).length;
 
   return (
     <Screen>
@@ -118,7 +128,7 @@ export function ProjectScreen() {
             {t.studio}
           </Text>
           <Text style={[mono(22, 500), { color: c.ink2, paddingBottom: 4 }]}>
-            <Text style={{ color: c.ink }}>7</Text> / 12
+            <Text style={{ color: c.ink }}>{doneCount}</Text> / {project.length}
           </Text>
         </View>
 
@@ -136,8 +146,11 @@ export function ProjectScreen() {
 
       <Ledger>
         <SectionLabel label={t.thisWeek} />
-        {rows.map((k) => (
-          <ProjectRow key={k.title} item={k} />
+        {project.map((k) => (
+          <ProjectRow
+            key={k.id}
+            item={{ title: rowTitle(k, t), meta: rowMeta(k), done: k.completedAt !== null }}
+          />
         ))}
         <SectionLabel label={`${t.later} · 5`} />
         <EmptyRules count={3} />

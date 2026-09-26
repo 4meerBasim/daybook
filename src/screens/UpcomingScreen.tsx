@@ -4,19 +4,39 @@ import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native
 import { useTheme } from '../theme/ThemeProvider';
 import { maxFontSizeMultiplier, metrics } from '../theme/tokens';
 import { align, marginStart, pad, row } from '../lib/rtl';
-import { upcoming } from '../data/seed';
+import { addDays, dayOfMonth, startOfDay, timeLabel } from '../lib/date';
+import { useStore } from '../state/store';
+import { rowTitle, type DatedTask } from '../db/schema';
 import { Screen } from '../components/Screen';
 import { PageHeader } from '../components/PageHeader';
 import { Checkbox, Dot, EmptyRules, Ledger, LedgerRow } from '../components/Ledger';
 
+function dateLabel(items: DatedTask[]): string {
+  const first = dayOfMonth(items[0].dueDate);
+  const last = dayOfMonth(items[items.length - 1].dueDate);
+  return first === last ? String(first) : `${first}–${last}`;
+}
+
 export function UpcomingScreen() {
-  const { c, t, ar, ui, mono, display, rtl } = useTheme();
+  const { c, t, ui, mono, display, rtl } = useTheme();
+  const { upcoming } = useStore();
   const scrollY = useSharedValue(0);
   const onScroll = useAnimatedScrollHandler((e) => {
     scrollY.value = e.contentOffset.y;
   });
 
-  const groups = upcoming(t, ar);
+  const now = Date.now();
+  const dayAfterTomorrow = startOfDay(addDays(now, 2));
+  const weekEnd = startOfDay(addDays(now, 8));
+
+  const groups = [
+    { day: t.tomorrow, items: upcoming.filter((k) => k.dueDate < dayAfterTomorrow) },
+    {
+      day: t.weekGroup,
+      items: upcoming.filter((k) => k.dueDate >= dayAfterTomorrow && k.dueDate < weekEnd),
+    },
+    { day: t.laterGroup, items: upcoming.filter((k) => k.dueDate >= weekEnd) },
+  ].filter((g) => g.items.length > 0);
 
   return (
     <Screen>
@@ -49,31 +69,34 @@ export function UpcomingScreen() {
                 >
                   {g.day}
                 </Text>
-                <Text style={[mono(12, 500), { color: c.ink3 }]}>{g.date}</Text>
+                <Text style={[mono(12, 500), { color: c.ink3 }]}>{dateLabel(g.items)}</Text>
                 <View style={{ flex: 1 }} />
-                <Text style={[mono(12, 500), { color: c.ink3 }]}>{g.count}</Text>
+                <Text style={[mono(12, 500), { color: c.ink3 }]}>{g.items.length}</Text>
               </View>
 
-              {g.items.map((k) => (
-                <LedgerRow key={k.title}>
-                  <Checkbox />
-                  <Text
-                    numberOfLines={1}
-                    maxFontSizeMultiplier={1.6}
-                    style={[
-                      ui(17, 400, 22),
-                      { flex: 1, minWidth: 0, color: c.ink, textAlign: align(rtl) },
-                      marginStart(rtl, 16),
-                    ]}
-                  >
-                    {k.title}
-                  </Text>
-                  <View style={{ flexDirection: row(rtl), alignItems: 'center', gap: 6 }}>
-                    <Dot color={c[k.color]} />
-                    {k.meta ? <Text style={[mono(12, 500), { color: c.ink3 }]}>{k.meta}</Text> : null}
-                  </View>
-                </LedgerRow>
-              ))}
+              {g.items.map((k) => {
+                const meta = timeLabel(k.dueDate);
+                return (
+                  <LedgerRow key={k.id}>
+                    <Checkbox />
+                    <Text
+                      numberOfLines={1}
+                      maxFontSizeMultiplier={1.6}
+                      style={[
+                        ui(17, 400, 22),
+                        { flex: 1, minWidth: 0, color: c.ink, textAlign: align(rtl) },
+                        marginStart(rtl, 16),
+                      ]}
+                    >
+                      {rowTitle(k, t)}
+                    </Text>
+                    <View style={{ flexDirection: row(rtl), alignItems: 'center', gap: 6 }}>
+                      <Dot color={c[k.color]} />
+                      {meta ? <Text style={[mono(12, 500), { color: c.ink3 }]}>{meta}</Text> : null}
+                    </View>
+                  </LedgerRow>
+                );
+              })}
             </React.Fragment>
           ))}
 
