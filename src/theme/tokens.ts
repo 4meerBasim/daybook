@@ -22,6 +22,8 @@ export const metrics = {
   content: 66,
   tabBar: 84,
   pen: 56,
+  tab: 56,
+  minTap: 44,
   labelColumn: 88,
   hitSlop: { top: 8, bottom: 8, left: 8, right: 8 },
 } as const;

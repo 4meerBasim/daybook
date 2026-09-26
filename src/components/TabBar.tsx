@@ -15,20 +15,17 @@ const icons = {
   search: SearchIcon,
 };
 
-export function TabBar({
-  active,
-  onSelect,
-  onPen,
-  onLongPress,
-}: {
+const LEADING: TabKey[] = ['today', 'upcoming'];
+const TRAILING: TabKey[] = ['inbox', 'search'];
+
+type TabProps = {
   active: TabKey;
   onSelect: (k: TabKey) => void;
-  onPen: () => void;
   onLongPress?: (k: TabKey) => void;
-}) {
-  const { c, t, rtl, dark } = useTheme();
+};
 
-  const items: TabKey[] = ['today', 'upcoming', 'inbox', 'search'];
+export function TabBar({ active, onSelect, onPen, onLongPress }: TabProps & { onPen: () => void }) {
+  const { c, t, rtl, dark } = useTheme();
 
   return (
     <View
@@ -46,33 +43,16 @@ export function TabBar({
           borderTopWidth: 1,
           borderTopColor: c.rule,
           flexDirection: row(rtl),
-          justifyContent: 'space-around',
           alignItems: 'flex-start',
           paddingTop: 10,
           paddingHorizontal: 12,
         }}
       >
-        {items.slice(0, 2).map((k) => (
-          <TabItem
-            key={k}
-            tab={k}
-            active={active === k}
-            onPress={() => onSelect(k)}
-            onLongPress={onLongPress ? () => onLongPress(k) : undefined}
-          />
-        ))}
+        <TabGroup keys={LEADING} active={active} onSelect={onSelect} onLongPress={onLongPress} />
 
         <View style={{ width: metrics.pen }} />
 
-        {items.slice(2).map((k) => (
-          <TabItem
-            key={k}
-            tab={k}
-            active={active === k}
-            onPress={() => onSelect(k)}
-            onLongPress={onLongPress ? () => onLongPress(k) : undefined}
-          />
-        ))}
+        <TabGroup keys={TRAILING} active={active} onSelect={onSelect} onLongPress={onLongPress} />
       </View>
 
       <View
@@ -104,6 +84,24 @@ export function TabBar({
   );
 }
 
+function TabGroup({ keys, active, onSelect, onLongPress }: TabProps & { keys: TabKey[] }) {
+  const { rtl } = useTheme();
+
+  return (
+    <View style={{ flex: 1, flexDirection: row(rtl), justifyContent: 'space-around' }}>
+      {keys.map((k) => (
+        <TabItem
+          key={k}
+          tab={k}
+          active={active === k}
+          onPress={() => onSelect(k)}
+          onLongPress={onLongPress ? () => onLongPress(k) : undefined}
+        />
+      ))}
+    </View>
+  );
+}
+
 function TabItem({
   tab,
   active,
@@ -127,7 +125,14 @@ function TabItem({
       accessibilityState={{ selected: active }}
       accessibilityLabel={t[tab]}
       android_ripple={null}
-      style={{ width: 56, height: 56, alignItems: 'center', gap: 4 }}
+      style={{
+        width: metrics.tab,
+        minWidth: metrics.minTap,
+        flexShrink: 1,
+        height: metrics.tab,
+        alignItems: 'center',
+        gap: 4,
+      }}
     >
       {tab === 'today' && active ? (
         <PageIcon color={c.ink} paper={c.paper2} />
