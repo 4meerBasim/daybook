@@ -10,12 +10,13 @@ import { useTheme } from '../theme/ThemeProvider';
 import { radius } from '../theme/tokens';
 import { align, row } from '../lib/rtl';
 import { useStore } from '../state/store';
-import { chipColors, parse, tokenColor } from '../lib/parse';
+import { chipColors, draft, parse, tokenColor } from '../lib/parse';
+import { PRIORITY_HIGH } from '../db/schema';
 import { CalendarIcon, FlagIcon, HashIcon, PaperclipIcon } from '../components/Icon';
 
 export function QuickAddSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { c, t, ar, ui, display, rtl, reduced } = useTheme();
-  const { qa, setQa } = useStore();
+  const { qa, setQa, create } = useStore();
   const sheetRef = useRef<BottomSheet>(null);
   const inputRef = useRef<React.ComponentRef<typeof BottomSheetTextInput>>(null);
 
@@ -36,6 +37,13 @@ export function QuickAddSheet({ open, onClose }: { open: boolean; onClose: () =>
     : ar
       ? 'يُحفظ في الوارد'
       : 'Saved to Inbox';
+
+  const onAdd = () => {
+    const { title, dueDate, high } = draft(parsed, Date.now());
+    if (title) create({ title, dueDate, priority: high ? PRIORITY_HIGH : null });
+    setQa('');
+    onClose();
+  };
 
   const renderBackdrop = useCallback(
     (props: BottomSheetBackdropProps) => (
@@ -178,7 +186,7 @@ export function QuickAddSheet({ open, onClose }: { open: boolean; onClose: () =>
             <PaperclipIcon size={22} color={c.ink2} />
           </View>
           <Pressable
-            onPress={onClose}
+            onPress={onAdd}
             accessibilityRole="button"
             accessibilityLabel={t.add}
             android_ripple={null}

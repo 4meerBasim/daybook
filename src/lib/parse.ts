@@ -1,4 +1,5 @@
 import { Palette } from '../theme/palette';
+import { addDays, atTime, nextWeekday, startOfDay } from './date';
 
 export type TokenKind = 'plain' | 'date' | 'time' | 'tag' | 'pri' | 'rep';
 
@@ -63,6 +64,52 @@ export function parse(q: string, ar: boolean): Parsed {
   );
 
   return { tokens, chips, hasDate };
+}
+
+export type Draft = { title: string; dueDate: number | null; high: boolean };
+
+const MONDAY = 1;
+const FRIDAY = 5;
+
+function resolveDay(text: string, now: number): number {
+  const w = text.toLowerCase();
+  if (w.includes('monday')) return nextWeekday(now, MONDAY);
+  if (w.includes('friday')) return nextWeekday(now, FRIDAY);
+  if (w.includes('next week')) return startOfDay(addDays(now, 7));
+  if (w.includes('tomorrow') || w.includes('غد')) return startOfDay(addDays(now, 1));
+  return startOfDay(now);
+}
+
+function applyTime(day: number, text: string): number {
+  const m = /(\d{1,2})(?::(\d{2}))?\s*(am|pm)/i.exec(text);
+  if (!m) return day;
+  const hour = (Number(m[1]) % 12) + (m[3].toLowerCase() === 'pm' ? 12 : 0);
+  return atTime(day, hour, m[2] ? Number(m[2]) : 0);
+}
+
+export function draft(p: Parsed, now: number): Draft {
+  const title = p.tokens
+    .filter(
+      (tk) =>
+        tk.kind === 'plain' ||
+        tk.kind === 'tag' ||
+        tk.kind === 'rep' ||
+        (tk.kind === 'time' && !p.hasDate)
+    )
+    .map((tk) => tk.text)
+    .join('')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  const high = p.tokens.some((tk) => tk.kind === 'pri');
+
+  if (!p.hasDate) return { title, dueDate: null, high };
+
+  const dateToken = p.tokens.find((tk) => tk.kind === 'date');
+  const timeToken = p.tokens.find((tk) => tk.kind === 'time');
+  const day = dateToken ? resolveDay(dateToken.text, now) : startOfDay(now);
+
+  return { title, dueDate: timeToken ? applyTime(day, timeToken.text) : day, high };
 }
 
 export function tokenColor(kind: TokenKind, c: Palette): string {
