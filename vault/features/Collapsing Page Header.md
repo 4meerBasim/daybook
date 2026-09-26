@@ -15,4 +15,4 @@ Under [[Reduced Motion Mode]] the animated style returns an empty object and the
 ## Related
 - Page: [[Today]], [[Upcoming]], [[Inbox]], [[Inbox Empty]]
 - Features: [[Reduced Motion Mode]], [[Ledger Paper Chrome]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]]
-- Bugs: none
+- Bugs: [[Startup Crash From Mismatched Worklets]]

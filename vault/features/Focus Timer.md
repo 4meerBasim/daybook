@@ -14,3 +14,4 @@ The primary button calls `toggleRun` and relabels itself Pause / Resume from `t.
 - Page: [[Focus Mode]]
 - Features: [[Reduced Motion Mode]], [[Light and Dark Paper Palettes]], [[In-App RTL and Arabic Typography]]
 - Bugs: [[Focus Mode Unreachable]]
+- Enhancements: [[Deal Me One Task Picker]], [[Focus Live Activity and Widgets]]

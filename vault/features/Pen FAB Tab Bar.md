@@ -22,3 +22,4 @@ The whole bar mirrors with `row(rtl)`, so in Arabic Search sits leftmost and the
 - Page: [[Main Tabs]], [[Today]], [[Upcoming]], [[Inbox]], [[Search]], [[Quick Add Sheet]], [[Settings]], [[Calendar]], [[Inbox Empty]]
 - Features: [[Natural Language Quick Add]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]]
 - Bugs: none
+- Enhancements: [[Deal Me One Task Picker]], [[System Capture Entry Points]]

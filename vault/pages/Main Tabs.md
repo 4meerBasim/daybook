@@ -6,8 +6,8 @@ Summary: The tab shell that hosts the four primary lists, the pen FAB, and the q
 ## Related
 - Connects to: [[Today]], [[Upcoming]], [[Inbox]], [[Search]], [[Quick Add Sheet]], [[Settings]], [[Calendar]], [[Inbox Empty]], [[Task Detail]], [[Project Detail]], [[Page Closed]], [[Swipe States]], [[Onboarding]], [[Focus Mode]]
 - Features: [[Pen FAB Tab Bar]], [[Light and Dark Paper Palettes]], [[In-App RTL and Arabic Typography]]
-- Bugs: [[Focus Mode Unreachable]]
-- Enhancements: none
+- Bugs: [[Focus Mode Unreachable]], [[Startup Crash From Mismatched Worklets]]
+- Enhancements: [[Deal Me One Task Picker]]
 
 ## Notes
 Tab switching is local `useState` inside `MainTabs`, not a navigator — only one of the four screens is mounted at a time. The stack routes are reached from here:

@@ -24,3 +24,4 @@ The highlighting effect in the sheet is a transparent `BottomSheetTextInput` lay
 - Page: [[Quick Add Sheet]], [[Inbox]], [[Upcoming]]
 - Features: [[Pen FAB Tab Bar]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]]
 - Bugs: [[Quick Add Does Not Create Tasks]]
+- Enhancements: [[Day Capacity Budget]], [[Notes With Live Task Lines]], [[Voice Brain Dump Capture]], [[System Capture Entry Points]]

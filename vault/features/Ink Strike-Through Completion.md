@@ -20,4 +20,5 @@ That split is the design's, not an inconsistency to tidy away. Only the [[Today]
 ## Related
 - Page: [[Today]], [[Project Detail]], [[Page Closed]], [[Search]], [[Task Detail]]
 - Features: [[Reduced Motion Mode]], [[Ledger Paper Chrome]]
-- Bugs: none
+- Bugs: [[Startup Crash From Mismatched Worklets]]
+- Enhancements: [[Closing the Page Ritual]], [[Ink Decay and Task Retirement]]

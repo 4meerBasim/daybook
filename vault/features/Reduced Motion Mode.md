@@ -21,4 +21,5 @@ Controlled from the Reduce motion row on [[Settings]].
 ## Related
 - Page: [[Settings]], [[Today]], [[Focus Mode]], [[Quick Add Sheet]], [[Swipe States]], [[Page Closed]]
 - Features: [[Ink Strike-Through Completion]], [[Swipe Row Actions]], [[Wax Page Closed Stamp]], [[Collapsing Page Header]], [[Focus Timer]]
-- Bugs: none
+- Bugs: [[Startup Crash From Mismatched Worklets]]
+- Enhancements: [[Ink Decay and Task Retirement]]

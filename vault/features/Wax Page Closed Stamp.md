@@ -14,3 +14,4 @@ The 0.9 opacity ceiling is deliberate — the stamp reads as ink absorbed into p
 - Page: [[Today]], [[Page Closed]]
 - Features: [[Ink Strike-Through Completion]], [[Reduced Motion Mode]], [[Light and Dark Paper Palettes]], [[Ledger Paper Chrome]]
 - Bugs: none
+- Enhancements: [[Closing the Page Ritual]]

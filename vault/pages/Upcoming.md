@@ -7,7 +7,7 @@ Summary: Scheduled work grouped by day — tomorrow, a named weekday, and next w
 - Connects to: [[Main Tabs]], [[Calendar]] — long-press the Upcoming tab, [[Quick Add Sheet]] — pen FAB
 - Features: [[Ledger Paper Chrome]], [[Collapsing Page Header]], [[Pen FAB Tab Bar]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]]
 - Bugs: [[Swipe Actions Not Wired Into Task Lists]]
-- Enhancements: none
+- Enhancements: [[Closing the Page Ritual]], [[Ink Decay and Task Retirement]], [[Weekly Spread Review]]
 
 ## Notes
 `src/screens/UpcomingScreen.tsx`, data from `upcoming()` in `src/data/seed.ts`. Rows here are read-only `LedgerRow`s — the checkboxes are static, unlike [[Today]].

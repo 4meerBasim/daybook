@@ -26,3 +26,4 @@ Language is set from two places: the English / العربية pair on [[Onboardi
 - Page: [[Onboarding]], [[Settings]], [[Main Tabs]], [[Today]], [[Upcoming]], [[Inbox]], [[Inbox Empty]], [[Search]], [[Quick Add Sheet]], [[Calendar]], [[Project Detail]], [[Task Detail]], [[Focus Mode]], [[Page Closed]], [[Swipe States]]
 - Features: [[Light and Dark Paper Palettes]], [[Ledger Paper Chrome]], [[Swipe Row Actions]], [[Natural Language Quick Add]]
 - Bugs: none
+- Enhancements: [[Voice Brain Dump Capture]]

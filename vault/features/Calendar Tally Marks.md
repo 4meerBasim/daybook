@@ -18,3 +18,4 @@ The design's prose describes "max 5, then a struck bundle", but its own render s
 - Page: [[Calendar]]
 - Features: [[Ledger Paper Chrome]], [[Light and Dark Paper Palettes]], [[In-App RTL and Arabic Typography]]
 - Bugs: none
+- Enhancements: [[Day Capacity Budget]], [[Weekly Spread Review]]

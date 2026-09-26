@@ -30,4 +30,5 @@ The thresholds are documented on-screen by the annotation rows in [[Swipe States
 ## Related
 - Page: [[Today]], [[Swipe States]], [[Settings]], [[Calendar]]
 - Features: [[Reduced Motion Mode]], [[In-App RTL and Arabic Typography]], [[Ink Strike-Through Completion]]
-- Bugs: [[Swipe Actions Not Wired Into Task Lists]]
+- Bugs: [[Swipe Actions Not Wired Into Task Lists]], [[Startup Crash From Mismatched Worklets]]
+- Enhancements: [[Waiting On Follow-Ups]]

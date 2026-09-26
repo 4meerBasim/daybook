@@ -18,3 +18,4 @@ Metrics come from `src/theme/tokens.ts` and are shared with every screen, which 
 - Page: [[Today]], [[Upcoming]], [[Inbox]], [[Inbox Empty]], [[Search]], [[Project Detail]], [[Task Detail]], [[Calendar]], [[Page Closed]], [[Swipe States]]
 - Features: [[Light and Dark Paper Palettes]], [[In-App RTL and Arabic Typography]], [[Ink Strike-Through Completion]], [[Collapsing Page Header]]
 - Bugs: none
+- Enhancements: [[Closing the Page Ritual]], [[Day Capacity Budget]], [[Ink Decay and Task Retirement]], [[Notes With Live Task Lines]], [[Deal Me One Task Picker]], [[Weekly Spread Review]], [[Focus Live Activity and Widgets]]

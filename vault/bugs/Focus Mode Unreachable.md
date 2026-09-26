@@ -16,3 +16,4 @@ Fixed by giving the ellipsis button on [[Task Detail]] an `onFocus` handler that
 ## Related
 - Feature: [[Focus Timer]]
 - Page: [[Focus Mode]], [[Task Detail]], [[Main Tabs]]
+- Enhancements: [[Deal Me One Task Picker]], [[Focus Live Activity and Widgets]]

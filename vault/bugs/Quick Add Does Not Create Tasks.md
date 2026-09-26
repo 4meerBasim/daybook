@@ -20,3 +20,4 @@ Worth confirming with the user whether this was left out deliberately for the de
 ## Related
 - Feature: [[Natural Language Quick Add]], [[Pen FAB Tab Bar]]
 - Page: [[Quick Add Sheet]], [[Today]], [[Upcoming]], [[Inbox]]
+- Enhancements: [[Voice Brain Dump Capture]], [[System Capture Entry Points]]

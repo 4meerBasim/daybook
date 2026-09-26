@@ -20,3 +20,4 @@ Controlled from the Appearance segmented control on [[Settings]].
 - Page: [[Settings]], [[Onboarding]], [[Main Tabs]], [[Today]], [[Upcoming]], [[Inbox]], [[Inbox Empty]], [[Search]], [[Quick Add Sheet]], [[Calendar]], [[Project Detail]], [[Task Detail]], [[Focus Mode]], [[Page Closed]], [[Swipe States]]
 - Features: [[Ledger Paper Chrome]], [[In-App RTL and Arabic Typography]], [[Natural Language Quick Add]], [[Wax Page Closed Stamp]]
 - Bugs: none
+- Enhancements: [[Ink Decay and Task Retirement]]
