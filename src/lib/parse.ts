@@ -1,4 +1,4 @@
-import { Palette } from '../theme/palette';
+import type { Palette } from '../theme/palette';
 import { addDays, atTime, nextWeekday, startOfDay } from './date';
 
 export type TokenKind = 'plain' | 'date' | 'time' | 'tag' | 'pri' | 'rep';
@@ -10,6 +10,16 @@ export type Parsed = { tokens: Token[]; chips: Chip[]; hasDate: boolean };
 
 const RE =
   /(\btomorrow\b|\btoday\b|\btonight\b|\bnext (?:week|monday|friday)\b|\bevery (?:day|week|monday|friday|month)\b|غداً|غدا|اليوم|كل (?:يوم|أسبوع|شهر)|\d{1,2}(?::\d{2})?\s*(?:am|pm)\b|#[\w؀-ۿ]+|!+|مهم)/gi;
+
+const TAG_RE = /#[\w؀-ۿ]+/g;
+
+export function splitTags(title: string): { title: string; tags: string[] } {
+  const found = title.match(TAG_RE) ?? [];
+  return {
+    title: title.replace(TAG_RE, '').replace(/\s+/g, ' ').trim(),
+    tags: [...new Set(found.map((tag) => tag.slice(1).toLowerCase()))],
+  };
+}
 
 export function parse(q: string, ar: boolean): Parsed {
   const tokens: Token[] = [];
@@ -66,7 +76,7 @@ export function parse(q: string, ar: boolean): Parsed {
   return { tokens, chips, hasDate };
 }
 
-export type Draft = { title: string; dueDate: number | null; high: boolean };
+export type Draft = { title: string; tags: string[]; dueDate: number | null; high: boolean };
 
 const MONDAY = 1;
 const FRIDAY = 5;
@@ -88,7 +98,7 @@ function applyTime(day: number, text: string): number {
 }
 
 export function draft(p: Parsed, now: number): Draft {
-  const title = p.tokens
+  const written = p.tokens
     .filter(
       (tk) =>
         tk.kind === 'plain' ||
@@ -97,19 +107,18 @@ export function draft(p: Parsed, now: number): Draft {
         (tk.kind === 'time' && !p.hasDate)
     )
     .map((tk) => tk.text)
-    .join('')
-    .replace(/\s+/g, ' ')
-    .trim();
+    .join('');
 
+  const { title, tags } = splitTags(written);
   const high = p.tokens.some((tk) => tk.kind === 'pri');
 
-  if (!p.hasDate) return { title, dueDate: null, high };
+  if (!p.hasDate) return { title, tags, dueDate: null, high };
 
   const dateToken = p.tokens.find((tk) => tk.kind === 'date');
   const timeToken = p.tokens.find((tk) => tk.kind === 'time');
   const day = dateToken ? resolveDay(dateToken.text, now) : startOfDay(now);
 
-  return { title, dueDate: timeToken ? applyTime(day, timeToken.text) : day, high };
+  return { title, tags, dueDate: timeToken ? applyTime(day, timeToken.text) : day, high };
 }
 
 export function tokenColor(kind: TokenKind, c: Palette): string {
@@ -126,6 +135,20 @@ export function tokenColor(kind: TokenKind, c: Palette): string {
     default:
       return c.ink;
   }
+}
+
+const TAG_TINTS: { bg: keyof Palette; fg: keyof Palette }[] = [
+  { bg: 'mossS', fg: 'moss' },
+  { bg: 'ochS', fg: 'och' },
+  { bg: 'blueS', fg: 'blue' },
+  { bg: 'verS', fg: 'ver' },
+];
+
+export function tagColors(tag: string, c: Palette): { bg: string; fg: string } {
+  let sum = 0;
+  for (let i = 0; i < tag.length; i += 1) sum += tag.charCodeAt(i);
+  const tint = TAG_TINTS[sum % TAG_TINTS.length];
+  return { bg: c[tint.bg], fg: c[tint.fg] };
 }
 
 export function chipColors(kind: Chip['kind'], c: Palette): { bg: string; fg: string } {

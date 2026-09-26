@@ -15,6 +15,7 @@ type SeedTask = {
   completedAt?: number;
   priority?: number;
   reminderAt?: number;
+  tags?: string[];
 };
 
 type SeedSubtask = {
@@ -35,6 +36,7 @@ function seedTasks(now: number): SeedTask[] {
       projectId: SEED_PROJECT_ID,
       priority: PRIORITY_HIGH,
       reminderAt: atTime(today, 9, 30),
+      tags: ['invoice'],
     },
     { id: 'seed-budget', seedKey: 'task2', color: 'och', dueDate: atTime(today, 14, 0) },
     { id: 'seed-oat-milk', seedKey: 'task3', color: 'moss', dueDate: today },
@@ -59,6 +61,7 @@ function seedTasks(now: number): SeedTask[] {
       color: 'blue',
       dueDate: addDays(today, 8),
       projectId: SEED_PROJECT_ID,
+      tags: ['design'],
     },
     { id: 'seed-amman-hotel', seedKey: 'ammanHotel', color: 'blue', dueDate: addDays(today, 9) },
     { id: 'seed-idea-board', seedKey: 'ideaBoard', color: 'blue' },
@@ -71,6 +74,7 @@ function seedTasks(now: number): SeedTask[] {
       dueDate: addDays(today, -5),
       projectId: SEED_PROJECT_ID,
       completedAt: addDays(today, -5),
+      tags: ['design'],
     },
     {
       id: 'seed-moodboards',
@@ -79,6 +83,7 @@ function seedTasks(now: number): SeedTask[] {
       dueDate: addDays(today, -4),
       projectId: SEED_PROJECT_ID,
       completedAt: addDays(today, -4),
+      tags: ['design'],
     },
   ];
 }
@@ -101,15 +106,22 @@ export async function seedFirstRun(db: SQLiteDatabase): Promise<void> {
 
   await db.withTransactionAsync(async () => {
     await db.runAsync(
-      'INSERT INTO projects (id, name, color, createdAt) VALUES ($id, $name, $color, $createdAt)',
-      { $id: SEED_PROJECT_ID, $name: EN.studio, $color: 'blue', $createdAt: now }
+      `INSERT INTO projects (id, name, seedKey, color, createdAt)
+        VALUES ($id, $name, $seedKey, $color, $createdAt)`,
+      {
+        $id: SEED_PROJECT_ID,
+        $name: EN.studio,
+        $seedKey: 'studio',
+        $color: 'blue',
+        $createdAt: now,
+      }
     );
 
     for (const [index, task] of tasks.entries()) {
       await db.runAsync(
         `INSERT INTO tasks
-          (id, title, seedKey, projectId, color, dueDate, createdAt, completedAt, priority, sortOrder, reminderAt)
-          VALUES ($id, $title, $seedKey, $projectId, $color, $dueDate, $createdAt, $completedAt, $priority, $sortOrder, $reminderAt)`,
+          (id, title, seedKey, projectId, color, dueDate, createdAt, completedAt, priority, sortOrder, reminderAt, tags)
+          VALUES ($id, $title, $seedKey, $projectId, $color, $dueDate, $createdAt, $completedAt, $priority, $sortOrder, $reminderAt, $tags)`,
         {
           $id: task.id,
           $title: EN[task.seedKey],
@@ -122,6 +134,7 @@ export async function seedFirstRun(db: SQLiteDatabase): Promise<void> {
           $priority: task.priority ?? null,
           $sortOrder: index + 1,
           $reminderAt: task.reminderAt ?? null,
+          $tags: task.tags ? task.tags.join(',') : null,
         }
       );
     }

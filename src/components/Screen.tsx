@@ -7,7 +7,7 @@ export function Screen({
   children,
   paper2 = false,
 }: {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   paper2?: boolean;
 }) {
   const { c } = useTheme();

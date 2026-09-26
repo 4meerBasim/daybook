@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import {
+  createNativeStackNavigator,
+  type NativeStackScreenProps,
+} from '@react-navigation/native-stack';
 import { useTheme } from '../theme/ThemeProvider';
 import { Screen } from '../components/Screen';
 import { TabBar, TabKey } from '../components/TabBar';
@@ -11,6 +14,8 @@ import { InboxEmptyScreen } from '../screens/InboxEmptyScreen';
 import { SearchScreen } from '../screens/SearchScreen';
 import { OnboardingScreen } from '../screens/OnboardingScreen';
 import { ProjectScreen } from '../screens/ProjectScreen';
+import { ProjectsScreen } from '../screens/ProjectsScreen';
+import { SEED_PROJECT_ID } from '../db/seed';
 import { TaskDetailScreen } from '../screens/TaskDetailScreen';
 import { CalendarScreen } from '../screens/CalendarScreen';
 import { FocusScreen } from '../screens/FocusScreen';
@@ -23,7 +28,8 @@ export type RootParams = {
   Onboarding: undefined;
   Main: undefined;
   Calendar: undefined;
-  Project: undefined;
+  Project: { projectId: string };
+  Projects: undefined;
   TaskDetail: undefined;
   Focus: undefined;
   Settings: undefined;
@@ -34,7 +40,7 @@ export type RootParams = {
 
 const Stack = createNativeStackNavigator<RootParams>();
 
-function MainTabs({ navigation }: { navigation: { navigate: (r: keyof RootParams) => void } }) {
+function MainTabs({ navigation }: NativeStackScreenProps<RootParams, 'Main'>) {
   const [tab, setTab] = useState<TabKey>('today');
   const [adding, setAdding] = useState(false);
 
@@ -49,7 +55,11 @@ function MainTabs({ navigation }: { navigation: { navigate: (r: keyof RootParams
       ) : null}
       {tab === 'upcoming' ? <UpcomingScreen /> : null}
       {tab === 'inbox' ? <InboxScreen /> : null}
-      {tab === 'search' ? <SearchScreen onOpenProject={() => navigation.navigate('Project')} /> : null}
+      {tab === 'search' ? (
+        <SearchScreen
+          onOpenProject={() => navigation.navigate('Project', { projectId: SEED_PROJECT_ID })}
+        />
+      ) : null}
 
       <TabBar
         active={tab}
@@ -83,7 +93,16 @@ export function Root() {
         </Stack.Screen>
         <Stack.Screen name="Main" component={MainTabs} />
         <Stack.Screen name="Calendar" component={CalendarScreen} />
-        <Stack.Screen name="Project" component={ProjectScreen} />
+        <Stack.Screen name="Project">
+          {({ route }) => <ProjectScreen projectId={route.params.projectId} />}
+        </Stack.Screen>
+        <Stack.Screen name="Projects">
+          {({ navigation }) => (
+            <ProjectsScreen
+              onOpenProject={(projectId) => navigation.navigate('Project', { projectId })}
+            />
+          )}
+        </Stack.Screen>
         <Stack.Screen name="TaskDetail">
           {({ navigation }) => (
             <TaskDetailScreen
@@ -96,7 +115,12 @@ export function Root() {
           {({ navigation }) => <FocusScreen onClose={() => navigation.goBack()} />}
         </Stack.Screen>
         <Stack.Screen name="Settings">
-          {({ navigation }) => <SettingsScreen onOpenGestures={() => navigation.navigate('SwipeStates')} />}
+          {({ navigation }) => (
+            <SettingsScreen
+              onOpenGestures={() => navigation.navigate('SwipeStates')}
+              onOpenProjects={() => navigation.navigate('Projects')}
+            />
+          )}
         </Stack.Screen>
         <Stack.Screen name="PageClosed">
           {({ navigation }) => <PageClosedScreen onPlanTomorrow={() => navigation.goBack()} />}

@@ -1,10 +1,18 @@
 import type { SQLiteBindValue, SQLiteDatabase } from 'expo-sqlite';
 import { addDays, startOfDay, startOfMonth, startOfNextMonth } from '../lib/date';
 import { snoozeUntil, type SnoozeOffset } from './reminders';
-import { DEFAULT_TASK_COLOR, type DatedTask, type SubtaskRow, type TaskRow } from './schema';
+import {
+  DEFAULT_TASK_COLOR,
+  type ColorToken,
+  type DatedTask,
+  type ProjectRow,
+  type SubtaskRow,
+  type TaskRow,
+} from './schema';
 
 export type NewTask = {
   title: string;
+  tags: string[];
   dueDate: number | null;
   priority: number | null;
 };
@@ -58,12 +66,17 @@ export function selectInbox(db: SQLiteDatabase): Promise<TaskRow[]> {
   );
 }
 
-export function selectProject(db: SQLiteDatabase, projectId: string): Promise<TaskRow[]> {
+export function selectAssigned(db: SQLiteDatabase): Promise<TaskRow[]> {
   return db.getAllAsync<TaskRow>(
     `SELECT * FROM tasks
-      WHERE deletedAt IS NULL AND projectId = $projectId
-      ORDER BY dueDate IS NULL, dueDate, sortOrder`,
-    { $projectId: projectId }
+      WHERE deletedAt IS NULL AND projectId IS NOT NULL
+      ORDER BY dueDate IS NULL, dueDate, sortOrder`
+  );
+}
+
+export function selectProjects(db: SQLiteDatabase): Promise<ProjectRow[]> {
+  return db.getAllAsync<ProjectRow>(
+    'SELECT * FROM projects WHERE archivedAt IS NULL ORDER BY createdAt'
   );
 }
 
@@ -90,11 +103,12 @@ export async function insertTask(db: SQLiteDatabase, task: NewTask, now: number)
     'SELECT COALESCE(MAX(sortOrder), 0) + 1 AS next FROM tasks'
   );
   await db.runAsync(
-    `INSERT INTO tasks (id, title, color, dueDate, createdAt, priority, sortOrder)
-      VALUES ($id, $title, $color, $dueDate, $createdAt, $priority, $sortOrder)`,
+    `INSERT INTO tasks (id, title, tags, color, dueDate, createdAt, priority, sortOrder)
+      VALUES ($id, $title, $tags, $color, $dueDate, $createdAt, $priority, $sortOrder)`,
     {
       $id: newId(),
       $title: task.title,
+      $tags: task.tags.length ? task.tags.join(',') : null,
       $color: DEFAULT_TASK_COLOR,
       $dueDate: task.dueDate,
       $createdAt: now,
@@ -102,6 +116,45 @@ export async function insertTask(db: SQLiteDatabase, task: NewTask, now: number)
       $sortOrder: tail ? tail.next : 1,
     }
   );
+}
+
+export async function insertProject(
+  db: SQLiteDatabase,
+  name: string,
+  color: ColorToken,
+  now: number
+): Promise<void> {
+  await db.runAsync(
+    `INSERT INTO projects (id, name, color, createdAt)
+      VALUES ($id, $name, $color, $createdAt)`,
+    { $id: newId(), $name: name, $color: color, $createdAt: now }
+  );
+}
+
+export async function updateProjectName(
+  db: SQLiteDatabase,
+  id: string,
+  name: string
+): Promise<void> {
+  // dropping seedKey stops the seeded project resolving through i18n once the user has named it
+  await db.runAsync('UPDATE projects SET name = $name, seedKey = NULL WHERE id = $id', {
+    $name: name,
+    $id: id,
+  });
+}
+
+export async function archiveProject(
+  db: SQLiteDatabase,
+  id: string,
+  now: number
+): Promise<void> {
+  await db.withTransactionAsync(async () => {
+    await db.runAsync('UPDATE tasks SET projectId = NULL WHERE projectId = $id', { $id: id });
+    await db.runAsync('UPDATE projects SET archivedAt = $archivedAt WHERE id = $id', {
+      $archivedAt: now,
+      $id: id,
+    });
+  });
 }
 
 export async function updateTask(

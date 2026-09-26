@@ -3,14 +3,22 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 import { useTheme } from '../theme/ThemeProvider';
 import { maxFontSizeMultiplier, metrics, radius } from '../theme/tokens';
 import { align, row } from '../lib/rtl';
+import { useStore } from '../state/store';
 import { Screen, useHeaderTop } from '../components/Screen';
 import { Segmented } from '../components/Segmented';
 import { Toggle } from '../components/Toggle';
 import { Dot } from '../components/Ledger';
 
-export function SettingsScreen({ onOpenGestures }: { onOpenGestures: () => void }) {
+export function SettingsScreen({
+  onOpenGestures,
+  onOpenProjects,
+}: {
+  onOpenGestures: () => void;
+  onOpenProjects: () => void;
+}) {
   const { c, t, lang, appearance, motion, ui, display, rtl, setLang, setAppearance, setMotion } =
     useTheme();
+  const { projects } = useStore();
   const top = useHeaderTop();
 
   return (
@@ -85,6 +93,11 @@ export function SettingsScreen({ onOpenGestures }: { onOpenGestures: () => void 
               <Keycap label="⌘" />
               <Keycap label="N" />
             </View>
+          </Row>
+
+          <Row onPress={onOpenProjects} label={t.projects}>
+            <RowLabel label={t.projects} />
+            <Text style={[ui(15), { color: c.ink3 }]}>{String(projects.length)}</Text>
           </Row>
 
           <Row>

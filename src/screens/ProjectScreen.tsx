@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
-import { LayoutChangeEvent, Pressable, ScrollView, Text, View } from 'react-native';
+import { LayoutChangeEvent, ScrollView, Text, View } from 'react-native';
 import { useTheme } from '../theme/ThemeProvider';
 import { maxFontSizeMultiplier, metrics } from '../theme/tokens';
 import { align, insetStart, marginStart, row } from '../lib/rtl';
-import { dayOfMonth, timeLabel } from '../lib/date';
+import { addDays, dayOfMonth, startOfDay, timeLabel } from '../lib/date';
+import { tagColors } from '../lib/parse';
 import { useStore } from '../state/store';
-import { rowTitle, type TaskRow } from '../db/schema';
+import { projectName, rowTitle, taskTags, type TaskRow } from '../db/schema';
+import { SEED_PROJECT_ID } from '../db/seed';
 import { Screen, useHeaderTop } from '../components/Screen';
-import { Ledger, SectionLabel, EmptyRules, rowContent, useRuling } from '../components/Ledger';
+import { Checkbox, Ledger, SectionLabel, EmptyRules, rowContent, useRuling } from '../components/Ledger';
 import { Chip } from '../components/Chip';
-import { CheckIcon } from '../components/Icon';
 
 function Avatar({ initials, bg, first }: { initials: string; bg: string; first: boolean }) {
   const { c, mono, rtl } = useTheme();
@@ -34,13 +35,12 @@ function Avatar({ initials, bg, first }: { initials: string; bg: string; first: 
   );
 }
 
-type ProjectItem = { title: string; meta: string; done: boolean };
-
-function ProjectRow({ item }: { item: ProjectItem }) {
-  const { c, ui, mono, rtl } = useTheme();
+function ProjectTaskRow({ task }: { task: TaskRow }) {
+  const { c, t, ui, mono, rtl } = useTheme();
   const { height, grown, onContentLayout } = useRuling();
   const [textWidth, setTextWidth] = useState(0);
   const onLayout = (e: LayoutChangeEvent) => setTextWidth(e.nativeEvent.layout.width);
+  const done = task.completedAt !== null;
 
   return (
     <View
@@ -52,20 +52,7 @@ function ProjectRow({ item }: { item: ProjectItem }) {
       }}
     >
       <View onLayout={onContentLayout} style={rowContent(rtl, 16)}>
-        <View
-          style={{
-            width: metrics.checkbox,
-            height: metrics.checkbox,
-            borderWidth: 1.5,
-            borderColor: c.ink,
-            borderRadius: 4,
-            backgroundColor: item.done ? c.ink : 'transparent',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          {item.done ? <CheckIcon color={c.paper} /> : null}
-        </View>
+        <Checkbox checked={done} />
 
         <View style={[{ flex: 1, minWidth: 0, position: 'relative' }, marginStart(rtl, 16)]}>
           <Text
@@ -73,13 +60,13 @@ function ProjectRow({ item }: { item: ProjectItem }) {
             onLayout={onLayout}
             style={[
               ui(17, 400, 22),
-              { color: item.done ? c.ink3 : c.ink, textAlign: align(rtl) },
-              item.done && grown ? { textDecorationLine: 'line-through' } : null,
+              { color: done ? c.ink3 : c.ink, textAlign: align(rtl) },
+              done && grown ? { textDecorationLine: 'line-through' } : null,
             ]}
           >
-            {item.title}
+            {rowTitle(task, t)}
           </Text>
-          {item.done && !grown ? (
+          {done && !grown ? (
             <View
               pointerEvents="none"
               style={{
@@ -95,7 +82,7 @@ function ProjectRow({ item }: { item: ProjectItem }) {
         </View>
 
         <Text numberOfLines={1} style={[mono(12, 500), { color: c.ink3 }]}>
-          {item.meta}
+          {rowMeta(task)}
         </Text>
       </View>
     </View>
@@ -107,56 +94,100 @@ function rowMeta(task: TaskRow): string {
   return timeLabel(task.dueDate) || String(dayOfMonth(task.dueDate));
 }
 
-export function ProjectScreen() {
+function unionTags(tasks: TaskRow[]): string[] {
+  const all: string[] = [];
+  for (const task of tasks) {
+    for (const tag of taskTags(task)) if (!all.includes(tag)) all.push(tag);
+  }
+  return all;
+}
+
+export function ProjectScreen({ projectId }: { projectId: string }) {
   const { c, t, display, ui, mono, rtl } = useTheme();
-  const { project } = useStore();
+  const { projects, assigned } = useStore();
   const top = useHeaderTop();
-  const doneCount = project.filter((k) => k.completedAt !== null).length;
+
+  const project = projects.find((p) => p.id === projectId);
+  if (!project) return <Screen />;
+
+  const tasks = assigned.filter((k) => k.projectId === projectId);
+  const doneCount = tasks.filter((k) => k.completedAt !== null).length;
+  const weekEnd = startOfDay(addDays(Date.now(), 7));
+  const thisWeek = tasks.filter((k) => k.dueDate !== null && k.dueDate < weekEnd);
+  const later = tasks.filter((k) => k.dueDate === null || k.dueDate >= weekEnd);
+  const collaborators = project.id === SEED_PROJECT_ID;
 
   return (
     <Screen>
       <ScrollView contentContainerStyle={{ paddingBottom: metrics.gutter }}>
-      <View style={{ paddingTop: top, paddingHorizontal: metrics.gutter, gap: 6 }}>
-        <View style={{ flexDirection: row(rtl), alignItems: 'center', gap: 8 }}>
-          <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: c.blue }} />
-          <Text style={[mono(12, 500, 0.1), { color: c.ink3 }]}>{t.project}</Text>
-        </View>
-
-        <View style={{ flexDirection: row(rtl), alignItems: 'flex-end', justifyContent: 'space-between' }}>
-          <Text
-            maxFontSizeMultiplier={maxFontSizeMultiplier}
-            style={[display(40, { lineHeight: 44 }), { color: c.ink, textAlign: align(rtl) }]}
-          >
-            {t.studio}
-          </Text>
-          <Text style={[mono(22, 500), { color: c.ink2, paddingBottom: 4 }]}>
-            <Text style={{ color: c.ink }}>{doneCount}</Text> / {project.length}
-          </Text>
-        </View>
-
-        <View style={{ flexDirection: row(rtl), alignItems: 'center', gap: 10, paddingTop: 8, paddingBottom: 12 }}>
-          <View style={{ flexDirection: row(rtl) }}>
-            <Avatar initials="LM" bg={c.ink} first />
-            <Avatar initials="NA" bg={c.moss} first={false} />
+        <View style={{ paddingTop: top, paddingHorizontal: metrics.gutter, gap: 6 }}>
+          <View style={{ flexDirection: row(rtl), alignItems: 'center', gap: 8 }}>
+            <View
+              style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: c[project.color] }}
+            />
+            <Text style={[mono(12, 500, 0.1), { color: c.ink3 }]}>{t.project}</Text>
           </View>
-          <Text style={[ui(13), { color: c.ink3 }]}>{t.shared}</Text>
-          <View style={{ flex: 1 }} />
-          <Chip label="#design" bg={c.blueS} fg={c.blue} />
-          <Chip label="#invoice" bg={c.ochS} fg={c.och} />
-        </View>
-      </View>
 
-      <Ledger>
-        <SectionLabel label={t.thisWeek} />
-        {project.map((k) => (
-          <ProjectRow
-            key={k.id}
-            item={{ title: rowTitle(k, t), meta: rowMeta(k), done: k.completedAt !== null }}
-          />
-        ))}
-        <SectionLabel label={`${t.later} · 5`} />
-        <EmptyRules count={3} />
-      </Ledger>
+          <View
+            style={{
+              flexDirection: row(rtl),
+              alignItems: 'flex-end',
+              justifyContent: 'space-between',
+            }}
+          >
+            <Text
+              maxFontSizeMultiplier={maxFontSizeMultiplier}
+              style={[
+                display(40, { lineHeight: 44 }),
+                { flex: 1, minWidth: 0, color: c.ink, textAlign: align(rtl) },
+              ]}
+            >
+              {projectName(project, t)}
+            </Text>
+            <Text style={[mono(22, 500), { color: c.ink2, paddingBottom: 4 }, marginStart(rtl, 12)]}>
+              <Text style={{ color: c.ink }}>{doneCount}</Text> / {tasks.length}
+            </Text>
+          </View>
+
+          <View
+            style={{
+              flexDirection: row(rtl),
+              alignItems: 'center',
+              gap: 10,
+              paddingTop: 8,
+              paddingBottom: 12,
+            }}
+          >
+            {collaborators ? (
+              <>
+                <View style={{ flexDirection: row(rtl) }}>
+                  <Avatar initials="LM" bg={c.ink} first />
+                  <Avatar initials="NA" bg={c.moss} first={false} />
+                </View>
+                <Text style={[ui(13), { color: c.ink3 }]}>{t.shared}</Text>
+              </>
+            ) : null}
+            <View style={{ flex: 1 }} />
+            {unionTags(tasks).map((tag) => {
+              const tint = tagColors(tag, c);
+              return <Chip key={tag} label={`#${tag}`} bg={tint.bg} fg={tint.fg} />;
+            })}
+          </View>
+        </View>
+
+        <Ledger>
+          {thisWeek.length ? <SectionLabel label={t.thisWeek} /> : null}
+          {thisWeek.map((task) => (
+            <ProjectTaskRow key={task.id} task={task} />
+          ))}
+
+          {later.length ? <SectionLabel label={`${t.later} · ${later.length}`} /> : null}
+          {later.map((task) => (
+            <ProjectTaskRow key={task.id} task={task} />
+          ))}
+
+          <EmptyRules count={3} />
+        </Ledger>
       </ScrollView>
     </Screen>
   );

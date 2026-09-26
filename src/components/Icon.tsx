@@ -118,6 +118,14 @@ export function FlagIcon({ size = 24, color }: Props) {
   );
 }
 
+export function PlusIcon({ size = 24, color }: Props) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+      <Path d="M12 5v14M5 12h14" stroke={color} {...stroke} />
+    </Svg>
+  );
+}
+
 export function HashIcon({ size = 24, color }: Props) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24">

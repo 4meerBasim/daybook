@@ -42,8 +42,8 @@ export function QuickAddSheet({ open, onClose }: { open: boolean; onClose: () =>
       : 'Saved to Inbox';
 
   const onAdd = () => {
-    const { title, dueDate, high } = draft(parsed, Date.now());
-    if (title) create({ title, dueDate, priority: high ? PRIORITY_HIGH : null });
+    const { title, tags, dueDate, high } = draft(parsed, Date.now());
+    if (title) create({ title, tags, dueDate, priority: high ? PRIORITY_HIGH : null });
     setQa('');
     onClose();
   };
