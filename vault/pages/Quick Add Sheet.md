@@ -5,7 +5,7 @@ Summary: The pen-FAB capture sheet: a growing field that is syntax-highlighted l
 
 ## Related
 - Connects to: [[Main Tabs]] — opened by the pen FAB from any tab and closed by pan-down or backdrop tap, [[Today]], [[Upcoming]], [[Inbox]], [[Search]]
-- Features: [[Natural Language Quick Add]], [[Offline First Local Store]], [[Pen FAB Tab Bar]], [[Reduced Motion Mode]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]], [[Ledger Paper Chrome]]
+- Features: [[Natural Language Quick Add]], [[Offline First Local Store]], [[Projects As A Real Entity]], [[Pen FAB Tab Bar]], [[Reduced Motion Mode]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]], [[Ledger Paper Chrome]]
 - Bugs: [[Quick Add Does Not Create Tasks]], [[Bottom Sheet Text Input Crashes On Web]], [[Quick Add Highlight Drifts From The Caret]]
 - Enhancements: [[Day Capacity Budget]], [[Voice Brain Dump Capture]], [[System Capture Entry Points]]
 
@@ -16,7 +16,7 @@ The field is multiline and grows. The mirror is the layer in normal flow and the
 
 The chips are the shared `Chip` now, so they pick up the Arabic padding widening from [[In-App RTL and Arabic Typography]] like every other chip.
 
-Add now commits. `onAdd` runs `draft()` from `src/lib/parse.ts` over the same parse output the highlighting uses, inserts the task through the store, clears the draft and closes the sheet — see [[Quick Add Does Not Create Tasks]] for what it resolves and what it deliberately leaves in the title. The destination the chip promises is honoured exactly: a due date is written only when `hasDate` is true, so a bare time with no day goes to [[Inbox]] as drawn.
+Add now commits. `onAdd` runs `draft()` from `src/lib/parse.ts` over the same parse output the highlighting uses, inserts the task through the store, clears the draft and closes the sheet — see [[Quick Add Does Not Create Tasks]] for what it resolves and what it deliberately leaves in the title. Hashtags are no longer part of that leftover: `draft()` splits them into the task's `tags` column and the stored title comes out clean, which is what lets a project describe itself by its tags — see [[Projects As A Real Entity]]. The destination the chip promises is honoured exactly: a due date is written only when `hasDate` is true, so a bare time with no day goes to [[Inbox]] as drawn.
 
 The draft starts empty rather than pre-filled, and only Add clears it — a sheet dismissed by pan-down or backdrop tap keeps what was typed.
 

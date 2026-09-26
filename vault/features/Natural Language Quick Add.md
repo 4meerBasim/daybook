@@ -24,14 +24,15 @@ The highlighting effect in the sheet is a coloured `Text` rebuilt from `parsed.t
 
 `draft(parsed, now)` is the consuming half, added alongside `parse` in the same file because it owns the same token vocabulary. It turns the token stream into the three things [[Offline First Local Store]] needs:
 
-- **Title** — the `plain` runs joined and collapsed. `tag` and `rep` tokens stay in, because no column captures a tag or a recurrence yet and dropping them would silently discard what the user typed. `date`, `time` and `pri` tokens come out, since the row carries those as real fields.
+- **Title** — the `plain` runs joined and collapsed. `rep` tokens stay in, because no column captures a recurrence yet and dropping one would silently discard what the user typed. `date`, `time` and `pri` tokens come out, since the row carries those as real fields.
+- **Tags** — `splitTags` lifts every `#hashtag` out of the assembled title, lowercases it and de-duplicates, and the row stores them comma-separated in `tasks.tags`. That is what a project's chips are built from; see [[Projects As A Real Entity]]. Until that column existed the hash stayed in the title.
 - **Due date** — resolved against the current date, so "tomorrow" means tomorrow on the day it is typed. `resolveDay` handles today / tonight / tomorrow / next week / next monday / next friday and the Arabic غداً, غدا and اليوم; `applyTime` then refines the hour from a `3pm` or `10:30am` token. A date is only produced when `hasDate` is already true, which keeps the insert consistent with the destination chip the user was shown.
 - **Priority** — `PRIORITY_HIGH` when a `pri` token is present, null otherwise.
 
 A time with no day is left in the title rather than thrown away, since that task goes to [[Inbox]] undated.
 
 ## Related
-- Page: [[Quick Add Sheet]], [[Inbox]], [[Upcoming]], [[Today]]
-- Features: [[Offline First Local Store]], [[Pen FAB Tab Bar]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]]
+- Page: [[Quick Add Sheet]], [[Inbox]], [[Upcoming]], [[Today]], [[Project Detail]]
+- Features: [[Offline First Local Store]], [[Projects As A Real Entity]], [[Pen FAB Tab Bar]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]]
 - Bugs: [[Quick Add Does Not Create Tasks]], [[Bottom Sheet Text Input Crashes On Web]], [[Quick Add Highlight Drifts From The Caret]]
 - Enhancements: [[Day Capacity Budget]], [[Notes With Live Task Lines]], [[Voice Brain Dump Capture]], [[System Capture Entry Points]]

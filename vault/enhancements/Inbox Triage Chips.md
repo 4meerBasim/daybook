@@ -13,10 +13,13 @@ The data blockers are gone. [[Offline First Local Store]] gave both pages the sa
 What is left is a product decision plus one dependency:
 
 - "Someday" still has nothing behind it. The `Someday · 4` section label is still literal, because no column marks a task as someday — a nullable field, a far-future due date, and a separate list are three different products. The same gap [[Ink Decay and Task Retirement]] runs into for its retirement prompt.
-- The long-press-for-a-project half needs a native context menu (`zeego`), which is named in the design's tech notes but is not a dependency — the same reason [[Focus Mode]] hangs off the Task Detail ellipsis instead of a row long-press.
 - Making the chips interactive means deciding what feedback a triaged row gets as it leaves the list, which the mock does not draw.
 
+The long-press-for-a-project half is done, and it did not need `zeego`. That claim was wrong: the design's tech notes name `zeego` for a native context menu, but the picker is a sheet, not a menu, so a plain `Pressable` with `onLongPress` on the row and a `Modal` sheet covered it with no new dependency — see [[Project Picker]] and [[Projects As A Real Entity]]. This note stays `planned` because the Today / Someday chips themselves are still inert.
+
+Wiring the chips will not fight the long-press: they are inert views inside the row's own `Pressable`, and the mock's "28px visual inside a 44px hit slop" is hit slop, which a chip gets when it becomes pressable without changing the row's layout height.
+
 ## Related
-- Page: [[Inbox]], [[Today]]
-- Features: [[Offline First Local Store]], [[Ledger Paper Chrome]], [[Natural Language Quick Add]]
+- Page: [[Inbox]], [[Today]], [[Project Picker]]
+- Features: [[Offline First Local Store]], [[Projects As A Real Entity]], [[Ledger Paper Chrome]], [[Natural Language Quick Add]]
 - Enhancements: [[Ink Decay and Task Retirement]]

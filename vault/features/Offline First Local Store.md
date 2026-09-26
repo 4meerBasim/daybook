@@ -10,15 +10,19 @@ The legacy `expo-sqlite` API is gone in SDK 57 — no `openDatabase`, no `db.tra
 
 ### Tables
 
-`tasks` — `id` TEXT PK (generated), `title`, `seedKey`, `notes`, `projectId` → `projects(id)`, `color` (a palette token name, never a hex), `dueDate`, `createdAt`, `completedAt`, `snoozedUntil`, `deletedAt`, `duration`, `priority`, `sortOrder`, `reminderAt`. Every date is real epoch milliseconds, not the display string the old seed carried.
+`tasks` — `id` TEXT PK (generated), `title`, `seedKey`, `notes`, `projectId` → `projects(id)`, `color` (a palette token name, never a hex), `dueDate`, `createdAt`, `completedAt`, `snoozedUntil`, `deletedAt`, `duration`, `priority`, `sortOrder`, `reminderAt`, `tags`. Every date is real epoch milliseconds, not the display string the old seed carried. `tags` is a comma-separated list of hashtag names with no hash, written by [[Natural Language Quick Add]] and read back by `taskTags()`.
 
-`projects` — `id`, `name`, `color`, `createdAt`, `archivedAt`.
+`projects` — `id`, `name`, `seedKey`, `color`, `createdAt`, `archivedAt`. `archivedAt` is the project's soft delete, and it comes with clearing `projectId` on that project's tasks so none of them disappear — see [[Projects As A Real Entity]].
 
 `subtasks` — its own id space, `parentTaskId` → `tasks(id)`, `title`, `seedKey`, `completedAt`, `sortOrder`.
 
 Three indexes, each matching a query that exists: `tasks (dueDate) WHERE deletedAt IS NULL`, `tasks (projectId) WHERE deletedAt IS NULL`, and `subtasks (parentTaskId, sortOrder)`. The partial predicate is there because every list query already filters soft-deleted rows.
 
 `PRAGMA journal_mode = WAL` and `PRAGMA foreign_keys = ON` run via `execAsync` at init, before any DDL and outside any transaction — both are per-connection and both are no-ops inside one.
+
+### Versioned migration steps
+
+`migrate()` holds an array of steps indexed by schema version and runs `STEPS.slice(user_version)`, so a fresh install runs all of them and an existing database runs only what it has not seen. Step 1 is the DDL above; step 2 adds `tasks.tags` and `projects.seedKey`, names the seeded project, tags the seeded project's tasks so an upgraded database reads like a fresh one, and lifts hashtags out of the titles of tasks the user wrote under version 1. Nothing is dropped and nothing is recreated — the whole point is that an installed database survives.
 
 ### Completion, snooze and delete are three different columns
 
@@ -32,7 +36,7 @@ Seed due dates are computed relative to the first-run date — today, yesterday,
 
 ### What the lists became
 
-Every screen that used to read a seed array now filters one task table: [[Today]] takes dated tasks up to end of day (carrying overdue ones that are still open), [[Upcoming]] takes future-dated tasks grouped into tomorrow / this week / later, [[Inbox]] takes undated tasks with no project, [[Project Detail]] takes one `projectId`, and [[Calendar]] takes the current month. Header counts, the project progress fraction and the subtask tally are all derived now — see [[Calendar Tally Marks]].
+Every screen that used to read a seed array now filters one task table: [[Today]] takes dated tasks up to end of day (carrying overdue ones that are still open), [[Upcoming]] takes future-dated tasks grouped into tomorrow / this week / later, [[Inbox]] takes undated tasks with no project, and [[Calendar]] takes the current month. One `assigned` query returns every task that has a project at all, which [[Project Detail]] filters by id and [[Projects]] counts per row, and `projects` is its own snapshot beside it. Header counts, the project progress fraction and the subtask tally are all derived now — see [[Calendar Tally Marks]].
 
 ### Notification readiness, deliberately unbuilt
 
@@ -43,7 +47,7 @@ No `expo-notifications`, no permission strings, no scheduler. The data model alo
 `duration` exists for [[Day Capacity Budget]], `createdAt` and `completedAt` for [[Ink Decay and Task Retirement]] and [[Closing the Page Ritual]], stable ids across every list for [[Inbox Triage Chips]]. Merge-friendliness for [[Shared Page Link]] is still undecided — rows are last-write-wins today, and CRDT-style merging would be a schema change. The sync row drawn in [[Settings]] is still inert by design.
 
 ## Related
-- Page: [[Settings]], [[Today]], [[Inbox]], [[Upcoming]], [[Calendar]], [[Project Detail]], [[Task Detail]], [[Quick Add Sheet]]
-- Features: [[Natural Language Quick Add]], [[Swipe Row Actions]], [[Calendar Tally Marks]], [[Ink Strike-Through Completion]]
+- Page: [[Settings]], [[Today]], [[Inbox]], [[Upcoming]], [[Calendar]], [[Project Detail]], [[Projects]], [[Project Picker]], [[Task Detail]], [[Quick Add Sheet]]
+- Features: [[Natural Language Quick Add]], [[Projects As A Real Entity]], [[Swipe Row Actions]], [[Calendar Tally Marks]], [[Ink Strike-Through Completion]]
 - Bugs: [[Quick Add Does Not Create Tasks]], [[Snooze And Delete Share One Cleared Map]], [[Task And Subtask Ids Share One Done Map]], [[Page Header Shows A Frozen Date]]
 - Enhancements: [[Closing the Page Ritual]], [[Day Capacity Budget]], [[Ink Decay and Task Retirement]], [[Notes With Live Task Lines]], [[Weekly Spread Review]], [[Shared Page Link]], [[Adaptive Reminders]], [[Focus Live Activity and Widgets]], [[System Capture Entry Points]], [[Inbox Triage Chips]], [[Waiting On Follow-Ups]], [[Voice Brain Dump Capture]]
