@@ -2,7 +2,7 @@ import React from 'react';
 import { Text, View } from 'react-native';
 import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
 import { useTheme } from '../theme/ThemeProvider';
-import { metrics } from '../theme/tokens';
+import { maxFontSizeMultiplier, metrics } from '../theme/tokens';
 import { marginStart, row } from '../lib/rtl';
 import { useStore } from '../state/store';
 import { rowTitle } from '../db/schema';
@@ -33,9 +33,7 @@ export function InboxScreen() {
             <LedgerRow key={k.id}>
               <Checkbox />
               <Text
-                numberOfLines={1}
-                ellipsizeMode="tail"
-                maxFontSizeMultiplier={1.6}
+                maxFontSizeMultiplier={maxFontSizeMultiplier}
                 style={[ui(17, 400, 22), { flex: 1, minWidth: 0, color: c.ink }, marginStart(rtl, 16)]}
               >
                 {rowTitle(k, t)}

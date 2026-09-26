@@ -106,9 +106,9 @@ function Row({
   onPress?: () => void;
   label?: string;
 }) {
-  const { c, rtl } = useTheme();
+  const { c, rtl, unit } = useTheme();
   const style = {
-    height: metrics.row,
+    minHeight: unit,
     flexDirection: row(rtl),
     alignItems: 'center' as const,
     paddingHorizontal: metrics.gutter,

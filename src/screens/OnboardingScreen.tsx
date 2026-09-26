@@ -1,9 +1,46 @@
 import React from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { useTheme } from '../theme/ThemeProvider';
-import { maxFontSizeMultiplier, radius } from '../theme/tokens';
+import { maxFontSizeMultiplier, metrics, radius } from '../theme/tokens';
 import { align, row } from '../lib/rtl';
 import { Screen } from '../components/Screen';
+import { useRuling } from '../components/Ledger';
+
+function Rule({ index, text }: { index: number; text: string }) {
+  const { c, ui, mono, rtl } = useTheme();
+  const { height, onContentLayout } = useRuling();
+
+  return (
+    <View
+      style={{
+        height,
+        justifyContent: 'center',
+        borderBottomWidth: 1,
+        borderBottomColor: c.rule,
+      }}
+    >
+      <View
+        onLayout={onContentLayout}
+        style={{
+          flexDirection: row(rtl),
+          alignItems: 'center',
+          gap: metrics.gap,
+          paddingVertical: metrics.rowPad,
+        }}
+      >
+        <Text style={[mono(13, 500), { color: c.ver, width: 22, textAlign: align(rtl) }]}>
+          {index}
+        </Text>
+        <Text
+          maxFontSizeMultiplier={maxFontSizeMultiplier}
+          style={[ui(17, 400, 22), { flex: 1, minWidth: 0, color: c.ink, textAlign: align(rtl) }]}
+        >
+          {text}
+        </Text>
+      </View>
+    </View>
+  );
+}
 
 export function OnboardingScreen({ onStart }: { onStart: () => void }) {
   const { c, t, ar, ui, mono, display, rtl, setLang } = useTheme();
@@ -38,27 +75,7 @@ export function OnboardingScreen({ onStart }: { onStart: () => void }) {
 
         <View style={{ marginTop: 36, borderTopWidth: 1, borderTopColor: c.rule }}>
           {rules.map((text, i) => (
-            <View
-              key={i}
-              style={{
-                height: 56,
-                flexDirection: row(rtl),
-                alignItems: 'center',
-                gap: 14,
-                borderBottomWidth: 1,
-                borderBottomColor: c.rule,
-              }}
-            >
-              <Text style={[mono(13, 500), { color: c.ver, width: 22, textAlign: align(rtl) }]}>
-                {i + 1}
-              </Text>
-              <Text
-                maxFontSizeMultiplier={1.6}
-                style={[ui(17, 400, 22), { flex: 1, color: c.ink, textAlign: align(rtl) }]}
-              >
-                {text}
-              </Text>
-            </View>
+            <Rule key={i} index={i + 1} text={text} />
           ))}
         </View>
 

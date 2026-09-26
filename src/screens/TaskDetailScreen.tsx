@@ -5,13 +5,60 @@ import { useTheme } from '../theme/ThemeProvider';
 import { maxFontSizeMultiplier, metrics, radius } from '../theme/tokens';
 import { align, insetStart, marginStart, pad, row } from '../lib/rtl';
 import { useStore } from '../state/store';
-import { rowTitle } from '../db/schema';
+import { rowTitle, type SubtaskRow as SubtaskRowData } from '../db/schema';
 import { Screen, useHeaderTop } from '../components/Screen';
-import { Checkbox } from '../components/Ledger';
+import { Checkbox, rowContent, useRuling } from '../components/Ledger';
+import { Chip } from '../components/Chip';
 import { ChevronBackIcon, EllipsisIcon, PaperclipIcon } from '../components/Icon';
 
+function SubtaskRow({ task, onToggle }: { task: SubtaskRowData; onToggle: () => void }) {
+  const { c, t, ui, rtl } = useTheme();
+  const { height, onContentLayout } = useRuling();
+  const checked = task.completedAt !== null;
+  const label = rowTitle(task, t);
+
+  return (
+    <Pressable
+      onPress={() => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        onToggle();
+      }}
+      accessibilityRole="checkbox"
+      accessibilityState={{ checked }}
+      accessibilityLabel={label}
+      android_ripple={null}
+      style={{
+        height,
+        justifyContent: 'center',
+        borderBottomWidth: 1,
+        borderBottomColor: c.rule,
+      }}
+    >
+      <View onLayout={onContentLayout} style={rowContent(rtl, 16)}>
+        <Checkbox checked={checked} />
+        <Text
+          maxFontSizeMultiplier={maxFontSizeMultiplier}
+          style={[
+            ui(15, 400, 22),
+            marginStart(rtl, 16),
+            {
+              flex: 1,
+              minWidth: 0,
+              color: checked ? c.ink3 : c.ink,
+              textAlign: align(rtl),
+              textDecorationLine: checked ? 'line-through' : 'none',
+            },
+          ]}
+        >
+          {label}
+        </Text>
+      </View>
+    </Pressable>
+  );
+}
+
 export function TaskDetailScreen({ onBack, onFocus }: { onBack: () => void; onFocus: () => void }) {
-  const { c, t, ui, mono, display, rtl } = useTheme();
+  const { c, t, ui, mono, display, rtl, unit } = useTheme();
   const { subtasks, completeSubtask } = useStore();
   const top = useHeaderTop();
 
@@ -85,7 +132,7 @@ export function TaskDetailScreen({ onBack, onFocus }: { onBack: () => void; onFo
           <View
             style={[
               {
-                height: metrics.row,
+                minHeight: unit,
                 flexDirection: row(rtl),
                 alignItems: 'center',
                 gap: 12,
@@ -110,7 +157,7 @@ export function TaskDetailScreen({ onBack, onFocus }: { onBack: () => void; onFo
           <View
             style={[
               {
-                height: metrics.row,
+                minHeight: unit,
                 flexDirection: row(rtl),
                 alignItems: 'center',
                 gap: 12,
@@ -131,7 +178,7 @@ export function TaskDetailScreen({ onBack, onFocus }: { onBack: () => void; onFo
           <View
             style={[
               {
-                height: metrics.row,
+                minHeight: unit,
                 flexDirection: row(rtl),
                 alignItems: 'center',
                 gap: 12,
@@ -144,36 +191,14 @@ export function TaskDetailScreen({ onBack, onFocus }: { onBack: () => void; onFo
             <Text style={[mono(11, 500, 0.1, true), { width: metrics.labelColumn, color: c.ink3, textAlign: align(rtl) }]}>
               {t.priority}
             </Text>
-            <View
-              style={{
-                height: 26,
-                paddingHorizontal: 10,
-                borderRadius: radius.chip,
-                backgroundColor: c.verS,
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <Text style={[ui(12, 500), { lineHeight: undefined, color: c.ver }]}>{t.high}</Text>
-            </View>
-            <View
-              style={{
-                height: 26,
-                paddingHorizontal: 10,
-                borderRadius: radius.chip,
-                backgroundColor: c.blueS,
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <Text style={[ui(12, 500), { lineHeight: undefined, color: c.blue }]}>#invoice</Text>
-            </View>
+            <Chip label={t.high} bg={c.verS} fg={c.ver} />
+            <Chip label="#invoice" bg={c.blueS} fg={c.blue} />
           </View>
 
           <View
             style={[
               {
-                height: metrics.row,
+                minHeight: unit,
                 flexDirection: row(rtl),
                 alignItems: 'center',
                 gap: 12,
@@ -199,52 +224,13 @@ export function TaskDetailScreen({ onBack, onFocus }: { onBack: () => void; onFo
                 insetStart(rtl, metrics.marginLine),
               ]}
             />
-            {subtasks.map((s) => {
-              const checked = s.completedAt !== null;
-              const label = rowTitle(s, t);
-              return (
-                <Pressable
-                  key={s.id}
-                  onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    completeSubtask(s.id, !checked);
-                  }}
-                  accessibilityRole="checkbox"
-                  accessibilityState={{ checked }}
-                  accessibilityLabel={label}
-                  android_ripple={null}
-                  style={[
-                    {
-                      flexDirection: row(rtl),
-                      alignItems: 'center',
-                      gap: 14,
-                      height: metrics.row,
-                      borderBottomWidth: 1,
-                      borderBottomColor: c.rule,
-                    },
-                    pad(rtl, 16, metrics.gutter),
-                  ]}
-                >
-                  <Checkbox checked={checked} />
-                  <Text
-                    numberOfLines={1}
-                    style={[
-                      ui(15),
-                      marginStart(rtl, 16),
-                      {
-                        flex: 1,
-                        lineHeight: undefined,
-                        color: checked ? c.ink3 : c.ink,
-                        textAlign: align(rtl),
-                        textDecorationLine: checked ? 'line-through' : 'none',
-                      },
-                    ]}
-                  >
-                    {label}
-                  </Text>
-                </Pressable>
-              );
-            })}
+            {subtasks.map((s) => (
+              <SubtaskRow
+                key={s.id}
+                task={s}
+                onToggle={() => completeSubtask(s.id, s.completedAt === null)}
+              />
+            ))}
           </View>
 
           <View

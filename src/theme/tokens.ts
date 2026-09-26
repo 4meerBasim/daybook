@@ -10,17 +10,28 @@ export const radius = {
   pen: 9999,
 } as const;
 
+export const maxFontSizeMultiplier = 1.6;
+
 export const metrics = {
-  row: 56,
+  ruling: 56,
   gutter: 20,
   marginLine: 52,
   checkbox: 22,
+  gap: 12,
+  rowPad: 12,
   content: 66,
   tabBar: 84,
   pen: 56,
   labelColumn: 88,
   hitSlop: { top: 8, bottom: 8, left: 8, right: 8 },
 } as const;
+
+export function rulingUnit(fontScale: number): number {
+  const scale = Math.min(fontScale, maxFontSizeMultiplier);
+  if (scale >= 1.3) return 72;
+  if (scale >= 1.2) return 64;
+  return metrics.ruling;
+}
 
 export const duration = {
   ui: 180,
@@ -45,5 +56,3 @@ export function penShadow(c: Palette, dark: boolean): ViewStyle {
         elevation: 8,
       };
 }
-
-export const maxFontSizeMultiplier = 1.6;

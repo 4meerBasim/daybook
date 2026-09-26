@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useMemo, useState } from 'react';
-import { TextStyle } from 'react-native';
+import { TextStyle, useWindowDimensions } from 'react-native';
 import { DARK, LIGHT, Palette } from './palette';
 import { displayFamily, monoFamily, uiFamily, Weight } from './fonts';
+import { rulingUnit } from './tokens';
 import { AR, EN, Strings } from '../i18n/strings';
 
 export type Lang = 'en' | 'ar';
@@ -27,6 +28,7 @@ export type Theme = {
   ui: (size: number, weight?: Weight, lineHeight?: number) => TextStyle;
   mono: (size: number, weight?: Weight, tracking?: number, label?: boolean) => TextStyle;
   chipPadding: number;
+  unit: number;
 };
 
 const ThemeContext = createContext<Theme | null>(null);
@@ -41,6 +43,7 @@ export function ThemeProvider({
   const [lang, setLang] = useState<Lang>('en');
   const [appearance, setAppearance] = useState<Appearance>('light');
   const [motion, setMotion] = useState<Motion>('full');
+  const { fontScale } = useWindowDimensions();
 
   const value = useMemo<Theme>(() => {
     const ar = lang === 'ar';
@@ -87,8 +90,9 @@ export function ThemeProvider({
       ui,
       mono,
       chipPadding: ar ? 12 : 10,
+      unit: rulingUnit(fontScale),
     };
-  }, [lang, appearance, motion, systemDark]);
+  }, [lang, appearance, motion, systemDark, fontScale]);
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }

@@ -1,10 +1,10 @@
 import React from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { useTheme } from '../theme/ThemeProvider';
-import { metrics, radius } from '../theme/tokens';
-import { align, insetEnd, insetStart } from '../lib/rtl';
+import { maxFontSizeMultiplier, metrics, radius } from '../theme/tokens';
+import { align } from '../lib/rtl';
 import { Screen } from '../components/Screen';
-import { EmptyRules, Ledger } from '../components/Ledger';
+import { EmptyRules, Ledger, LedgerRow } from '../components/Ledger';
 import { Stamp } from '../components/Stamp';
 
 export function PageClosedScreen({ onPlanTomorrow }: { onPlanTomorrow: () => void }) {
@@ -21,30 +21,27 @@ export function PageClosedScreen({ onPlanTomorrow }: { onPlanTomorrow: () => voi
       </View>
 
       <Ledger>
-        <EmptyRules count={6} />
+        {struck.map((line, i) => (
+          <LedgerRow key={i} start={metrics.content}>
+            <Text
+              maxFontSizeMultiplier={maxFontSizeMultiplier}
+              style={[
+                ui(17, 400, 22),
+                {
+                  flex: 1,
+                  minWidth: 0,
+                  color: c.ink3,
+                  textDecorationLine: 'line-through',
+                  textAlign: align(rtl),
+                },
+              ]}
+            >
+              {line}
+            </Text>
+          </LedgerRow>
+        ))}
 
-        <View
-          pointerEvents="none"
-          style={[
-            { position: 'absolute', top: 0 },
-            insetStart(rtl, metrics.content),
-            insetEnd(rtl, metrics.gutter),
-          ]}
-        >
-          {struck.map((line, i) => (
-            <View key={i} style={{ height: metrics.row, justifyContent: 'center' }}>
-              <Text
-                maxFontSizeMultiplier={1.6}
-                style={[
-                  ui(17),
-                  { color: c.ink3, textDecorationLine: 'line-through', textAlign: align(rtl) },
-                ]}
-              >
-                {line}
-              </Text>
-            </View>
-          ))}
-        </View>
+        <EmptyRules count={1} />
 
         <View
           pointerEvents="none"
@@ -68,7 +65,7 @@ export function PageClosedScreen({ onPlanTomorrow }: { onPlanTomorrow: () => voi
           accessibilityRole="button"
           accessibilityLabel={t.planTomorrow}
           style={{
-            height: metrics.row,
+            minHeight: metrics.ruling,
             borderRadius: radius.card,
             borderWidth: 1,
             borderColor: c.ink,

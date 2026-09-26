@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { LayoutChangeEvent, Pressable, ScrollView, Text, View } from 'react-native';
 import { useTheme } from '../theme/ThemeProvider';
-import { metrics } from '../theme/tokens';
-import { align, insetStart, marginStart, pad, row } from '../lib/rtl';
+import { maxFontSizeMultiplier, metrics } from '../theme/tokens';
+import { align, insetStart, marginStart, row } from '../lib/rtl';
 import { dayOfMonth, timeLabel } from '../lib/date';
 import { useStore } from '../state/store';
 import { rowTitle, type TaskRow } from '../db/schema';
 import { Screen, useHeaderTop } from '../components/Screen';
-import { Ledger, SectionLabel, EmptyRules } from '../components/Ledger';
+import { Ledger, SectionLabel, EmptyRules, rowContent, useRuling } from '../components/Ledger';
 import { Chip } from '../components/Chip';
 import { CheckIcon } from '../components/Icon';
 
@@ -38,64 +38,66 @@ type ProjectItem = { title: string; meta: string; done: boolean };
 
 function ProjectRow({ item }: { item: ProjectItem }) {
   const { c, ui, mono, rtl } = useTheme();
+  const { height, grown, onContentLayout } = useRuling();
   const [textWidth, setTextWidth] = useState(0);
   const onLayout = (e: LayoutChangeEvent) => setTextWidth(e.nativeEvent.layout.width);
 
   return (
     <View
-      style={[
-        {
-          height: metrics.row,
-          flexDirection: row(rtl),
-          alignItems: 'center',
-          gap: 14,
-          borderBottomWidth: 1,
-          borderBottomColor: c.rule,
-        },
-        pad(rtl, 16, metrics.gutter),
-      ]}
+      style={{
+        height,
+        justifyContent: 'center',
+        borderBottomWidth: 1,
+        borderBottomColor: c.rule,
+      }}
     >
-      <View
-        style={{
-          width: metrics.checkbox,
-          height: metrics.checkbox,
-          borderWidth: 1.5,
-          borderColor: c.ink,
-          borderRadius: 4,
-          backgroundColor: item.done ? c.ink : 'transparent',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        {item.done ? <CheckIcon color={c.paper} /> : null}
-      </View>
-
-      <View style={[{ flex: 1, minWidth: 0, position: 'relative' }, marginStart(rtl, 16)]}>
-        <Text
-          numberOfLines={1}
-          ellipsizeMode="tail"
-          maxFontSizeMultiplier={1.6}
-          onLayout={onLayout}
-          style={[ui(17, 400, 22), { color: item.done ? c.ink3 : c.ink, textAlign: align(rtl) }]}
+      <View onLayout={onContentLayout} style={rowContent(rtl, 16)}>
+        <View
+          style={{
+            width: metrics.checkbox,
+            height: metrics.checkbox,
+            borderWidth: 1.5,
+            borderColor: c.ink,
+            borderRadius: 4,
+            backgroundColor: item.done ? c.ink : 'transparent',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
         >
-          {item.title}
-        </Text>
-        {item.done ? (
-          <View
-            pointerEvents="none"
-            style={{
-              position: 'absolute',
-              top: 11,
-              height: 1.5,
-              width: textWidth + 2,
-              backgroundColor: c.ink,
-              ...insetStart(rtl, -2),
-            }}
-          />
-        ) : null}
-      </View>
+          {item.done ? <CheckIcon color={c.paper} /> : null}
+        </View>
 
-      <Text style={[mono(12, 500), { color: c.ink3 }]}>{item.meta}</Text>
+        <View style={[{ flex: 1, minWidth: 0, position: 'relative' }, marginStart(rtl, 16)]}>
+          <Text
+            maxFontSizeMultiplier={maxFontSizeMultiplier}
+            onLayout={onLayout}
+            style={[
+              ui(17, 400, 22),
+              { color: item.done ? c.ink3 : c.ink, textAlign: align(rtl) },
+              item.done && grown ? { textDecorationLine: 'line-through' } : null,
+            ]}
+          >
+            {item.title}
+          </Text>
+          {item.done && !grown ? (
+            <View
+              pointerEvents="none"
+              style={{
+                position: 'absolute',
+                top: '50%',
+                height: 1.5,
+                width: textWidth + 2,
+                backgroundColor: c.ink,
+                ...insetStart(rtl, -2),
+              }}
+            />
+          ) : null}
+        </View>
+
+        <Text numberOfLines={1} style={[mono(12, 500), { color: c.ink3 }]}>
+          {item.meta}
+        </Text>
+      </View>
     </View>
   );
 }
@@ -122,7 +124,7 @@ export function ProjectScreen() {
 
         <View style={{ flexDirection: row(rtl), alignItems: 'flex-end', justifyContent: 'space-between' }}>
           <Text
-            maxFontSizeMultiplier={1.6}
+            maxFontSizeMultiplier={maxFontSizeMultiplier}
             style={[display(40, { lineHeight: 44 }), { color: c.ink, textAlign: align(rtl) }]}
           >
             {t.studio}

@@ -18,7 +18,7 @@ function dateLabel(items: DatedTask[]): string {
 }
 
 export function UpcomingScreen() {
-  const { c, t, ui, mono, display, rtl } = useTheme();
+  const { c, t, ui, mono, display, rtl, unit } = useTheme();
   const { upcoming } = useStore();
   const scrollY = useSharedValue(0);
   const onScroll = useAnimatedScrollHandler((e) => {
@@ -53,7 +53,7 @@ export function UpcomingScreen() {
               <View
                 style={[
                   {
-                    height: metrics.row,
+                    minHeight: unit,
                     flexDirection: row(rtl),
                     alignItems: 'baseline',
                     gap: 10,
@@ -69,9 +69,13 @@ export function UpcomingScreen() {
                 >
                   {g.day}
                 </Text>
-                <Text style={[mono(12, 500), { color: c.ink3 }]}>{dateLabel(g.items)}</Text>
+                <Text numberOfLines={1} style={[mono(12, 500), { color: c.ink3 }]}>
+                  {dateLabel(g.items)}
+                </Text>
                 <View style={{ flex: 1 }} />
-                <Text style={[mono(12, 500), { color: c.ink3 }]}>{g.items.length}</Text>
+                <Text numberOfLines={1} style={[mono(12, 500), { color: c.ink3 }]}>
+                  {g.items.length}
+                </Text>
               </View>
 
               {g.items.map((k) => {
@@ -80,8 +84,7 @@ export function UpcomingScreen() {
                   <LedgerRow key={k.id}>
                     <Checkbox />
                     <Text
-                      numberOfLines={1}
-                      maxFontSizeMultiplier={1.6}
+                      maxFontSizeMultiplier={maxFontSizeMultiplier}
                       style={[
                         ui(17, 400, 22),
                         { flex: 1, minWidth: 0, color: c.ink, textAlign: align(rtl) },
@@ -92,7 +95,11 @@ export function UpcomingScreen() {
                     </Text>
                     <View style={{ flexDirection: row(rtl), alignItems: 'center', gap: 6 }}>
                       <Dot color={c[k.color]} />
-                      {meta ? <Text style={[mono(12, 500), { color: c.ink3 }]}>{meta}</Text> : null}
+                      {meta ? (
+                        <Text numberOfLines={1} style={[mono(12, 500), { color: c.ink3 }]}>
+                          {meta}
+                        </Text>
+                      ) : null}
                     </View>
                   </LedgerRow>
                 );

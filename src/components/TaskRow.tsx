@@ -16,9 +16,9 @@ import Animated, {
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '../theme/ThemeProvider';
-import { duration, easing, metrics } from '../theme/tokens';
-import { insetStart, marginStart, pad, row } from '../lib/rtl';
-import { Checkbox, Dot } from './Ledger';
+import { duration, easing, maxFontSizeMultiplier } from '../theme/tokens';
+import { insetStart, marginStart, row } from '../lib/rtl';
+import { Checkbox, Dot, rowContent, useRuling } from './Ledger';
 
 export type TaskRowProps = {
   title: string;
@@ -42,6 +42,7 @@ export function TaskRow({
   onAccessibilityAction,
 }: TaskRowProps) {
   const { c, ui, mono, rtl, reduced } = useTheme();
+  const { height, grown, onContentLayout } = useRuling();
   const [textWidth, setTextWidth] = useState(0);
 
   const strike = useSharedValue(done ? 1 : 0);
@@ -86,52 +87,55 @@ export function TaskRow({
       accessibilityLabel={title}
       accessibilityActions={accessibilityActions}
       onAccessibilityAction={onAccessibilityAction}
-      style={({ pressed }) => [
-        {
-          flex: 1,
-          flexDirection: row(rtl),
-          alignItems: 'center',
-          gap: 14,
-          backgroundColor: pressed ? c.paper2 : done ? c.paper : 'transparent',
-        },
-        pad(rtl, 16, metrics.gutter),
-      ]}
+      style={({ pressed }) => ({
+        height,
+        justifyContent: 'center',
+        backgroundColor: pressed ? c.paper2 : done ? c.paper : 'transparent',
+      })}
     >
-      <Checkbox checked={done} />
+      <View onLayout={onContentLayout} style={rowContent(rtl, 16)}>
+        <Checkbox checked={done} />
 
-      <View style={[{ flex: 1, minWidth: 0, position: 'relative' }, marginStart(rtl, 16)]}>
-        <Animated.Text
-          numberOfLines={1}
-          ellipsizeMode="tail"
-          maxFontSizeMultiplier={1.6}
-          onLayout={onLayout}
-          style={[ui(17, 400, 22), titleStyle]}
-        >
-          {title}
-        </Animated.Text>
-        <Animated.View
-          pointerEvents="none"
-          style={[
-            {
-              position: 'absolute',
-              top: 11,
-              height: 1.5,
-              backgroundColor: c.ink,
-              ...insetStart(rtl, -2),
-            },
-            strikeStyle,
-          ]}
-        />
-      </View>
-
-      {meta || dotColor ? (
-        <View style={{ flexDirection: row(rtl), alignItems: 'center', gap: 6 }}>
-          {dotColor ? <Dot color={dotColor} /> : null}
-          {meta ? (
-            <Text style={[mono(12, 500), { color: overdue && !done ? c.ver : c.ink3 }]}>{meta}</Text>
-          ) : null}
+        <View style={[{ flex: 1, minWidth: 0, position: 'relative' }, marginStart(rtl, 16)]}>
+          <Animated.Text
+            maxFontSizeMultiplier={maxFontSizeMultiplier}
+            onLayout={onLayout}
+            style={[
+              ui(17, 400, 22),
+              titleStyle,
+              grown && done ? { textDecorationLine: 'line-through' } : null,
+            ]}
+          >
+            {title}
+          </Animated.Text>
+          {grown ? null : (
+            <Animated.View
+              pointerEvents="none"
+              style={[
+                {
+                  position: 'absolute',
+                  top: '50%',
+                  height: 1.5,
+                  backgroundColor: c.ink,
+                  ...insetStart(rtl, -2),
+                },
+                strikeStyle,
+              ]}
+            />
+          )}
         </View>
-      ) : null}
+
+        {meta || dotColor ? (
+          <View style={{ flexDirection: row(rtl), alignItems: 'center', gap: 6 }}>
+            {dotColor ? <Dot color={dotColor} /> : null}
+            {meta ? (
+              <Text numberOfLines={1} style={[mono(12, 500), { color: overdue && !done ? c.ver : c.ink3 }]}>
+                {meta}
+              </Text>
+            ) : null}
+          </View>
+        ) : null}
+      </View>
     </Pressable>
   );
 }

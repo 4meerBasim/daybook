@@ -109,16 +109,7 @@ export function SwipeableRow({
   const actionText = [ui(13, 500), { lineHeight: undefined }];
 
   return (
-    <View
-      onLayout={onLayout}
-      style={{
-        position: 'relative',
-        height: metrics.row,
-        borderBottomWidth: 1,
-        borderBottomColor: c.rule,
-        overflow: 'hidden',
-      }}
-    >
+    <View onLayout={onLayout} style={{ position: 'relative', overflow: 'hidden' }}>
       <Animated.View
         pointerEvents="none"
         accessibilityElementsHidden
@@ -180,8 +171,13 @@ export function SwipeableRow({
       </Animated.View>
 
       <GestureDetector gesture={gesture}>
-        <Animated.View style={[fill, face]}>{children}</Animated.View>
+        <Animated.View style={face}>{children}</Animated.View>
       </GestureDetector>
+
+      <View
+        pointerEvents="none"
+        style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 1, backgroundColor: c.rule }}
+      />
     </View>
   );
 }

@@ -1,5 +1,5 @@
-import React from 'react';
-import { Text, View } from 'react-native';
+import React, { useState } from 'react';
+import { LayoutChangeEvent, Text, View } from 'react-native';
 import { useTheme } from '../theme/ThemeProvider';
 import { metrics, radius } from '../theme/tokens';
 import { insetStart, pad, row } from '../lib/rtl';
@@ -21,34 +21,56 @@ export function Ledger({ children }: { children?: React.ReactNode }) {
   );
 }
 
-export function LedgerRow({ children }: { children?: React.ReactNode }) {
+export function useRuling() {
+  const { unit } = useTheme();
+  const [units, setUnits] = useState(1);
+
+  const onContentLayout = (e: LayoutChangeEvent) => {
+    const next = Math.max(1, Math.ceil(e.nativeEvent.layout.height / unit));
+    setUnits((prev) => (prev === next ? prev : next));
+  };
+
+  return { height: unit * units, grown: units > 1, onContentLayout };
+}
+
+export function rowContent(rtl: boolean, start: number) {
+  return [
+    {
+      flexDirection: row(rtl),
+      alignItems: 'center' as const,
+      gap: metrics.gap,
+      paddingVertical: metrics.rowPad,
+    },
+    pad(rtl, start, metrics.gutter),
+  ];
+}
+
+export function LedgerRow({ children, start = 16 }: { children?: React.ReactNode; start?: number }) {
   const { c, rtl } = useTheme();
+  const { height, onContentLayout } = useRuling();
   return (
     <View
-      style={[
-        {
-          height: metrics.row,
-          flexDirection: row(rtl),
-          alignItems: 'center',
-          gap: 14,
-          borderBottomWidth: 1,
-          borderBottomColor: c.rule,
-        },
-        pad(rtl, 16, metrics.gutter),
-      ]}
+      style={{
+        height,
+        justifyContent: 'center',
+        borderBottomWidth: 1,
+        borderBottomColor: c.rule,
+      }}
     >
-      {children}
+      <View onLayout={onContentLayout} style={rowContent(rtl, start)}>
+        {children}
+      </View>
     </View>
   );
 }
 
 export function SectionLabel({ label }: { label: string }) {
-  const { c, mono, rtl } = useTheme();
+  const { c, mono, rtl, unit } = useTheme();
   return (
     <View
       style={[
         {
-          height: metrics.row,
+          minHeight: unit,
           flexDirection: row(rtl),
           alignItems: 'center',
           borderBottomWidth: 1,
@@ -63,11 +85,11 @@ export function SectionLabel({ label }: { label: string }) {
 }
 
 export function EmptyRules({ count }: { count: number }) {
-  const { c } = useTheme();
+  const { c, unit } = useTheme();
   return (
     <View pointerEvents="none">
       {Array.from({ length: count }).map((_, i) => (
-        <View key={i} style={{ height: metrics.row, borderBottomWidth: 1, borderBottomColor: c.rule }} />
+        <View key={i} style={{ height: unit, borderBottomWidth: 1, borderBottomColor: c.rule }} />
       ))}
     </View>
   );

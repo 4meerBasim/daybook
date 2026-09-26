@@ -7,12 +7,15 @@ import BottomSheet, {
 } from '@gorhom/bottom-sheet';
 import type { BottomSheetBackdropProps } from '@gorhom/bottom-sheet';
 import { useTheme } from '../theme/ThemeProvider';
-import { radius } from '../theme/tokens';
+import { maxFontSizeMultiplier, radius } from '../theme/tokens';
 import { align, row } from '../lib/rtl';
 import { useStore } from '../state/store';
 import { chipColors, draft, parse, tokenColor } from '../lib/parse';
 import { PRIORITY_HIGH } from '../db/schema';
+import { Chip } from '../components/Chip';
 import { CalendarIcon, FlagIcon, HashIcon, PaperclipIcon } from '../components/Icon';
+
+const LINE = 28;
 
 export function QuickAddSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { c, t, ar, ui, display, rtl, reduced } = useTheme();
@@ -59,7 +62,8 @@ export function QuickAddSheet({ open, onClose }: { open: boolean; onClose: () =>
     [c.ink]
   );
 
-  const lineStyle = [display(22, { lineHeight: 28 }), { color: c.ink }];
+  const field = display(22, { lineHeight: LINE });
+  const lineStyle = [field, { padding: 0, textAlign: align(rtl) } as const];
 
   return (
     <BottomSheet
@@ -95,22 +99,23 @@ export function QuickAddSheet({ open, onClose }: { open: boolean; onClose: () =>
         />
 
         <View style={{ borderBottomWidth: 1.5, borderBottomColor: c.ink, paddingBottom: 10 }}>
-          <View style={StyleSheet.absoluteFill} pointerEvents="none">
-            <Text style={[lineStyle, { color: c.ink, textAlign: align(rtl) }]}>
-              {parsed.tokens.map((tk, i) => (
-                <Text
-                  key={i}
-                  style={{
-                    color: tokenColor(tk.kind, c),
-                    textDecorationLine: tk.kind === 'plain' ? 'none' : 'underline',
-                    textDecorationColor: tokenColor(tk.kind, c),
-                  }}
-                >
-                  {tk.text}
-                </Text>
-              ))}
-            </Text>
-          </View>
+          <Text
+            maxFontSizeMultiplier={maxFontSizeMultiplier}
+            style={[lineStyle, { minHeight: field.lineHeight, color: c.ink }]}
+          >
+            {parsed.tokens.map((tk, i) => (
+              <Text
+                key={i}
+                style={{
+                  color: tokenColor(tk.kind, c),
+                  textDecorationLine: tk.kind === 'plain' ? 'none' : 'underline',
+                  textDecorationColor: tokenColor(tk.kind, c),
+                }}
+              >
+                {tk.text}
+              </Text>
+            ))}
+          </Text>
           <BottomSheetTextInput
             ref={inputRef}
             value={qa}
@@ -119,8 +124,11 @@ export function QuickAddSheet({ open, onClose }: { open: boolean; onClose: () =>
             placeholderTextColor={c.ink3}
             selectionColor={c.ink}
             accessibilityLabel={t.newTask}
-            multiline={false}
-            style={[lineStyle, { color: 'transparent', padding: 0, textAlign: align(rtl) }]}
+            maxFontSizeMultiplier={maxFontSizeMultiplier}
+            multiline
+            scrollEnabled={false}
+            textAlignVertical="top"
+            style={[lineStyle, StyleSheet.absoluteFill, { color: 'transparent' }]}
           />
         </View>
 
@@ -135,36 +143,9 @@ export function QuickAddSheet({ open, onClose }: { open: boolean; onClose: () =>
         >
           {parsed.chips.map((ch, i) => {
             const col = chipColors(ch.kind, c);
-            return (
-              <View
-                key={i}
-                style={{
-                  height: 28,
-                  paddingHorizontal: 10,
-                  borderRadius: radius.chip,
-                  backgroundColor: col.bg,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <Text style={[ui(12, 500), { lineHeight: undefined, color: col.fg }]}>{ch.label}</Text>
-              </View>
-            );
+            return <Chip key={i} label={ch.label} bg={col.bg} fg={col.fg} height={28} />;
           })}
-          <View
-            style={{
-              height: 28,
-              paddingHorizontal: 10,
-              borderRadius: radius.chip,
-              borderWidth: 1,
-              borderStyle: 'dashed',
-              borderColor: c.rule,
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Text style={[ui(12, 500), { lineHeight: undefined, color: c.ink3 }]}>{dest}</Text>
-          </View>
+          <Chip label={dest} dashed height={28} />
         </View>
 
         <View

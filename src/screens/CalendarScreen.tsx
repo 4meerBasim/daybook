@@ -1,18 +1,19 @@
 import React from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { useTheme } from '../theme/ThemeProvider';
-import { metrics } from '../theme/tokens';
+import { maxFontSizeMultiplier, metrics } from '../theme/tokens';
 import { align, insetStart, marginStart, pad, row } from '../lib/rtl';
 import { dayOfMonth, timeLabel } from '../lib/date';
 import { useStore } from '../state/store';
 import { rowTitle } from '../db/schema';
 import { Screen, useHeaderTop } from '../components/Screen';
+import { Checkbox, EmptyRules, LedgerRow } from '../components/Ledger';
 import { TallyMarks } from '../components/TallyMarks';
 
 type Cell = { n: number; count: number; today: boolean };
 
 export function CalendarScreen() {
-  const { c, t, ar, rtl, display, ui, mono } = useTheme();
+  const { c, t, ar, rtl, display, ui, mono, unit } = useTheme();
   const { month, sel, setSel } = useStore();
   const top = useHeaderTop();
 
@@ -133,14 +134,14 @@ export function CalendarScreen() {
           <View
             style={[
               {
-                height: 56,
+                minHeight: unit,
                 flexDirection: row(rtl),
                 alignItems: 'baseline',
                 gap: 10,
                 borderBottomWidth: 1,
                 borderBottomColor: c.rule,
               },
-              pad(rtl, 66, metrics.gutter),
+              pad(rtl, metrics.content, metrics.gutter),
             ]}
           >
             <Text style={[display(20, { weight: 400, italic: true }), { color: c.ink }]}>
@@ -151,50 +152,27 @@ export function CalendarScreen() {
           </View>
 
           {selItems.map((k) => (
-            <View
-              key={k.id}
-              style={[
-                {
-                  flexDirection: row(rtl),
-                  alignItems: 'center',
-                  gap: 14,
-                  height: 56,
-                  borderBottomWidth: 1,
-                  borderBottomColor: c.rule,
-                },
-                pad(rtl, 16, metrics.gutter),
-              ]}
-            >
-              <View
-                style={{
-                  width: 22,
-                  height: 22,
-                  borderWidth: 1.5,
-                  borderColor: c.ink,
-                  borderRadius: 4,
-                }}
-              />
+            <LedgerRow key={k.id}>
+              <Checkbox />
               <Text
-                numberOfLines={1}
-                maxFontSizeMultiplier={1.6}
-                style={[ui(17), { flex: 1, color: c.ink, textAlign: align(rtl) }, marginStart(rtl, 16)]}
+                maxFontSizeMultiplier={maxFontSizeMultiplier}
+                style={[
+                  ui(17, 400, 22),
+                  { flex: 1, minWidth: 0, color: c.ink, textAlign: align(rtl) },
+                  marginStart(rtl, 16),
+                ]}
               >
                 {rowTitle(k, t)}
               </Text>
               {timeLabel(k.dueDate) ? (
-                <Text style={[mono(12, 500), { color: c.ink3 }]}>{timeLabel(k.dueDate)}</Text>
+                <Text numberOfLines={1} style={[mono(12, 500), { color: c.ink3 }]}>
+                  {timeLabel(k.dueDate)}
+                </Text>
               ) : null}
-            </View>
+            </LedgerRow>
           ))}
 
-          <View style={{ height: 120 }}>
-            {[0, 1].map((i) => (
-              <View
-                key={i}
-                style={{ height: 56, borderBottomWidth: 1, borderBottomColor: c.rule }}
-              />
-            ))}
-          </View>
+          <EmptyRules count={2} />
         </View>
       </View>
     </Screen>

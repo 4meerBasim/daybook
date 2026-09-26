@@ -2,14 +2,14 @@ import React from 'react';
 import { Pressable, Text, View } from 'react-native';
 import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
 import { useTheme } from '../theme/ThemeProvider';
-import { metrics } from '../theme/tokens';
-import { marginStart, pad, row } from '../lib/rtl';
+import { maxFontSizeMultiplier, metrics } from '../theme/tokens';
+import { marginStart, row } from '../lib/rtl';
 import { isOverdue, isYesterday, timeLabel } from '../lib/date';
 import { useStore } from '../state/store';
 import { rowTitle } from '../db/schema';
 import { Screen } from '../components/Screen';
 import { PageHeader } from '../components/PageHeader';
-import { Checkbox, EmptyRules, Ledger, SectionLabel } from '../components/Ledger';
+import { Checkbox, EmptyRules, Ledger, LedgerRow, SectionLabel } from '../components/Ledger';
 import { TaskRow } from '../components/TaskRow';
 import { SwipeableRow } from '../components/SwipeableRow';
 import { Stamp } from '../components/Stamp';
@@ -90,32 +90,21 @@ export function TodayScreen({
 
           <SectionLabel label={t.habits} />
 
-          <View
-            style={[
-              {
-                height: metrics.row,
-                flexDirection: row(rtl),
-                alignItems: 'center',
-                gap: 14,
-                borderBottomWidth: 1,
-                borderBottomColor: c.rule,
-              },
-              pad(rtl, 16, metrics.gutter),
-            ]}
-          >
+          <LedgerRow>
             <Checkbox circle color={c.moss} />
             <Text
-              numberOfLines={1}
-              maxFontSizeMultiplier={1.6}
-              style={[ui(17, 400, 22), { flex: 1, color: c.ink }, marginStart(rtl, 16)]}
+              maxFontSizeMultiplier={maxFontSizeMultiplier}
+              style={[ui(17, 400, 22), { flex: 1, minWidth: 0, color: c.ink }, marginStart(rtl, 16)]}
             >
               {t.habit1}
             </Text>
             <View style={{ flexDirection: row(rtl), alignItems: 'center' }}>
               <StreakTallyIcon color={c.moss} flip={rtl} />
-              <Text style={[mono(12, 500), { color: c.moss }, marginStart(rtl, 6)]}>12</Text>
+              <Text numberOfLines={1} style={[mono(12, 500), { color: c.moss }, marginStart(rtl, 6)]}>
+                12
+              </Text>
             </View>
-          </View>
+          </LedgerRow>
 
           <EmptyRules count={4} />
         </Ledger>

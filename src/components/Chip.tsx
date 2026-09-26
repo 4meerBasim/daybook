@@ -18,7 +18,7 @@ export function Chip({ label, bg, fg, outline, dashed, height = 26 }: Props) {
   return (
     <View
       style={{
-        height,
+        minHeight: height,
         paddingHorizontal: chipPadding,
         borderRadius: radius.chip,
         backgroundColor: dashed || outline ? 'transparent' : bg,
@@ -27,9 +27,12 @@ export function Chip({ label, bg, fg, outline, dashed, height = 26 }: Props) {
         borderColor: c.rule,
         alignItems: 'center',
         justifyContent: 'center',
+        flexShrink: 1,
       }}
     >
-      <Text style={[ui(12, 500), { color, lineHeight: undefined }]}>{label}</Text>
+      <Text numberOfLines={1} style={[ui(12, 500), { color, lineHeight: 16 }]}>
+        {label}
+      </Text>
     </View>
   );
 }

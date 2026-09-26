@@ -4,12 +4,14 @@ import { useTheme } from '../theme/ThemeProvider';
 import { maxFontSizeMultiplier, metrics, radius } from '../theme/tokens';
 import { align, insetStart, marginStart, pad, row } from '../lib/rtl';
 import { Screen, useHeaderTop } from '../components/Screen';
+import { LedgerRow } from '../components/Ledger';
+import { Chip } from '../components/Chip';
 import { SearchIcon } from '../components/Icon';
 
 type Filter = 'all' | 'tasks' | 'notes' | 'completed';
 
 export function SearchScreen({ onOpenProject }: { onOpenProject: () => void }) {
-  const { c, t, ui, mono, rtl } = useTheme();
+  const { c, t, ui, mono, rtl, unit, chipPadding } = useTheme();
   const top = useHeaderTop();
   const [typed, setTyped] = useState<string | null>(null);
   const [filter, setFilter] = useState<Filter>('all');
@@ -73,8 +75,8 @@ export function SearchScreen({ onOpenProject }: { onOpenProject: () => void }) {
                 hitSlop={{ top: 7, bottom: 7 }}
                 android_ripple={null}
                 style={{
-                  height: 30,
-                  paddingHorizontal: 12,
+                  minHeight: 30,
+                  paddingHorizontal: chipPadding + 2,
                   borderRadius: radius.chip,
                   backgroundColor: on ? c.ink : 'transparent',
                   borderWidth: on ? 0 : 1,
@@ -83,7 +85,10 @@ export function SearchScreen({ onOpenProject }: { onOpenProject: () => void }) {
                   justifyContent: 'center',
                 }}
               >
-                <Text style={[ui(13, 500), { color: on ? c.paper : c.ink2, lineHeight: undefined }]}>
+                <Text
+                  numberOfLines={1}
+                  style={[ui(13, 500), { color: on ? c.paper : c.ink2, lineHeight: 18 }]}
+                >
                   {f.label}
                 </Text>
               </Pressable>
@@ -102,23 +107,11 @@ export function SearchScreen({ onOpenProject }: { onOpenProject: () => void }) {
 
           <ResultHeader label={`${t.tasks} · 2`} />
 
-          <View
-            style={[
-              {
-                height: metrics.row,
-                flexDirection: row(rtl),
-                alignItems: 'center',
-                gap: 14,
-                borderBottomWidth: 1,
-                borderBottomColor: c.rule,
-              },
-              pad(rtl, 16, metrics.gutter),
-            ]}
-          >
+          <LedgerRow>
             <View
               style={{
-                width: 22,
-                height: 22,
+                width: metrics.checkbox,
+                height: metrics.checkbox,
                 borderWidth: 1.5,
                 borderColor: c.ink,
                 borderRadius: radius.checkbox,
@@ -126,33 +119,26 @@ export function SearchScreen({ onOpenProject }: { onOpenProject: () => void }) {
               }}
             />
             <Text
-              numberOfLines={1}
               maxFontSizeMultiplier={maxFontSizeMultiplier}
-              style={[ui(17), { flex: 1, color: c.ink, textAlign: align(rtl) }, marginStart(rtl, 16)]}
+              style={[
+                ui(17, 400, 22),
+                { flex: 1, minWidth: 0, color: c.ink, textAlign: align(rtl) },
+                marginStart(rtl, 16),
+              ]}
             >
-              <Text style={{ backgroundColor: c.ochS }}>{` ${t.searchQ} `}</Text>
+              <Text style={{ backgroundColor: c.ochS }}>{` ${t.searchQ} `}</Text>
               {` ${t.searchR1}`}
             </Text>
-            <Text style={[mono(12, 500), { color: c.ink3 }]}>{t.today}</Text>
-          </View>
+            <Text numberOfLines={1} style={[mono(12, 500), { color: c.ink3 }]}>
+              {t.today}
+            </Text>
+          </LedgerRow>
 
-          <View
-            style={[
-              {
-                height: metrics.row,
-                flexDirection: row(rtl),
-                alignItems: 'center',
-                gap: 14,
-                borderBottomWidth: 1,
-                borderBottomColor: c.rule,
-              },
-              pad(rtl, 16, metrics.gutter),
-            ]}
-          >
+          <LedgerRow>
             <View
               style={{
-                width: 22,
-                height: 22,
+                width: metrics.checkbox,
+                height: metrics.checkbox,
                 borderWidth: 1.5,
                 borderColor: c.ink,
                 borderRadius: radius.checkbox,
@@ -161,12 +147,12 @@ export function SearchScreen({ onOpenProject }: { onOpenProject: () => void }) {
               }}
             />
             <Text
-              numberOfLines={1}
               maxFontSizeMultiplier={maxFontSizeMultiplier}
               style={[
-                ui(17),
+                ui(17, 400, 22),
                 {
                   flex: 1,
+                  minWidth: 0,
                   color: c.ink3,
                   textDecorationLine: 'line-through',
                   textAlign: align(rtl),
@@ -176,8 +162,10 @@ export function SearchScreen({ onOpenProject }: { onOpenProject: () => void }) {
             >
               {t.searchR2}
             </Text>
-            <Text style={[mono(12, 500), { color: c.ink3 }]}>{t.lastWeek}</Text>
-          </View>
+            <Text numberOfLines={1} style={[mono(12, 500), { color: c.ink3 }]}>
+              {t.lastWeek}
+            </Text>
+          </LedgerRow>
 
           <ResultHeader label={`${t.tags} · 1`} />
 
@@ -188,52 +176,32 @@ export function SearchScreen({ onOpenProject }: { onOpenProject: () => void }) {
             accessibilityLabel="#invoice"
             style={[
               {
-                height: metrics.row,
+                minHeight: unit,
                 flexDirection: row(rtl),
                 alignItems: 'center',
-                gap: 14,
+                gap: metrics.gap,
                 borderBottomWidth: 1,
                 borderBottomColor: c.rule,
               },
               pad(rtl, metrics.content, metrics.gutter),
             ]}
           >
-            <View
-              style={{
-                height: 26,
-                paddingHorizontal: 10,
-                borderRadius: radius.chip,
-                backgroundColor: c.ochS,
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <Text style={[ui(12, 500), { color: c.och, lineHeight: undefined }]}>#invoice</Text>
-            </View>
-            <Text style={[mono(12, 500), { color: c.ink3 }]}>6</Text>
+            <Chip label="#invoice" bg={c.ochS} fg={c.och} />
+            <Text numberOfLines={1} style={[mono(12, 500), { color: c.ink3 }]}>
+              6
+            </Text>
           </Pressable>
 
           <ResultHeader label={`${t.notes} · 1`} />
 
-          <View
-            style={[
-              {
-                height: metrics.row,
-                flexDirection: row(rtl),
-                alignItems: 'center',
-                borderBottomWidth: 1,
-                borderBottomColor: c.rule,
-              },
-              pad(rtl, metrics.content, metrics.gutter),
-            ]}
-          >
+          <LedgerRow start={metrics.content}>
             <Text
-              numberOfLines={1}
-              style={[ui(15), { flex: 1, color: c.ink2, textAlign: align(rtl) }]}
+              maxFontSizeMultiplier={maxFontSizeMultiplier}
+              style={[ui(15, 400, 22), { flex: 1, minWidth: 0, color: c.ink2, textAlign: align(rtl) }]}
             >
               {`…${t.searchR3}…`}
             </Text>
-          </View>
+          </LedgerRow>
         </View>
       </ScrollView>
     </Screen>
@@ -241,12 +209,12 @@ export function SearchScreen({ onOpenProject }: { onOpenProject: () => void }) {
 }
 
 function ResultHeader({ label }: { label: string }) {
-  const { c, mono, rtl } = useTheme();
+  const { c, mono, rtl, unit } = useTheme();
   return (
     <View
       style={[
         {
-          height: metrics.row,
+          minHeight: unit,
           flexDirection: row(rtl),
           alignItems: 'center',
           borderBottomWidth: 1,
