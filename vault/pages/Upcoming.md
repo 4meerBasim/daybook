@@ -14,4 +14,4 @@ Summary: Scheduled work grouped by horizon — tomorrow, this week, later — ea
 
 Each header's mono sub-label is the day-of-month range of the rows actually in that group, and the count is their length — both derived, where the old seed carried them as strings. Row meta is the time of day when the task has one; an all-day task shows nothing, since the group header already states the day.
 
-Anything [[Natural Language Quick Add]] parses with a day lands here, which is what the sheet's "Saved to Upcoming" chip promises. Rows are still read-only `LedgerRow`s — the checkboxes are static, unlike [[Today]].
+Anything [[Natural Language Quick Add]] parses with a day lands here, which is what the sheet's "Saved to Upcoming" chip promises. Rows are still read-only `LedgerRow`s — the checkboxes are static, unlike [[Today]] — and they grow with their titles now that `LedgerRow` snaps to whole ruling units. The group headers do not: they are chrome, so they hold one line at `minHeight: unit`.

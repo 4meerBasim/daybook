@@ -16,6 +16,10 @@ Typography switches per script in `src/theme/fonts.ts`: display Newsreader → N
 
 Digit-bearing elements that must stay in order — the focus countdown and its session counter — are pinned with `writingDirection: 'ltr'`.
 
+`chipPadding` reaches every chip now that the four screens that drew their own pill inline use the shared `Chip` in `src/components/Chip.tsx`; the filter chips on [[Search]] are the one remaining bespoke pill, because they carry a selected state, and they widen by the same 2pt.
+
+Dates are localised the same way the rest of the copy is: `weekdays`, `months` and `dateComma` in `src/i18n/strings.ts`, assembled by `longDate()`. The weekday array is ordered the way `wd` already was — Monday first in English, Saturday first in Arabic — with `firstWeekday` mapping `Date.getDay()` onto it. Arabic takes real Arabic month names, an Arabic comma, and Naskh regular in place of the Latin italic, since the design notes that Arabic has no italics and the hierarchy has to come from size alone. Numerals stay Western by default, with Eastern Arabic numerals left as the setting the design describes and nothing implements yet.
+
 The design's mirror list also names the tally bundle stroke, so `StreakTallyIcon` takes a `flip` prop and [[Today]]'s habit row passes `rtl`, mirroring the diagonal that binds the first five marks. The vertical marks of [[Calendar Tally Marks]] need no flip — they are symmetrical.
 
 Because the native layout direction stays LTR, a `Text` resolves its base direction from its first strong character, which gives Arabic strings RTL order for free and keeps Latin runs like `invoice-0918.pdf` intact. The one place that broke was [[Task Detail]]'s attachment caption, where the filename and the Arabic hint shared a single `Text` separated by a newline: the Latin filename won the base direction and dragged the Arabic line LTR with it. They are now two `Text` elements, which is the isolation the design asks for.
@@ -24,6 +28,6 @@ Language is set from two places: the English / العربية pair on [[Onboardi
 
 ## Related
 - Page: [[Onboarding]], [[Settings]], [[Main Tabs]], [[Today]], [[Upcoming]], [[Inbox]], [[Inbox Empty]], [[Search]], [[Quick Add Sheet]], [[Calendar]], [[Project Detail]], [[Task Detail]], [[Focus Mode]], [[Page Closed]], [[Swipe States]]
-- Features: [[Light and Dark Paper Palettes]], [[Ledger Paper Chrome]], [[Swipe Row Actions]], [[Natural Language Quick Add]]
-- Bugs: none
+- Features: [[Light and Dark Paper Palettes]], [[Ledger Paper Chrome]], [[Swipe Row Actions]], [[Natural Language Quick Add]], [[Collapsing Page Header]]
+- Bugs: [[Page Header Shows A Frozen Date]]
 - Enhancements: [[Voice Brain Dump Capture]]

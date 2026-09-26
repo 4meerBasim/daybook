@@ -28,7 +28,7 @@ Completion is `completedAt` on the row, not a separate map — that is what fixe
 
 Seed rows carry a nullable `seedKey` holding an i18n key. When it is set the row renders `t[seedKey]`, so demo content still switches with the app language; when it is null the row renders its stored `title`, which is what every user-created task does. `rowTitle()` in `schema.ts` is the whole mechanism, and `StringKey` in `src/i18n/strings.ts` narrows the key to the string-valued members of `EN` so a bad key is a compile error.
 
-Seed due dates are computed relative to the first-run date — today, yesterday, tomorrow, later this week — so a fresh install always reads as the current day rather than a frozen September 2026.
+Seed due dates are computed relative to the first-run date — today, yesterday, tomorrow, later this week — so a fresh install always reads as the current day rather than a frozen September 2026. That is what exposed [[Page Header Shows A Frozen Date]]: once the rows were real, the literal date line above them was visibly wrong.
 
 ### What the lists became
 
@@ -45,5 +45,5 @@ No `expo-notifications`, no permission strings, no scheduler. The data model alo
 ## Related
 - Page: [[Settings]], [[Today]], [[Inbox]], [[Upcoming]], [[Calendar]], [[Project Detail]], [[Task Detail]], [[Quick Add Sheet]]
 - Features: [[Natural Language Quick Add]], [[Swipe Row Actions]], [[Calendar Tally Marks]], [[Ink Strike-Through Completion]]
-- Bugs: [[Quick Add Does Not Create Tasks]], [[Snooze And Delete Share One Cleared Map]], [[Task And Subtask Ids Share One Done Map]]
+- Bugs: [[Quick Add Does Not Create Tasks]], [[Snooze And Delete Share One Cleared Map]], [[Task And Subtask Ids Share One Done Map]], [[Page Header Shows A Frozen Date]]
 - Enhancements: [[Closing the Page Ritual]], [[Day Capacity Budget]], [[Ink Decay and Task Retirement]], [[Notes With Live Task Lines]], [[Weekly Spread Review]], [[Shared Page Link]], [[Adaptive Reminders]], [[Focus Live Activity and Widgets]], [[System Capture Entry Points]], [[Inbox Triage Chips]], [[Waiting On Follow-Ups]], [[Voice Brain Dump Capture]]

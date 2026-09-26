@@ -1,7 +1,7 @@
 # Bottom Sheet Text Input Crashes On Web
 
 Status: not-fixed
-Found: `node_modules/@gorhom/bottom-sheet/lib/commonjs/components/bottomSheetTextInput/BottomSheetTextInput.js:42`, surfaced at `src/screens/QuickAddSheet.tsx:114`
+Found: `node_modules/@gorhom/bottom-sheet/lib/commonjs/components/bottomSheetTextInput/BottomSheetTextInput.js:42`, surfaced by the `BottomSheetTextInput` in `src/screens/QuickAddSheet.tsx`
 Summary: On web, blurring the quick-add input throws `TypeError: RNTextInput.default.State.currentlyFocusedInput is not a function`, because `@gorhom/bottom-sheet` calls an API that `react-native-web` does not expose.
 
 ## Details
@@ -30,4 +30,4 @@ Native behaviour is unverified — this project does not boot emulators, so the 
 ## Related
 - Feature: [[Natural Language Quick Add]], [[Pen FAB Tab Bar]]
 - Page: [[Quick Add Sheet]]
-- Bugs: [[Quick Add Does Not Create Tasks]]
+- Bugs: [[Quick Add Does Not Create Tasks]], [[Quick Add Highlight Drifts From The Caret]]

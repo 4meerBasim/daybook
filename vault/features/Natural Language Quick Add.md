@@ -18,7 +18,7 @@ Each match also emits a chip with a localised label — `High priority` / `أو�
 
 `hasDate` is true when a date or time chip carries no digits; [[Quick Add Sheet]] reads it to show the dashed destination chip, "Saved to Upcoming" when a day is understood and "Saved to Inbox" otherwise — which is what wires this to [[Upcoming]] and [[Inbox]].
 
-The highlighting effect in the sheet is a transparent `BottomSheetTextInput` layered over an absolutely positioned coloured `Text` rebuilt from `parsed.tokens` on every keystroke.
+The highlighting effect in the sheet is a coloured `Text` rebuilt from `parsed.tokens` on every keystroke with a transparent `BottomSheetTextInput` absolutely filled over it. The mirror is the layer in flow and the input cannot scroll, which is what keeps the caret on its glyph — see [[Quick Add Highlight Drifts From The Caret]] for the arrangement this replaced and why the previous one came apart.
 
 ### From tokens to a task
 
@@ -33,5 +33,5 @@ A time with no day is left in the title rather than thrown away, since that task
 ## Related
 - Page: [[Quick Add Sheet]], [[Inbox]], [[Upcoming]], [[Today]]
 - Features: [[Offline First Local Store]], [[Pen FAB Tab Bar]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]]
-- Bugs: [[Quick Add Does Not Create Tasks]], [[Bottom Sheet Text Input Crashes On Web]]
+- Bugs: [[Quick Add Does Not Create Tasks]], [[Bottom Sheet Text Input Crashes On Web]], [[Quick Add Highlight Drifts From The Caret]]
 - Enhancements: [[Day Capacity Budget]], [[Notes With Live Task Lines]], [[Voice Brain Dump Capture]], [[System Capture Entry Points]]

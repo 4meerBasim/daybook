@@ -13,3 +13,5 @@ Summary: Undated captures waiting to be triaged, each row offering a "Today" or 
 `src/screens/InboxScreen.tsx`, reading the `inbox` snapshot from [[Offline First Local Store]] — every task with no due date and no project that is neither completed nor soft-deleted. Rows are keyed by their real id now rather than by title, and the count in the header derives from the list instead of being the literal string `3`, so anything [[Natural Language Quick Add]] parses without a date lands here and the count moves with it.
 
 The triage chips are still static, exactly as the design draws them — see [[Inbox Triage Chips]] for what is left to decide. The `Someday · 4` section label is still literal, because nothing in the schema marks a task as someday yet.
+
+A capture is the user's own words and the chips eat most of the row's width, so this is the list where wrapping shows up first: the row takes a second ruling unit and the chips stay centred on it. See [[Ledger Paper Chrome]].
