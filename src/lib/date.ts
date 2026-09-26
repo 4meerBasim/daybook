@@ -1,3 +1,5 @@
+import type { Strings } from '../i18n/strings';
+
 export const MINUTE = 60_000;
 export const HOUR = 60 * MINUTE;
 
@@ -55,4 +57,16 @@ export function isOverdue(ts: number, now: number): boolean {
 
 export function isYesterday(ts: number, now: number): boolean {
   return startOfDay(ts) === startOfDay(addDays(now, -1));
+}
+
+export function longDate(ts: number, t: Strings): string {
+  const d = new Date(ts);
+  const weekday = t.weekdays[(d.getDay() - t.firstWeekday + 7) % 7];
+  return `${weekday}${t.dateComma}${d.getDate()} ${t.months[d.getMonth()]}`;
+}
+
+export function stamped(ts: number): string {
+  const d = new Date(ts);
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${pad(d.getDate())} · ${pad(d.getMonth() + 1)} · ${d.getFullYear()} — ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }

@@ -4,7 +4,7 @@ import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native
 import { useTheme } from '../theme/ThemeProvider';
 import { maxFontSizeMultiplier, metrics } from '../theme/tokens';
 import { marginStart, row } from '../lib/rtl';
-import { isOverdue, isYesterday, timeLabel } from '../lib/date';
+import { isOverdue, isYesterday, longDate, timeLabel } from '../lib/date';
 import { useStore } from '../state/store';
 import { rowTitle } from '../db/schema';
 import { Screen } from '../components/Screen';
@@ -51,7 +51,7 @@ export function TodayScreen({
       >
         <PageHeader
           title={t.today}
-          dateLine={t.dateLine}
+          dateLine={longDate(now, t)}
           trailing={leftN ? `${leftN} ${t.left}` : t.allDoneShort}
           scrollY={scrollY}
         />

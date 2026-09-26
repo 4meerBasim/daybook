@@ -3,6 +3,7 @@ import { Pressable, Text, View } from 'react-native';
 import { useTheme } from '../theme/ThemeProvider';
 import { maxFontSizeMultiplier, metrics, radius } from '../theme/tokens';
 import { align } from '../lib/rtl';
+import { longDate, stamped } from '../lib/date';
 import { Screen } from '../components/Screen';
 import { EmptyRules, Ledger, LedgerRow } from '../components/Ledger';
 import { Stamp } from '../components/Stamp';
@@ -10,12 +11,13 @@ import { Stamp } from '../components/Stamp';
 export function PageClosedScreen({ onPlanTomorrow }: { onPlanTomorrow: () => void }) {
   const { c, t, ui, mono, display, rtl } = useTheme();
   const struck = [t.task1, t.task2, t.task3, t.task4, t.task5];
+  const now = Date.now();
 
   return (
     <Screen>
       <View style={{ paddingTop: 64, paddingHorizontal: 20, paddingBottom: 12 }}>
         <Text style={[display(15, { italic: true }), { color: c.ink2, textAlign: align(rtl) }]}>
-          {t.dateLine}
+          {longDate(now, t)}
         </Text>
         <Text style={[display(40), { color: c.ink, textAlign: align(rtl) }]}>{t.today}</Text>
       </View>
@@ -47,7 +49,7 @@ export function PageClosedScreen({ onPlanTomorrow }: { onPlanTomorrow: () => voi
           pointerEvents="none"
           style={{ position: 'absolute', top: 96, left: 0, right: 0, alignItems: 'center' }}
         >
-          <Stamp label={t.pageClosed} timestamp="18 · 09 · 2026 — 17:42" size={26} />
+          <Stamp label={t.pageClosed} timestamp={stamped(now)} size={26} />
         </View>
       </Ledger>
 
