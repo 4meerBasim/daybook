@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LayoutChangeEvent, ScrollView, Text, View } from 'react-native';
+import { LayoutChangeEvent, Pressable, ScrollView, Text, View } from 'react-native';
 import { useTheme } from '../theme/ThemeProvider';
 import { maxFontSizeMultiplier, metrics } from '../theme/tokens';
 import { align, insetStart, marginStart, row } from '../lib/rtl';
@@ -11,6 +11,7 @@ import { SEED_PROJECT_ID } from '../db/seed';
 import { Screen, useHeaderTop } from '../components/Screen';
 import { Checkbox, Ledger, SectionLabel, EmptyRules, rowContent, useRuling } from '../components/Ledger';
 import { Chip } from '../components/Chip';
+import { ProjectPickerSheet } from './ProjectPickerSheet';
 
 function Avatar({ initials, bg, first }: { initials: string; bg: string; first: boolean }) {
   const { c, mono, rtl } = useTheme();
@@ -35,7 +36,7 @@ function Avatar({ initials, bg, first }: { initials: string; bg: string; first: 
   );
 }
 
-function ProjectTaskRow({ task }: { task: TaskRow }) {
+function ProjectTaskRow({ task, onAssign }: { task: TaskRow; onAssign: () => void }) {
   const { c, t, ui, mono, rtl } = useTheme();
   const { height, grown, onContentLayout } = useRuling();
   const [textWidth, setTextWidth] = useState(0);
@@ -43,13 +44,23 @@ function ProjectTaskRow({ task }: { task: TaskRow }) {
   const done = task.completedAt !== null;
 
   return (
-    <View
-      style={{
+    <Pressable
+      onLongPress={onAssign}
+      android_ripple={null}
+      accessibilityRole="button"
+      accessibilityLabel={rowTitle(task, t)}
+      accessibilityHint={t.moveToProject}
+      accessibilityActions={[{ name: 'assign', label: t.moveToProject }]}
+      onAccessibilityAction={(e) => {
+        if (e.nativeEvent.actionName === 'assign') onAssign();
+      }}
+      style={({ pressed }) => ({
         height,
         justifyContent: 'center',
         borderBottomWidth: 1,
         borderBottomColor: c.rule,
-      }}
+        backgroundColor: pressed ? c.paper2 : 'transparent',
+      })}
     >
       <View onLayout={onContentLayout} style={rowContent(rtl, 16)}>
         <Checkbox checked={done} />
@@ -85,7 +96,7 @@ function ProjectTaskRow({ task }: { task: TaskRow }) {
           {rowMeta(task)}
         </Text>
       </View>
-    </View>
+    </Pressable>
   );
 }
 
@@ -106,6 +117,7 @@ export function ProjectScreen({ projectId }: { projectId: string }) {
   const { c, t, display, ui, mono, rtl } = useTheme();
   const { projects, assigned } = useStore();
   const top = useHeaderTop();
+  const [picking, setPicking] = useState<TaskRow | null>(null);
 
   const project = projects.find((p) => p.id === projectId);
   if (!project) return <Screen />;
@@ -167,28 +179,39 @@ export function ProjectScreen({ projectId }: { projectId: string }) {
                 <Text style={[ui(13), { color: c.ink3 }]}>{t.shared}</Text>
               </>
             ) : null}
-            <View style={{ flex: 1 }} />
-            {unionTags(tasks).map((tag) => {
-              const tint = tagColors(tag, c);
-              return <Chip key={tag} label={`#${tag}`} bg={tint.bg} fg={tint.fg} />;
-            })}
+            <View
+              style={{
+                flex: 1,
+                flexDirection: row(rtl),
+                flexWrap: 'wrap',
+                justifyContent: 'flex-end',
+                gap: 8,
+              }}
+            >
+              {unionTags(tasks).map((tag) => {
+                const tint = tagColors(tag, c);
+                return <Chip key={tag} label={`#${tag}`} bg={tint.bg} fg={tint.fg} />;
+              })}
+            </View>
           </View>
         </View>
 
         <Ledger>
           {thisWeek.length ? <SectionLabel label={t.thisWeek} /> : null}
           {thisWeek.map((task) => (
-            <ProjectTaskRow key={task.id} task={task} />
+            <ProjectTaskRow key={task.id} task={task} onAssign={() => setPicking(task)} />
           ))}
 
           {later.length ? <SectionLabel label={`${t.later} · ${later.length}`} /> : null}
           {later.map((task) => (
-            <ProjectTaskRow key={task.id} task={task} />
+            <ProjectTaskRow key={task.id} task={task} onAssign={() => setPicking(task)} />
           ))}
 
           <EmptyRules count={3} />
         </Ledger>
       </ScrollView>
+
+      {picking ? <ProjectPickerSheet task={picking} onClose={() => setPicking(null)} /> : null}
     </Screen>
   );
 }
