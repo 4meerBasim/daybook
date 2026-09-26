@@ -11,8 +11,9 @@ Fixed by wrapping each [[Today]] row in `SwipeableRow`. `onComplete` calls the e
 
 `SwipeStatesScreen` no longer drives `SwipeableRow` with a demo-only `offset` prop — it now renders its own static illustration with the pane hardcoded per row, as the mock does. This also fixed two defects in that screen: the third row showed the blue snooze pane instead of the vermilion delete pane (a -200pt offset on a ~390pt row is 51%, below the 70% delete threshold), and touching any demo row snapped it back to zero, destroying the illustration.
 
-[[Inbox]] and [[Upcoming]] were deliberately left without swipe. The mock specifies one-tap triage chips and long-press-for-project on Inbox, and day sub-headings on Upcoming; neither note mentions swipe, and their seed rows carry no stable ids.
+[[Inbox]] and [[Upcoming]] were deliberately left without swipe. The mock specifies one-tap triage chips and long-press-for-project on Inbox, and day sub-headings on Upcoming; neither note mentions swipe. The rows do now carry stable ids — [[Offline First Local Store]] gave every list the same task table — so the only thing still keeping swipe off those two pages is the design, not the data.
 
 ## Related
-- Feature: [[Swipe Row Actions]]
+- Feature: [[Swipe Row Actions]], [[Offline First Local Store]]
 - Page: [[Swipe States]], [[Today]], [[Inbox]], [[Upcoming]]
+- Bugs: [[Snooze And Delete Share One Cleared Map]]

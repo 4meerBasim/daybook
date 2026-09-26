@@ -10,12 +10,12 @@ This is what collapses the note-app / task-app split that makes people carry two
 
 Open decisions:
 
-- Notes are not a first-class object anywhere yet. `src/data/seed.ts` has task titles and note excerpts, not note records.
+- Notes are not a first-class object anywhere yet. [[Offline First Local Store]] gives every task a `notes` column, but that is a body hanging off a task, not a note record with its own identity — and the seeded invoice task deliberately leaves it null so the mock's note body keeps switching language.
 - Editing model: a task line inside a note needs an identity that survives the user rewriting the text around it. This is the hard part, and it is a data-layer decision rather than a UI one.
 - Two-way sync means striking a task in [[Today]] edits text inside the note. What happens when the user deletes the line instead is a product call.
 - Rendering checkbox syntax inside body text wants the same live-highlight approach `src/lib/parse.ts` uses for the [[Quick Add Sheet]], applied to a multi-line field.
 
 ## Related
 - Page: [[Task Detail]], [[Search]], [[Today]]
-- Features: [[Natural Language Quick Add]], [[Ledger Paper Chrome]]
-- Enhancements: [[Offline First Local Store]]
+- Features: [[Offline First Local Store]], [[Natural Language Quick Add]], [[Ledger Paper Chrome]]
+- Bugs: [[Task And Subtask Ids Share One Done Map]]

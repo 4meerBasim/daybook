@@ -11,7 +11,7 @@ Summary: Checking a task draws a pen stroke left-to-right across its title and l
 
 The bar is absolutely positioned at `top: 11` and anchored to `left: -2` or `right: -2` depending on `rtl`, so the stroke starts from the correct edge in Arabic. A medium impact haptic fires on completion only, not on un-completion. Under [[Reduced Motion Mode]] both values are assigned instantly with no timing.
 
-Completion state itself is the `done` map in `src/state/store.tsx`, keyed by task id.
+Completion state itself is `completedAt` on the task row in [[Offline First Local Store]], not a map — so a struck row is still struck after a reload. Subtasks carry their own `completedAt` in their own table; see [[Task And Subtask Ids Share One Done Map]] for the shared map this replaced.
 
 Static end-state renderings of the same stroke appear elsewhere: `ProjectScreen.tsx` draws the bar at full width for finished rows, and [[Page Closed]], [[Search]] and the subtasks on [[Task Detail]] use plain `textDecorationLine: 'line-through'`.
 
@@ -19,6 +19,6 @@ That split is the design's, not an inconsistency to tidy away. Only the [[Today]
 
 ## Related
 - Page: [[Today]], [[Project Detail]], [[Page Closed]], [[Search]], [[Task Detail]]
-- Features: [[Reduced Motion Mode]], [[Ledger Paper Chrome]]
-- Bugs: [[Startup Crash From Mismatched Worklets]]
+- Features: [[Offline First Local Store]], [[Reduced Motion Mode]], [[Ledger Paper Chrome]]
+- Bugs: [[Startup Crash From Mismatched Worklets]], [[Task And Subtask Ids Share One Done Map]]
 - Enhancements: [[Closing the Page Ritual]], [[Ink Decay and Task Retirement]]

@@ -5,9 +5,11 @@ Summary: One ruled row per preference — language, appearance, week start, remi
 
 ## Related
 - Connects to: [[Today]] — reached by long-pressing the Today tab; returns via the system back gesture, [[Main Tabs]], [[Swipe States]] — the Shortcuts row calls `onOpenGestures`
-- Features: [[Light and Dark Paper Palettes]], [[Reduced Motion Mode]], [[In-App RTL and Arabic Typography]], [[Swipe Row Actions]]
+- Features: [[Offline First Local Store]], [[Light and Dark Paper Palettes]], [[Reduced Motion Mode]], [[In-App RTL and Arabic Typography]], [[Swipe Row Actions]]
 - Bugs: none found
-- Enhancements: [[Adaptive Reminders]], [[Offline First Local Store]], [[Shared Page Link]], [[Ink Decay and Task Retirement]]
+- Enhancements: [[Adaptive Reminders]], [[Shared Page Link]], [[Ink Decay and Task Retirement]]
 
 ## Notes
 `src/screens/SettingsScreen.tsx`. Three rows are live and write straight to the theme context: Language toggles en/ar, Appearance is a three-way `Segmented` for light/dark/auto, and Reduce motion is a `Toggle`. Week start, reminders, text size, sync and sharing render their values but are not editable. Shortcuts is the only row wired as a `Pressable`, and it is the sole entry point to [[Swipe States]].
+
+The Sync row stays inert on purpose. [[Offline First Local Store]] is local-only and off-network by design — sync is optional and later, not a prerequisite. The Reminders row's "evening review 20:30" is now backed by a named constant in `src/db/reminders.ts`, which is as far as notification work goes until [[Adaptive Reminders]] lands.

@@ -1,13 +1,17 @@
 # Upcoming
 
 Route: `Main` → tab key `upcoming`
-Summary: Scheduled work grouped by day — tomorrow, a named weekday, and next week — each group headed by an italic display date and a count.
+Summary: Scheduled work grouped by horizon — tomorrow, this week, later — each group headed by an italic display title, its day range and a count.
 
 ## Related
 - Connects to: [[Main Tabs]], [[Calendar]] — long-press the Upcoming tab, [[Quick Add Sheet]] — pen FAB
-- Features: [[Ledger Paper Chrome]], [[Collapsing Page Header]], [[Pen FAB Tab Bar]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]]
-- Bugs: [[Swipe Actions Not Wired Into Task Lists]]
+- Features: [[Offline First Local Store]], [[Ledger Paper Chrome]], [[Collapsing Page Header]], [[Pen FAB Tab Bar]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]]
+- Bugs: [[Swipe Actions Not Wired Into Task Lists]], [[Quick Add Does Not Create Tasks]]
 - Enhancements: [[Closing the Page Ritual]], [[Ink Decay and Task Retirement]], [[Weekly Spread Review]]
 
 ## Notes
-`src/screens/UpcomingScreen.tsx`, data from `upcoming()` in `src/data/seed.ts`. Rows here are read-only `LedgerRow`s — the checkboxes are static, unlike [[Today]].
+`src/screens/UpcomingScreen.tsx`, reading the `upcoming` snapshot from [[Offline First Local Store]] — open tasks dated from tomorrow onward, ordered by due date. The screen buckets them into three horizons rather than the mock's tomorrow / named weekday / next week, because the horizons are derivable from real dates without a weekday-name table: `t.tomorrow`, `t.weekGroup` for the following six days, and `t.laterGroup` beyond that. An empty bucket is dropped rather than drawn.
+
+Each header's mono sub-label is the day-of-month range of the rows actually in that group, and the count is their length — both derived, where the old seed carried them as strings. Row meta is the time of day when the task has one; an all-day task shows nothing, since the group header already states the day.
+
+Anything [[Natural Language Quick Add]] parses with a day lands here, which is what the sheet's "Saved to Upcoming" chip promises. Rows are still read-only `LedgerRow`s — the checkboxes are static, unlike [[Today]].

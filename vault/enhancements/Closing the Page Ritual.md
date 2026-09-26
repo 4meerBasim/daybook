@@ -12,10 +12,10 @@ Open decisions:
 
 - [[Today]] can already be cleared by striking or swiping every row, and `leftN === 0` is what reveals the stamp. A real ritual has to handle the opposite case — closing a page with work still on it — which the mock has no state for.
 - The struck lines on [[Page Closed]] are a non-interactive overlay over six empty ruled rows, not real task rows. The ritual needs actual rows to act on.
-- Carry counts need per-task history, and nothing in `src/state/store.tsx` persists across launches — the `done` and `cleared` maps are in-memory only. Needs [[Offline First Local Store]] first.
-- Closed pages have to be readable later, which implies a dated archive route the design does not include.
+- Carry counts need per-task history. [[Offline First Local Store]] now persists `createdAt`, `completedAt`, `snoozedUntil` and `deletedAt`, so the timestamps a ritual would read exist — but there is no carry count column and no per-day record of what was carried, which is the schema addition this enhancement actually needs.
+- Closed pages have to be readable later, which implies a dated archive route the design does not include, and a table of closed days that does not exist.
 
 ## Related
 - Page: [[Page Closed]], [[Today]], [[Upcoming]]
-- Features: [[Wax Page Closed Stamp]], [[Ink Strike-Through Completion]], [[Ledger Paper Chrome]]
-- Enhancements: [[Ink Decay and Task Retirement]], [[Weekly Spread Review]], [[Day Capacity Budget]], [[Offline First Local Store]]
+- Features: [[Offline First Local Store]], [[Wax Page Closed Stamp]], [[Ink Strike-Through Completion]], [[Ledger Paper Chrome]]
+- Enhancements: [[Ink Decay and Task Retirement]], [[Weekly Spread Review]], [[Day Capacity Budget]]

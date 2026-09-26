@@ -17,7 +17,11 @@ Three absolutely positioned action layers sit behind the row face and cross-fade
 
 Direction is mirrored by a `sign` derived from `rtl`, so "leading" is a right-drag in English and a left-drag in Arabic. `activeOffsetX([-12, 12])` with `failOffsetY([-10, 10])` keeps vertical list scrolling intact. A simultaneous `Gesture.LongPress` at 320ms lifts the row onto `paper2` for reordering. Every threshold crossing fires a medium impact haptic; under [[Reduced Motion Mode]] the settle is an instant assignment instead of a timed spring.
 
-Mounted on every [[Today]] row. Complete calls `toggle(id)`; snooze and delete call `clear(id)`, which takes the task off today's page; pick-date opens [[Calendar]]. The wrapper owns the row height, the ledger rule and the clipping; `TaskRow` is `flex: 1` inside the sliding face and declares no height or border of its own, so the rule stays printed on the paper while the face slides over it. Sizing the row in both places would overhang the wrapper's border by a pixel and let a completed row's paper background paint out its own rule.
+Mounted on every [[Today]] row. Complete calls `complete(id, done)`, which writes `completedAt`; snooze calls `snooze(id, 'tomorrow')`, which writes `snoozedUntil`; delete calls `remove(id)`, which writes `deletedAt` as a soft delete; pick-date opens [[Calendar]]. Snooze and delete used to be the same call into one `cleared` map — see [[Snooze And Delete Share One Cleared Map]] for why that was wrong and what each now means.
+
+The snooze offsets are named constants in `src/db/reminders.ts` rather than inline arithmetic, so the scheduler that [[Adaptive Reminders]] eventually adds reads the same ten-minute, one-hour and tomorrow values this swipe uses.
+
+The wrapper owns the row height, the ledger rule and the clipping; `TaskRow` is `flex: 1` inside the sliding face and declares no height or border of its own, so the rule stays printed on the paper while the face slides over it. Sizing the row in both places would overhang the wrapper's border by a pixel and let a completed row's paper background paint out its own rule.
 
 The face is transparent at rest so the red margin line shows through, and only turns opaque paper once the drag starts, which is what hides the action layers between gestures.
 
@@ -29,6 +33,6 @@ The thresholds are documented on-screen by the annotation rows in [[Swipe States
 
 ## Related
 - Page: [[Today]], [[Swipe States]], [[Settings]], [[Calendar]]
-- Features: [[Reduced Motion Mode]], [[In-App RTL and Arabic Typography]], [[Ink Strike-Through Completion]]
-- Bugs: [[Swipe Actions Not Wired Into Task Lists]], [[Startup Crash From Mismatched Worklets]]
-- Enhancements: [[Waiting On Follow-Ups]]
+- Features: [[Offline First Local Store]], [[Reduced Motion Mode]], [[In-App RTL and Arabic Typography]], [[Ink Strike-Through Completion]]
+- Bugs: [[Swipe Actions Not Wired Into Task Lists]], [[Startup Crash From Mismatched Worklets]], [[Snooze And Delete Share One Cleared Map]]
+- Enhancements: [[Waiting On Follow-Ups]], [[Adaptive Reminders]]

@@ -1,23 +1,31 @@
 # Quick Add Does Not Create Tasks
 
-Status: not-fixed
-Found: `src/screens/QuickAddSheet.tsx:204`
-Summary: The Add button in the quick-add sheet has no `onPress`, so a composed task is parsed and previewed but never committed to any list.
+Status: fixed
+Found: `src/screens/QuickAddSheet.tsx:180`
+Summary: The Add button in the quick-add sheet had no `onPress`, so a composed task was parsed and previewed but never committed to any list.
 
 ## Details
-The sheet parses the query live and shows the destination chip ("Saved to Upcoming" / "Saved to Inbox"), but the dark Add `Pressable` at the bottom right declares only `accessibilityRole`, `accessibilityLabel` and styling — no handler. The four tool buttons beside it (calendar, flag, hash, paperclip) are in the same state.
+The sheet parsed the query live and showed the destination chip ("Saved to Upcoming" / "Saved to Inbox"), but the dark Add `Pressable` at the bottom of the row declared only `accessibilityRole`, `accessibilityLabel` and styling — no handler. Its `onPress` was `onClose`, so submitting was indistinguishable from dismissing.
 
-Consequences:
+Three symptoms, all gone:
 
-- Nothing is ever appended to [[Today]], [[Upcoming]] or [[Inbox]] — those lists render fixed content from `src/data/seed.ts`
-- The sheet does not close on submit, since `onClose` is only reachable via pan-down or backdrop tap
-- `qa` in `src/state/store.tsx` is seeded with `'Call dentist tomorrow 3pm #health'` and never cleared, so reopening the sheet shows the previous text rather than an empty line
+- Nothing was ever appended to [[Today]], [[Upcoming]] or [[Inbox]] — those lists rendered fixed content from the old `src/data/seed.ts`
+- The sheet did not close on submit in any meaningful sense, since there was nothing to submit
+- `qa` in `src/state/store.tsx` was seeded with `'Call dentist tomorrow 3pm #health'` and never cleared, so reopening the sheet showed the previous text rather than an empty line
 
-The parsing side is complete and correct — see [[Natural Language Quick Add]]. What is missing is a task collection in the store that lists read from, plus an `onPress` that appends the parsed result and calls `onClose`.
+Fixed by `draft()` in `src/lib/parse.ts` plus `create` on the store. `draft()` consumes the parser's existing token stream and resolves it into a real task: the plain runs become the title, a date token resolves against the current date (today, tonight, tomorrow, next week, next monday/friday, and the Arabic غداً / اليوم), and a time token refines the hour. `onAdd` in the sheet inserts it, clears `qa` and closes.
 
-Worth confirming with the user whether this was left out deliberately for the design transcription pass.
+Two deliberate choices:
+
+- A due date is only written when `hasDate` is already true, which is exactly the condition the dashed destination chip reads. A bare time with no day still lands in [[Inbox]], matching what the sheet promised the user.
+- Tag and repeat tokens stay inside the title, because no column in [[Offline First Local Store]] captures them yet. Dropping them would lose what the user typed. `#health` therefore reads as part of the title until a tags table exists.
+
+`qa` now starts empty. A draft abandoned by pan-down or backdrop tap is kept on purpose — only Add clears it.
+
+The four tool buttons beside Add (calendar, flag, hash, paperclip) are still inert, as the mock draws them. The parsing side was always complete — see [[Natural Language Quick Add]].
 
 ## Related
-- Feature: [[Natural Language Quick Add]], [[Pen FAB Tab Bar]]
+- Feature: [[Natural Language Quick Add]], [[Pen FAB Tab Bar]], [[Offline First Local Store]]
 - Page: [[Quick Add Sheet]], [[Today]], [[Upcoming]], [[Inbox]]
+- Bugs: [[Bottom Sheet Text Input Crashes On Web]]
 - Enhancements: [[Voice Brain Dump Capture]], [[System Capture Entry Points]]

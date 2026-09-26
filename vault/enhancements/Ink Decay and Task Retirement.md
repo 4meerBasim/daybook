@@ -10,12 +10,12 @@ The retirement prompt is the part that matters. Past the threshold the task stop
 
 Open decisions:
 
-- Fade needs an age, which needs a created-at timestamp and persistence — see [[Offline First Local Store]].
-- Carry counts come from [[Closing the Page Ritual]]; without that pass there is nothing to count.
+- Fade needs an age. [[Offline First Local Store]] now persists `createdAt` on every task, so the age is readable; what is undecided is the curve and the threshold, not where the number comes from.
+- Carry counts come from [[Closing the Page Ritual]]; without that pass there is nothing to count, and no column holds one.
 - Contrast floor. Faded ink must stay legible in both [[Light and Dark Paper Palettes]] and must not drop below the accessible minimum, so the fade should bottom out well before it disappears — and probably be defeatable in [[Settings]] next to [[Reduced Motion Mode]].
-- "Someday" already exists as an [[Inbox]] section label, but it is a literal string with no backing list — the same gap [[Inbox Triage Chips]] runs into.
+- "Someday" already exists as an [[Inbox]] section label, but it is still a literal string with no backing list and no column — the same gap [[Inbox Triage Chips]] runs into.
 
 ## Related
 - Page: [[Today]], [[Inbox]], [[Upcoming]]
-- Features: [[Ink Strike-Through Completion]], [[Light and Dark Paper Palettes]], [[Ledger Paper Chrome]]
-- Enhancements: [[Closing the Page Ritual]], [[Inbox Triage Chips]], [[Offline First Local Store]]
+- Features: [[Offline First Local Store]], [[Ink Strike-Through Completion]], [[Light and Dark Paper Palettes]], [[Ledger Paper Chrome]]
+- Enhancements: [[Closing the Page Ritual]], [[Inbox Triage Chips]]
