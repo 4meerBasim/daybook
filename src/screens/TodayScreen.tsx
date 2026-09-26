@@ -4,8 +4,9 @@ import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native
 import { useTheme } from '../theme/ThemeProvider';
 import { metrics } from '../theme/tokens';
 import { marginStart, pad, row } from '../lib/rtl';
+import { isOverdue, isYesterday, timeLabel } from '../lib/date';
 import { useStore } from '../state/store';
-import { tasks } from '../data/seed';
+import { rowTitle } from '../db/schema';
 import { Screen } from '../components/Screen';
 import { PageHeader } from '../components/PageHeader';
 import { Checkbox, EmptyRules, Ledger, SectionLabel } from '../components/Ledger';
@@ -24,15 +25,15 @@ export function TodayScreen({
   onPickDate: () => void;
 }) {
   const { c, t, ui, mono, rtl } = useTheme();
-  const { done, toggle, cleared, clear } = useStore();
+  const { today, loaded, complete, snooze, remove } = useStore();
   const scrollY = useSharedValue(0);
   const onScroll = useAnimatedScrollHandler((e) => {
     scrollY.value = e.contentOffset.y;
   });
 
-  const list = tasks(t).filter((k) => !cleared[k.id]);
-  const leftN = list.filter((k) => !done[k.id]).length;
-  const allDone = leftN === 0;
+  const now = Date.now();
+  const leftN = today.filter((k) => k.completedAt === null).length;
+  const allDone = loaded && leftN === 0;
 
   const swipeActions = [
     { name: 'complete', label: t.done },
@@ -56,33 +57,36 @@ export function TodayScreen({
         />
 
         <Ledger>
-          {list.map((k) => (
-            <SwipeableRow
-              key={k.id}
-              onComplete={() => toggle(k.id)}
-              onSnooze={() => clear(k.id)}
-              onPickDate={onPickDate}
-              onDelete={() => clear(k.id)}
-              onLongPress={onOpenTask}
-            >
-              <TaskRow
-                title={k.title}
-                meta={k.time}
-                dotColor={c[k.color]}
-                done={!!done[k.id]}
-                overdue={k.over}
-                onToggle={() => toggle(k.id)}
-                accessibilityActions={swipeActions}
-                onAccessibilityAction={(e) => {
-                  const action = e.nativeEvent.actionName;
-                  if (action === 'complete') toggle(k.id);
-                  if (action === 'snooze') clear(k.id);
-                  if (action === 'pickDate') onPickDate();
-                  if (action === 'delete') clear(k.id);
-                }}
-              />
-            </SwipeableRow>
-          ))}
+          {today.map((k) => {
+            const done = k.completedAt !== null;
+            return (
+              <SwipeableRow
+                key={k.id}
+                onComplete={() => complete(k.id, !done)}
+                onSnooze={() => snooze(k.id, 'tomorrow')}
+                onPickDate={onPickDate}
+                onDelete={() => remove(k.id)}
+                onLongPress={onOpenTask}
+              >
+                <TaskRow
+                  title={rowTitle(k, t)}
+                  meta={isYesterday(k.dueDate, now) ? t.yesterday : timeLabel(k.dueDate)}
+                  dotColor={c[k.color]}
+                  done={done}
+                  overdue={isOverdue(k.dueDate, now)}
+                  onToggle={() => complete(k.id, !done)}
+                  accessibilityActions={swipeActions}
+                  onAccessibilityAction={(e) => {
+                    const action = e.nativeEvent.actionName;
+                    if (action === 'complete') complete(k.id, !done);
+                    if (action === 'snooze') snooze(k.id, 'tomorrow');
+                    if (action === 'pickDate') onPickDate();
+                    if (action === 'delete') remove(k.id);
+                  }}
+                />
+              </SwipeableRow>
+            );
+          })}
 
           <SectionLabel label={t.habits} />
 

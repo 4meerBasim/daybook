@@ -5,20 +5,17 @@ import { useTheme } from '../theme/ThemeProvider';
 import { maxFontSizeMultiplier, metrics, radius } from '../theme/tokens';
 import { align, insetStart, marginStart, pad, row } from '../lib/rtl';
 import { useStore } from '../state/store';
+import { rowTitle } from '../db/schema';
 import { Screen, useHeaderTop } from '../components/Screen';
 import { Checkbox } from '../components/Ledger';
 import { ChevronBackIcon, EllipsisIcon, PaperclipIcon } from '../components/Icon';
 
 export function TaskDetailScreen({ onBack, onFocus }: { onBack: () => void; onFocus: () => void }) {
   const { c, t, ui, mono, display, rtl } = useTheme();
-  const { done, toggle } = useStore();
+  const { subtasks, completeSubtask } = useStore();
   const top = useHeaderTop();
 
-  const subs = [
-    { id: 'd1', label: t.sub1, checked: true },
-    { id: 'd2', label: t.sub2, checked: false },
-    { id: 'd3', label: t.sub3, checked: false },
-  ];
+  const doneCount = subtasks.filter((s) => s.completedAt !== null).length;
 
   return (
     <Screen>
@@ -189,7 +186,9 @@ export function TaskDetailScreen({ onBack, onFocus }: { onBack: () => void; onFo
             <Text style={[mono(11, 500, 0.1, true), { width: metrics.labelColumn, color: c.ink3, textAlign: align(rtl) }]}>
               {t.subtasks}
             </Text>
-            <Text style={[mono(13, 500), { color: c.ink2 }]}>1 / 3</Text>
+            <Text style={[mono(13, 500), { color: c.ink2 }]}>
+              {doneCount} / {subtasks.length}
+            </Text>
           </View>
 
           <View style={{ position: 'relative' }}>
@@ -200,18 +199,19 @@ export function TaskDetailScreen({ onBack, onFocus }: { onBack: () => void; onFo
                 insetStart(rtl, metrics.marginLine),
               ]}
             />
-            {subs.map((s) => {
-              const checked = s.checked ? !done[s.id] : !!done[s.id];
+            {subtasks.map((s) => {
+              const checked = s.completedAt !== null;
+              const label = rowTitle(s, t);
               return (
                 <Pressable
                   key={s.id}
                   onPress={() => {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    toggle(s.id);
+                    completeSubtask(s.id, !checked);
                   }}
                   accessibilityRole="checkbox"
                   accessibilityState={{ checked }}
-                  accessibilityLabel={s.label}
+                  accessibilityLabel={label}
                   android_ripple={null}
                   style={[
                     {
@@ -240,7 +240,7 @@ export function TaskDetailScreen({ onBack, onFocus }: { onBack: () => void; onFo
                       },
                     ]}
                   >
-                    {s.label}
+                    {label}
                   </Text>
                 </Pressable>
               );
