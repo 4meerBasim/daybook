@@ -9,7 +9,7 @@ import { useStore } from '../state/store';
 import { tasks } from '../data/seed';
 import { Screen } from '../components/Screen';
 import { PageHeader } from '../components/PageHeader';
-import { SearchField } from '../components/SearchField';
+import { SearchField, searchFieldInset } from '../components/SearchField';
 import { Checkbox, EmptyRules, Ledger, SectionLabel } from '../components/Ledger';
 import { TaskRow } from '../components/TaskRow';
 import { SwipeableRow } from '../components/SwipeableRow';
@@ -54,7 +54,7 @@ export function TodayScreen({
         scrollEventThrottle={16}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
-        contentContainerStyle={{ paddingBottom: metrics.tabBar }}
+        contentContainerStyle={{ paddingBottom: searchFieldInset }}
       >
         <PageHeader
           title={t.today}
@@ -62,7 +62,6 @@ export function TodayScreen({
           trailing={leftN ? `${leftN} ${t.left}` : t.allDoneShort}
           scrollY={scrollY}
         />
-        <SearchField value={query} onChangeText={setQuery} />
 
         <Ledger>
           {visible.map((k) => (
@@ -131,6 +130,8 @@ export function TodayScreen({
           <EmptyRules count={4} />
         </Ledger>
       </Animated.ScrollView>
+
+      <SearchField value={query} onChangeText={setQuery} />
 
       {allDone ? (
         <Pressable

@@ -8,7 +8,7 @@ import { matches } from '../lib/matches';
 import { upcoming } from '../data/seed';
 import { Screen } from '../components/Screen';
 import { PageHeader } from '../components/PageHeader';
-import { SearchField } from '../components/SearchField';
+import { SearchField, searchFieldInset } from '../components/SearchField';
 import { Checkbox, Dot, EmptyRules, Ledger, LedgerRow, SectionLabel } from '../components/Ledger';
 
 export function UpcomingScreen() {
@@ -34,10 +34,9 @@ export function UpcomingScreen() {
         scrollEventThrottle={16}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
-        contentContainerStyle={{ paddingBottom: metrics.tabBar }}
+        contentContainerStyle={{ paddingBottom: searchFieldInset }}
       >
         <PageHeader title={t.upcoming} scrollY={scrollY} />
-        <SearchField value={query} onChangeText={setQuery} />
 
         <Ledger>
           {groups.length === 0 ? <SectionLabel label={t.noMatches} /> : null}
@@ -94,6 +93,8 @@ export function UpcomingScreen() {
           <EmptyRules count={2} />
         </Ledger>
       </Animated.ScrollView>
+
+      <SearchField value={query} onChangeText={setQuery} />
     </Screen>
   );
 }

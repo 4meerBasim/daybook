@@ -2,13 +2,12 @@ import React, { useState } from 'react';
 import { Text, View } from 'react-native';
 import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
 import { useTheme } from '../theme/ThemeProvider';
-import { metrics } from '../theme/tokens';
 import { marginStart, row } from '../lib/rtl';
 import { matches } from '../lib/matches';
 import { inbox } from '../data/seed';
 import { Screen } from '../components/Screen';
 import { PageHeader } from '../components/PageHeader';
-import { SearchField } from '../components/SearchField';
+import { SearchField, searchFieldInset } from '../components/SearchField';
 import { Checkbox, EmptyRules, Ledger, LedgerRow, SectionLabel } from '../components/Ledger';
 import { Chip } from '../components/Chip';
 
@@ -30,10 +29,9 @@ export function InboxScreen() {
         scrollEventThrottle={16}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
-        contentContainerStyle={{ paddingBottom: metrics.tabBar }}
+        contentContainerStyle={{ paddingBottom: searchFieldInset }}
       >
         <PageHeader title={t.inbox} trailing={String(rows.length)} scrollY={scrollY} />
-        <SearchField value={query} onChangeText={setQuery} />
 
         <Ledger>
           {rows.map((k) => (
@@ -61,6 +59,8 @@ export function InboxScreen() {
           <EmptyRules count={5} />
         </Ledger>
       </Animated.ScrollView>
+
+      <SearchField value={query} onChangeText={setQuery} />
     </Screen>
   );
 }

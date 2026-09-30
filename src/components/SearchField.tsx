@@ -1,9 +1,14 @@
-import React from 'react';
-import { Pressable, TextInput, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Keyboard, Platform, Pressable, TextInput, View } from 'react-native';
 import { useTheme } from '../theme/ThemeProvider';
 import { maxFontSizeMultiplier, metrics, radius } from '../theme/tokens';
 import { align, row } from '../lib/rtl';
 import { CloseIcon, SearchIcon } from './Icon';
+
+const searchFieldHeight = 48;
+const searchFieldGap = 28;
+
+export const searchFieldInset = metrics.tabBar + searchFieldGap + searchFieldHeight + 12;
 
 export function SearchField({
   value,
@@ -13,12 +18,33 @@ export function SearchField({
   onChangeText: (v: string) => void;
 }) {
   const { c, t, ui, rtl } = useTheme();
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+  useEffect(() => {
+    // android resizes the window for the keyboard, so the tab bar and this field ride up with it
+    if (Platform.OS !== 'ios') return;
+    const show = Keyboard.addListener('keyboardWillShow', (e) =>
+      setKeyboardHeight(e.endCoordinates.height)
+    );
+    const hide = Keyboard.addListener('keyboardWillHide', () => setKeyboardHeight(0));
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, []);
 
   return (
-    <View style={{ paddingHorizontal: metrics.gutter, paddingBottom: 12 }}>
+    <View
+      style={{
+        position: 'absolute',
+        left: metrics.gutter,
+        right: metrics.gutter,
+        bottom: keyboardHeight ? keyboardHeight + 8 : metrics.tabBar + searchFieldGap,
+      }}
+    >
       <View
         style={{
-          height: 48,
+          height: searchFieldHeight,
           borderRadius: radius.card,
           backgroundColor: c.paper2,
           borderWidth: 1,
