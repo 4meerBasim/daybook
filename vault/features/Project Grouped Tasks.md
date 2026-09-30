@@ -20,6 +20,6 @@ Seeded distribution: Today holds Studio 4, Work 2, Home 3 and one unassigned; In
 
 ## Related
 - Page: [[Today]], [[Recent]], [[Inbox]], [[Project Detail]], [[Profile]], [[Main Tabs]], [[Quick Add Sheet]]
-- Features: [[Inline Page Search]], [[Swipe Row Actions]], [[Ink Strike-Through Completion]], [[Natural Language Quick Add]], [[Ledger Paper Chrome]], [[In-App RTL and Arabic Typography]]
+- Features: [[Add Task Inside Project]], [[Inline Page Search]], [[Swipe Row Actions]], [[Ink Strike-Through Completion]], [[Natural Language Quick Add]], [[Ledger Paper Chrome]], [[In-App RTL and Arabic Typography]]
 - Bugs: [[Quick Add Does Not Create Tasks]], [[Swipe Actions Not Wired Into Task Lists]]
 - Enhancements: [[Inbox Triage Chips]]

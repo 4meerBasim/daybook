@@ -1,9 +1,10 @@
-import React from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import React, { useRef, useState } from 'react';
+import { Keyboard, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import * as Haptics from 'expo-haptics';
 import { useTheme } from '../theme/ThemeProvider';
-import { maxFontSizeMultiplier, metrics } from '../theme/tokens';
-import { align, marginStart, row } from '../lib/rtl';
+import { maxFontSizeMultiplier, metrics, penShadow, radius } from '../theme/tokens';
+import { align, marginStart, pad, row } from '../lib/rtl';
 import { useStore, useTasks } from '../state/store';
 import { projects } from '../data/seed';
 import type { RootParams } from '../navigation/Root';
@@ -11,12 +12,18 @@ import { Screen, useHeaderTop } from '../components/Screen';
 import { Dot, EmptyRules, Ledger } from '../components/Ledger';
 import { TaskRow } from '../components/TaskRow';
 import { SwipeableRow } from '../components/SwipeableRow';
-import { ChevronBackIcon } from '../components/Icon';
+import { ChevronBackIcon, PenIcon } from '../components/Icon';
+import { QuickAddSheet } from './QuickAddSheet';
 
 export function ProjectScreen({ route, navigation }: NativeStackScreenProps<RootParams, 'Project'>) {
   const { projectId, list } = route.params;
-  const { c, t, display, mono, rtl } = useTheme();
-  const { done, toggle, clear } = useStore();
+  const { c, t, display, ui, mono, rtl, dark } = useTheme();
+  const { done, toggle, clear, addTask } = useStore();
+  const [draft, setDraft] = useState('');
+  const [adding, setAdding] = useState(false);
+  const [typing, setTyping] = useState(false);
+  const scrollRef = useRef<ScrollView>(null);
+  const scrollY = useRef(0);
   const top = useHeaderTop();
 
   const project = projects(t).find((p) => p.id === projectId);
@@ -31,9 +38,29 @@ export function ProjectScreen({ route, navigation }: NativeStackScreenProps<Root
   ];
   const onPickDate = () => navigation.navigate('Calendar');
 
+  const addDraft = () => {
+    const title = draft.trim();
+    if (!title) {
+      Keyboard.dismiss();
+      return;
+    }
+    addTask({ title, meta: '', list: list ?? 'today', projectId });
+    setDraft('');
+    scrollRef.current?.scrollTo({ y: scrollY.current + metrics.row });
+  };
+
   return (
     <Screen>
-      <ScrollView contentContainerStyle={{ paddingBottom: metrics.gutter }}>
+      <ScrollView
+        ref={scrollRef}
+        onScroll={(e) => {
+          scrollY.current = e.nativeEvent.contentOffset.y;
+        }}
+        scrollEventThrottle={16}
+        keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets
+        contentContainerStyle={{ paddingBottom: 32 + metrics.pen + 24 }}
+      >
         <View style={{ paddingTop: top, paddingHorizontal: metrics.gutter, paddingBottom: 12, gap: 8 }}>
           <View style={{ flexDirection: row(rtl) }}>
             <Pressable
@@ -112,9 +139,88 @@ export function ProjectScreen({ route, navigation }: NativeStackScreenProps<Root
             </SwipeableRow>
           ))}
 
+          <View
+            style={[
+              {
+                height: metrics.row,
+                flexDirection: row(rtl),
+                alignItems: 'center',
+                gap: 14,
+                borderBottomWidth: 1,
+                borderBottomColor: c.rule,
+              },
+              pad(rtl, 16, metrics.gutter),
+            ]}
+          >
+            <View
+              style={{
+                width: metrics.checkbox,
+                height: metrics.checkbox,
+                borderWidth: 1.5,
+                borderStyle: 'dashed',
+                borderColor: c.ink3,
+                borderRadius: radius.checkbox,
+              }}
+            />
+            <TextInput
+              value={draft}
+              onChangeText={setDraft}
+              onSubmitEditing={addDraft}
+              submitBehavior="submit"
+              returnKeyType="done"
+              placeholder={t.placeholder}
+              placeholderTextColor={c.ink3}
+              selectionColor={c.ink}
+              maxFontSizeMultiplier={maxFontSizeMultiplier}
+              onFocus={() => setTyping(true)}
+              onBlur={() => setTyping(false)}
+              style={[
+                ui(17),
+                { flex: 1, alignSelf: 'stretch', color: c.ink, padding: 0, textAlign: align(rtl) },
+                marginStart(rtl, 16),
+              ]}
+            />
+          </View>
+
           <EmptyRules count={4} />
         </Ledger>
       </ScrollView>
+
+      {typing || adding ? null : (
+        <View
+          pointerEvents="box-none"
+          style={{ position: 'absolute', left: 0, right: 0, bottom: 32, alignItems: 'center' }}
+        >
+          <Pressable
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              setAdding(true);
+            }}
+            android_ripple={null}
+            accessibilityRole="button"
+            accessibilityLabel={t.newTask}
+            style={{
+              width: metrics.pen,
+              height: metrics.pen,
+              borderRadius: radius.pen,
+              backgroundColor: c.ink,
+              alignItems: 'center',
+              justifyContent: 'center',
+              ...penShadow(c, dark),
+            }}
+          >
+            <PenIcon color={c.paper} />
+          </Pressable>
+        </View>
+      )}
+
+      {adding ? (
+        <QuickAddSheet
+          initialProjectId={projectId}
+          undatedList={list ?? 'today'}
+          onClose={() => setAdding(false)}
+        />
+      ) : null}
     </Screen>
   );
 }

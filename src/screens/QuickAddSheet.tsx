@@ -14,14 +14,22 @@ import { ListKey, projects } from '../data/seed';
 import { chipColors, parse, tokenColor } from '../lib/parse';
 import { CalendarIcon, FlagIcon, HashIcon, PaperclipIcon } from '../components/Icon';
 
-export function QuickAddSheet({ onClose }: { onClose: () => void }) {
+export function QuickAddSheet({
+  initialProjectId = null,
+  undatedList = 'inbox',
+  onClose,
+}: {
+  initialProjectId?: string | null;
+  undatedList?: ListKey;
+  onClose: () => void;
+}) {
   const { c, t, ar, ui, display, rtl, reduced } = useTheme();
   const { qa, setQa, addTask } = useStore();
-  const [projectId, setProjectId] = useState<string | null>(null);
+  const [projectId, setProjectId] = useState(initialProjectId);
   const sheetRef = useRef<BottomSheet>(null);
 
   const parsed = parse(qa, ar);
-  const list: ListKey = parsed.hasDate ? 'today' : 'inbox';
+  const list: ListKey = parsed.hasDate ? 'today' : undatedList;
   const dest = {
     today: ar ? 'يُحفظ في اليوم' : 'Saved to Today',
     inbox: ar ? 'يُحفظ في الوارد' : 'Saved to Inbox',
