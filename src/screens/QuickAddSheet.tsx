@@ -17,6 +17,8 @@ import { chipColors, parse, tokenColor } from '../lib/parse';
 const priorities: Priority[] = ['none', 'low', 'medium', 'high'];
 const statuses: Status[] = ['todo', 'doing', 'waiting'];
 
+type SheetInput = React.ComponentRef<typeof BottomSheetTextInput>;
+
 export type AddKind = 'task' | 'habit' | 'project';
 
 const kinds: AddKind[] = ['task', 'habit', 'project'];
@@ -39,21 +41,36 @@ export function QuickAddSheet({
   const [kind, setKind] = useState(initialKind);
   const [name, setName] = useState('');
   const [color, setColor] = useState<(typeof projectColors)[number]>('blue');
+  const [minutes, setMinutes] = useState('');
+  const [when, setWhen] = useState('');
   const [desc, setDesc] = useState('');
   const [pickedPriority, setPickedPriority] = useState<Priority | null>(null);
   const [status, setStatus] = useState<Status>('todo');
   const [projectId, setProjectId] = useState(initialProjectId);
   const sheetRef = useRef<BottomSheet>(null);
+  const minutesRef = useRef<SheetInput>(null);
   const topInset = useSafeAreaInsets().top;
 
   const parsed = parse(qa, ar);
-  const list: ListKey = parsed.hasDate ? 'today' : undatedList;
+  const whenParsed = parse(when, ar);
+  const freeWhen = whenParsed.tokens
+    .filter((tk) => tk.kind === 'plain')
+    .map((tk) => tk.text)
+    .join(' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  const chips = [...whenParsed.chips, ...parsed.chips].filter(
+    (ch, i, all) => all.findIndex((o) => o.kind === ch.kind && o.label === ch.label) === i
+  );
+  const whenDated =
+    !!freeWhen || whenParsed.chips.some((ch) => ch.kind === 'date' || ch.kind === 'time');
+  const list: ListKey = parsed.hasDate || whenDated ? 'today' : undatedList;
   const dest = {
     today: ar ? 'يُحفظ في اليوم' : 'Saved to Today',
     inbox: ar ? 'يُحفظ في الوارد' : 'Saved to Inbox',
   }[list];
   const priority =
-    pickedPriority ?? (parsed.chips.some((ch) => ch.kind === 'pri') ? 'high' : 'none');
+    pickedPriority ?? (chips.some((ch) => ch.kind === 'pri') ? 'high' : 'none');
 
   const kindLabels = {
     task: t.kindTask,
@@ -71,7 +88,7 @@ export function QuickAddSheet({
     if (kind !== 'task') {
       const trimmed = name.trim();
       if (!trimmed) return;
-      if (kind === 'habit') addHabit(trimmed);
+      if (kind === 'habit') addHabit(trimmed, Math.min(Number(minutes) || 0, 1440));
       if (kind === 'project') addProject({ name: trimmed, color });
       sheetRef.current?.forceClose();
       return;
@@ -84,15 +101,16 @@ export function QuickAddSheet({
       .trim();
     const title = plain || qa.trim();
     if (!title) return;
-    const when = parsed.chips
+    const meta = chips
       .filter((ch) => ch.kind !== 'tag' && ch.kind !== 'pri' && ch.label !== t.today)
       .map((ch) => ch.label);
+    if (freeWhen) meta.push(freeWhen);
     addTask({
       title,
-      meta: when.join(' · '),
+      meta: meta.join(' · '),
       list,
       projectId,
-      later: parsed.hasLaterDay,
+      later: parsed.hasLaterDay || whenParsed.hasLaterDay || !!freeWhen,
       desc: desc.trim(),
       priority,
       status,
@@ -213,7 +231,8 @@ export function QuickAddSheet({
             selectionColor={c.ink}
             accessibilityLabel={kind === 'habit' ? t.newHabit : t.newProject}
             multiline={false}
-            onSubmitEditing={submit}
+            returnKeyType={kind === 'habit' ? 'next' : 'done'}
+            onSubmitEditing={kind === 'habit' ? () => minutesRef.current?.focus() : submit}
             submitBehavior="submit"
             style={[
               lineStyle,
@@ -227,6 +246,25 @@ export function QuickAddSheet({
             ]}
           />
         )}
+
+        {kind === 'habit' ? (
+          <DetailInput
+            label={t.habitTime}
+            value={minutes}
+            onChangeText={(v) =>
+              setMinutes(
+                v
+                  .replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 0x0660))
+                  .replace(/[۰-۹]/g, (d) => String(d.charCodeAt(0) - 0x06f0))
+                  .replace(/[^0-9]/g, '')
+              )
+            }
+            placeholder={t.habitTimePlaceholder}
+            keyboardType="number-pad"
+            maxLength={4}
+            inputRef={minutesRef}
+          />
+        ) : null}
 
         {kind === 'project' ? (
           <View style={{ marginTop: 12 }}>
@@ -331,7 +369,7 @@ export function QuickAddSheet({
                 minHeight: 28,
               }}
             >
-              {parsed.chips
+              {chips
                 .filter((ch) => ch.kind !== 'pri')
                 .map((ch, i) => {
                   const col = chipColors(ch.kind, c);
@@ -369,29 +407,19 @@ export function QuickAddSheet({
               </View>
             </View>
 
-            <BottomSheetTextInput
+            <DetailInput
+              label={t.when}
+              value={when}
+              onChangeText={setWhen}
+              placeholder={t.whenPlaceholder}
+              onSubmitEditing={submit}
+            />
+            <DetailInput
+              label={t.description}
               value={desc}
               onChangeText={setDesc}
               placeholder={t.descPlaceholder}
-              placeholderTextColor={c.ink3}
-              selectionColor={c.ink}
-              accessibilityLabel={t.description}
               multiline
-              style={[
-                ui(15, 400, 22),
-                {
-                  minHeight: 44,
-                  maxHeight: 82,
-                  marginTop: 12,
-                  paddingVertical: 8,
-                  paddingHorizontal: 0,
-                  color: c.ink,
-                  borderBottomWidth: 1,
-                  borderBottomColor: c.rule,
-                  textAlign: align(rtl),
-                  textAlignVertical: 'top',
-                },
-              ]}
             />
 
             <ChoiceChips
@@ -439,6 +467,64 @@ export function QuickAddSheet({
         </Pressable>
       </BottomSheetScrollView>
     </BottomSheet>
+  );
+}
+
+function DetailInput({
+  label,
+  value,
+  onChangeText,
+  placeholder,
+  multiline = false,
+  keyboardType,
+  maxLength,
+  onSubmitEditing,
+  inputRef,
+}: {
+  label: string;
+  value: string;
+  onChangeText: (v: string) => void;
+  placeholder: string;
+  multiline?: boolean;
+  keyboardType?: 'number-pad';
+  maxLength?: number;
+  onSubmitEditing?: () => void;
+  inputRef?: React.RefObject<SheetInput | null>;
+}) {
+  const { c, ui, mono, rtl } = useTheme();
+  return (
+    <View style={{ marginTop: 12 }}>
+      <Text style={[mono(11, 500, 0.1, true), { color: c.ink3, textAlign: align(rtl) }]}>{label}</Text>
+      <BottomSheetTextInput
+        value={value}
+        onChangeText={onChangeText}
+        placeholder={placeholder}
+        placeholderTextColor={c.ink3}
+        selectionColor={c.ink}
+        accessibilityLabel={label}
+        ref={inputRef}
+        multiline={multiline}
+        keyboardType={keyboardType}
+        maxLength={maxLength}
+        onSubmitEditing={onSubmitEditing}
+        submitBehavior={onSubmitEditing ? 'submit' : undefined}
+        returnKeyType={onSubmitEditing ? 'done' : undefined}
+        style={[
+          ui(15, 400, 22),
+          {
+            minHeight: 44,
+            maxHeight: 82,
+            paddingVertical: 8,
+            paddingHorizontal: 0,
+            color: c.ink,
+            borderBottomWidth: 1,
+            borderBottomColor: c.rule,
+            textAlign: align(rtl),
+            textAlignVertical: multiline ? 'top' : 'center',
+          },
+        ]}
+      />
+    </View>
   );
 }
 

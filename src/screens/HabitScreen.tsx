@@ -62,6 +62,8 @@ export function HabitScreen({ habitId, onClose }: { habitId: string; onClose: ()
   const spoken = (seconds: number) =>
     `${Math.floor(seconds / 60)} ${t.minutes} ${seconds % 60} ${t.seconds}`;
 
+  const target = (habit?.minutes ?? 0) * 60;
+  const reached = target > 0 && elapsed >= target;
   const runLabel = running ? t.stop : t.startTimer;
   const history = sessions.map((s, i) => ({ ...s, n: i + 1 })).reverse();
 
@@ -105,11 +107,11 @@ export function HabitScreen({ habitId, onClose }: { habitId: string; onClose: ()
         <Text
           allowFontScaling={false}
           accessibilityRole="timer"
-          accessibilityLabel={spoken(elapsed)}
+          accessibilityLabel={reached ? `${spoken(elapsed)}, ${t.targetReached}` : spoken(elapsed)}
           style={[
             mono(64, 500, -0.03),
             {
-              color: c.ink,
+              color: reached ? c.moss : c.ink,
               lineHeight: 64,
               paddingTop: 32,
               paddingHorizontal: 24,
@@ -121,6 +123,17 @@ export function HabitScreen({ habitId, onClose }: { habitId: string; onClose: ()
         >
           {clock(elapsed)}
         </Text>
+
+        {habit && habit.minutes > 0 ? (
+          <Text
+            style={[
+              mono(12, 500, 0.1, true),
+              { color: c.ink3, paddingTop: 8, paddingHorizontal: 24, textAlign: align(rtl) },
+            ]}
+          >
+            {`${t.target} · ${habit.minutes} ${t.minShort}`}
+          </Text>
+        ) : null}
 
         <View
           accessible

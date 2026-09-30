@@ -2,7 +2,7 @@ import React, { createContext, useContext, useMemo, useState } from 'react';
 import { useTheme } from '../theme/ThemeProvider';
 import { Project, projects, Task, tasks } from '../data/seed';
 
-export type Habit = { id: string; name: string; streak: number };
+export type Habit = { id: string; name: string; streak: number; minutes: number };
 
 export type HabitSession = { habitId: string; startedAt: number; seconds: number };
 
@@ -16,7 +16,7 @@ type Store = {
   addedProjects: Project[];
   addProject: (project: Omit<Project, 'id'>) => void;
   addedHabits: Habit[];
-  addHabit: (name: string) => void;
+  addHabit: (name: string, minutes: number) => void;
   habitSessions: HabitSession[];
   addHabitSession: (session: HabitSession) => void;
   qa: string;
@@ -49,8 +49,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       addProject: (project) =>
         setAddedProjects((p) => [...p, { ...project, id: `p${p.length + 1}` }]),
       addedHabits,
-      addHabit: (name) =>
-        setAddedHabits((h) => [...h, { id: `g${h.length + 1}`, name, streak: 0 }]),
+      addHabit: (name, minutes) =>
+        setAddedHabits((h) => [...h, { id: `g${h.length + 1}`, name, streak: 0, minutes }]),
       habitSessions,
       addHabitSession: (session) => setHabitSessions((s) => [...s, session]),
       qa,
@@ -85,5 +85,5 @@ export function useProjects() {
 export function useHabits(): Habit[] {
   const { t } = useTheme();
   const { addedHabits } = useStore();
-  return [{ id: 'h1', name: t.habit1, streak: 12 }, ...addedHabits];
+  return [{ id: 'h1', name: t.habit1, streak: 12, minutes: 30 }, ...addedHabits];
 }

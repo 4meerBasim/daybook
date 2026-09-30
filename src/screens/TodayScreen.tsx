@@ -71,7 +71,13 @@ export function TodayScreen({
                     onPress={() => onOpenHabit(h.id)}
                     android_ripple={null}
                     accessibilityRole="button"
-                    accessibilityLabel={`${h.name}, ${t.sessionsToday}: ${sessions}`}
+                    accessibilityLabel={[
+                      h.name,
+                      h.minutes > 0 ? `${t.target} ${h.minutes} ${t.minutes}` : '',
+                      `${t.sessionsToday}: ${sessions}`,
+                    ]
+                      .filter(Boolean)
+                      .join(', ')}
                     style={({ pressed }) => [
                       {
                         height: metrics.row,
@@ -97,6 +103,11 @@ export function TodayScreen({
                     >
                       {h.name}
                     </Text>
+                    {h.minutes > 0 ? (
+                      <Text style={[mono(12, 500, 0, true), { color: c.ink3 }]}>
+                        {`${h.minutes} ${t.minShort}`}
+                      </Text>
+                    ) : null}
                     {h.streak > 0 ? (
                       <View style={{ flexDirection: row(rtl), alignItems: 'center' }}>
                         <StreakTallyIcon color={c.moss} flip={rtl} />
