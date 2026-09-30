@@ -25,4 +25,4 @@ The highlighting effect in the sheet is a transparent `BottomSheetTextInput` lay
 ## Related
 - Page: [[Quick Add Sheet]], [[Today]], [[Inbox]], [[Recent]]
 - Features: [[Project Grouped Tasks]], [[Pen FAB Tab Bar]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]]
-- Bugs: [[Quick Add Does Not Create Tasks]]
+- Bugs: [[Quick Add Does Not Create Tasks]], [[Quick Add Sheet Shown On Launch]]

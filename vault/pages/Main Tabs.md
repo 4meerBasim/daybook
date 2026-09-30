@@ -6,7 +6,7 @@ Summary: The tab shell that hosts the three primary lists and the profile page, 
 ## Related
 - Connects to: [[Today]], [[Recent]], [[Inbox]], [[Profile]], [[Quick Add Sheet]], [[Settings]], [[Calendar]], [[Inbox Empty]], [[Task Detail]], [[Project Detail]], [[Page Closed]], [[Swipe States]], [[Onboarding]], [[Focus Mode]]
 - Features: [[Pen FAB Tab Bar]], [[Project Grouped Tasks]], [[Inline Page Search]], [[Light and Dark Paper Palettes]], [[In-App RTL and Arabic Typography]]
-- Bugs: [[Focus Mode Unreachable]]
+- Bugs: [[Focus Mode Unreachable]], [[Quick Add Sheet Shown On Launch]]
 - Enhancements: none
 
 ## Notes

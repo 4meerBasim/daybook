@@ -1,12 +1,12 @@
 # Quick Add Sheet
 
-Route: no stack route — a `@gorhom/bottom-sheet` rendered inside `MainTabs`, opened by the `adding` flag
+Route: no stack route — a `@gorhom/bottom-sheet` mounted inside `MainTabs` only while the `adding` flag is true
 Summary: The pen-FAB capture sheet: one line of input that is syntax-highlighted live, parsed chips and a destination hint, a row of project chips, and an Add button that files the task.
 
 ## Related
 - Connects to: [[Main Tabs]] — opened by the pen FAB from any tab and closed by Add, keyboard submit, pan-down or backdrop tap, [[Today]], [[Recent]], [[Inbox]], [[Profile]]
 - Features: [[Natural Language Quick Add]], [[Project Grouped Tasks]], [[Pen FAB Tab Bar]], [[Reduced Motion Mode]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]]
-- Bugs: [[Quick Add Does Not Create Tasks]]
+- Bugs: [[Quick Add Does Not Create Tasks]], [[Quick Add Sheet Shown On Launch]]
 - Enhancements: none
 
 ## Notes

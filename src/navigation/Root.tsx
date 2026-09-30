@@ -74,7 +74,7 @@ function MainTabs({ navigation }: NativeStackScreenProps<RootParams, 'Main'>) {
         }}
       />
 
-      <QuickAddSheet open={adding} onClose={() => setAdding(false)} />
+      {adding ? <QuickAddSheet onClose={() => setAdding(false)} /> : null}
     </Screen>
   );
 }

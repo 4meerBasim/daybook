@@ -20,4 +20,4 @@ The whole bar mirrors with `row(rtl)`, so in Arabic Profile sits leftmost and th
 ## Related
 - Page: [[Main Tabs]], [[Today]], [[Recent]], [[Inbox]], [[Profile]], [[Quick Add Sheet]], [[Settings]], [[Inbox Empty]]
 - Features: [[Natural Language Quick Add]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]]
-- Bugs: none
+- Bugs: [[Quick Add Sheet Shown On Launch]]

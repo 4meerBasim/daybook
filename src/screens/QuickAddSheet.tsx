@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import BottomSheet, {
   BottomSheetBackdrop,
@@ -14,21 +14,11 @@ import { ListKey, projects } from '../data/seed';
 import { chipColors, parse, tokenColor } from '../lib/parse';
 import { CalendarIcon, FlagIcon, HashIcon, PaperclipIcon } from '../components/Icon';
 
-export function QuickAddSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function QuickAddSheet({ onClose }: { onClose: () => void }) {
   const { c, t, ar, ui, display, rtl, reduced } = useTheme();
   const { qa, setQa, addTask } = useStore();
   const [projectId, setProjectId] = useState<string | null>(null);
   const sheetRef = useRef<BottomSheet>(null);
-  const inputRef = useRef<React.ComponentRef<typeof BottomSheetTextInput>>(null);
-
-  useEffect(() => {
-    if (!open) {
-      sheetRef.current?.close();
-      return;
-    }
-    sheetRef.current?.expand();
-    if (!reduced) inputRef.current?.focus();
-  }, [open, reduced]);
 
   const parsed = parse(qa, ar);
   const list: ListKey = parsed.hasDate ? 'today' : 'inbox';
@@ -53,9 +43,8 @@ export function QuickAddSheet({ open, onClose }: { open: boolean; onClose: () =>
         .map((ch) => ch.label);
       addTask({ title, meta: when.join(' · '), list, projectId, later: parsed.hasLaterDay });
       setQa('');
-      setProjectId(null);
     }
-    onClose();
+    sheetRef.current?.forceClose();
   };
 
   const renderBackdrop = useCallback(
@@ -77,7 +66,7 @@ export function QuickAddSheet({ open, onClose }: { open: boolean; onClose: () =>
   return (
     <BottomSheet
       ref={sheetRef}
-      index={-1}
+      index={0}
       enableDynamicSizing
       keyboardBehavior="interactive"
       keyboardBlurBehavior="restore"
@@ -125,7 +114,7 @@ export function QuickAddSheet({ open, onClose }: { open: boolean; onClose: () =>
             </Text>
           </View>
           <BottomSheetTextInput
-            ref={inputRef}
+            autoFocus={!reduced}
             value={qa}
             onChangeText={setQa}
             placeholder={t.placeholder}
@@ -134,6 +123,7 @@ export function QuickAddSheet({ open, onClose }: { open: boolean; onClose: () =>
             accessibilityLabel={t.newTask}
             multiline={false}
             onSubmitEditing={submit}
+            submitBehavior="submit"
             style={[lineStyle, { color: 'transparent', padding: 0, textAlign: align(rtl) }]}
           />
         </View>
