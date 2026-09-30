@@ -4,7 +4,7 @@ Route: `Settings` (native stack)
 Summary: One ruled row per preference — language, appearance, week start, reminders, text size, reduce motion, sync, shortcuts, sharing.
 
 ## Related
-- Connects to: [[Today]] — reached by long-pressing the Today tab; returns via the system back gesture, [[Main Tabs]], [[Swipe States]] — the Shortcuts row calls `onOpenGestures`
+- Connects to: [[Today]] — reached by long-pressing the Today tab; returns via the system back gesture, [[Profile]] — the Settings row, [[Main Tabs]], [[Swipe States]] — the Shortcuts row calls `onOpenGestures`
 - Features: [[Light and Dark Paper Palettes]], [[Reduced Motion Mode]], [[In-App RTL and Arabic Typography]], [[Swipe Row Actions]]
 - Bugs: none found
 - Enhancements: none

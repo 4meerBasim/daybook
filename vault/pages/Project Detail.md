@@ -4,7 +4,7 @@ Route: `Project` (native stack)
 Summary: The Studio project page — a 7/12 progress count, shared avatars, tag chips, and the project's tasks split into "this week" and "later".
 
 ## Related
-- Connects to: [[Search]] — reached by tapping the `#invoice` tag result; returns via the system back gesture, [[Main Tabs]], [[Task Detail]]
+- Connects to: [[Profile]] — reached by tapping the Projects row; returns via the system back gesture, [[Main Tabs]], [[Task Detail]]
 - Features: [[Ink Strike-Through Completion]], [[Ledger Paper Chrome]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]]
 - Bugs: none found
 - Enhancements: none

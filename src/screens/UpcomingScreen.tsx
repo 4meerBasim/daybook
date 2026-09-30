@@ -1,13 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Text, View } from 'react-native';
 import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
 import { useTheme } from '../theme/ThemeProvider';
 import { maxFontSizeMultiplier, metrics } from '../theme/tokens';
 import { align, marginStart, pad, row } from '../lib/rtl';
+import { matches } from '../lib/matches';
 import { upcoming } from '../data/seed';
 import { Screen } from '../components/Screen';
 import { PageHeader } from '../components/PageHeader';
-import { Checkbox, Dot, EmptyRules, Ledger, LedgerRow } from '../components/Ledger';
+import { SearchField } from '../components/SearchField';
+import { Checkbox, Dot, EmptyRules, Ledger, LedgerRow, SectionLabel } from '../components/Ledger';
 
 export function UpcomingScreen() {
   const { c, t, ar, ui, mono, display, rtl } = useTheme();
@@ -16,18 +18,30 @@ export function UpcomingScreen() {
     scrollY.value = e.contentOffset.y;
   });
 
-  const groups = upcoming(t, ar);
+  const [query, setQuery] = useState('');
+  const searching = query.trim() !== '';
+  const groups = upcoming(t, ar)
+    .map((g) => {
+      const items = g.items.filter((k) => matches(k.title, query));
+      return { ...g, items, count: searching ? String(items.length) : g.count };
+    })
+    .filter((g) => g.items.length > 0);
 
   return (
     <Screen>
       <Animated.ScrollView
         onScroll={onScroll}
         scrollEventThrottle={16}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
         contentContainerStyle={{ paddingBottom: metrics.tabBar }}
       >
         <PageHeader title={t.upcoming} scrollY={scrollY} />
+        <SearchField value={query} onChangeText={setQuery} />
 
         <Ledger>
+          {groups.length === 0 ? <SectionLabel label={t.noMatches} /> : null}
+
           {groups.map((g) => (
             <React.Fragment key={g.day}>
               <View

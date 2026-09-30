@@ -5,7 +5,7 @@ Summary: The day's ledger page — five dated tasks, a habits section with a str
 
 ## Related
 - Connects to: [[Main Tabs]], [[Task Detail]] — long-press any task row, [[Calendar]] — swipe a row past the pick-date threshold, [[Page Closed]] — tap the wax stamp that appears when nothing is left, [[Quick Add Sheet]] — pen FAB, [[Settings]] — long-press the Today tab
-- Features: [[Swipe Row Actions]], [[Ink Strike-Through Completion]], [[Wax Page Closed Stamp]], [[Ledger Paper Chrome]], [[Collapsing Page Header]], [[Pen FAB Tab Bar]], [[Reduced Motion Mode]], [[Light and Dark Paper Palettes]], [[In-App RTL and Arabic Typography]]
+- Features: [[Inline Page Search]], [[Swipe Row Actions]], [[Ink Strike-Through Completion]], [[Wax Page Closed Stamp]], [[Ledger Paper Chrome]], [[Collapsing Page Header]], [[Pen FAB Tab Bar]], [[Reduced Motion Mode]], [[Light and Dark Paper Palettes]], [[In-App RTL and Arabic Typography]]
 - Bugs: [[Swipe Actions Not Wired Into Task Lists]]
 - Enhancements: [[Inbox Triage Chips]] — the destination half of the triage model lands here
 

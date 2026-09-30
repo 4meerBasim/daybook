@@ -5,7 +5,7 @@ Summary: Undated captures waiting to be triaged, each row offering a "Today" or 
 
 ## Related
 - Connects to: [[Main Tabs]], [[Inbox Empty]] — long-press the Inbox tab, [[Quick Add Sheet]] — pen FAB
-- Features: [[Ledger Paper Chrome]], [[Collapsing Page Header]], [[Pen FAB Tab Bar]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]]
+- Features: [[Inline Page Search]], [[Ledger Paper Chrome]], [[Collapsing Page Header]], [[Pen FAB Tab Bar]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]]
 - Bugs: [[Swipe Actions Not Wired Into Task Lists]]
 - Enhancements: [[Inbox Triage Chips]]
 

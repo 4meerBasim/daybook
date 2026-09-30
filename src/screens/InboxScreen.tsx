@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Text, View } from 'react-native';
 import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
 import { useTheme } from '../theme/ThemeProvider';
 import { metrics } from '../theme/tokens';
 import { marginStart, row } from '../lib/rtl';
+import { matches } from '../lib/matches';
 import { inbox } from '../data/seed';
 import { Screen } from '../components/Screen';
 import { PageHeader } from '../components/PageHeader';
+import { SearchField } from '../components/SearchField';
 import { Checkbox, EmptyRules, Ledger, LedgerRow, SectionLabel } from '../components/Ledger';
 import { Chip } from '../components/Chip';
 
@@ -17,16 +19,21 @@ export function InboxScreen() {
     scrollY.value = e.contentOffset.y;
   });
 
-  const rows = inbox(ar);
+  const [query, setQuery] = useState('');
+  const searching = query.trim() !== '';
+  const rows = inbox(ar).filter((k) => matches(k.title, query));
 
   return (
     <Screen>
       <Animated.ScrollView
         onScroll={onScroll}
         scrollEventThrottle={16}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
         contentContainerStyle={{ paddingBottom: metrics.tabBar }}
       >
-        <PageHeader title={t.inbox} trailing="3" scrollY={scrollY} />
+        <PageHeader title={t.inbox} trailing={String(rows.length)} scrollY={scrollY} />
+        <SearchField value={query} onChangeText={setQuery} />
 
         <Ledger>
           {rows.map((k) => (
@@ -47,7 +54,9 @@ export function InboxScreen() {
             </LedgerRow>
           ))}
 
-          <SectionLabel label={`${t.someday} · 4`} />
+          {rows.length === 0 ? <SectionLabel label={t.noMatches} /> : null}
+
+          {searching ? null : <SectionLabel label={`${t.someday} · 4`} />}
 
           <EmptyRules count={5} />
         </Ledger>

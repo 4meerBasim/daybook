@@ -1,13 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
 import { useTheme } from '../theme/ThemeProvider';
 import { metrics } from '../theme/tokens';
 import { marginStart, pad, row } from '../lib/rtl';
+import { matches } from '../lib/matches';
 import { useStore } from '../state/store';
 import { tasks } from '../data/seed';
 import { Screen } from '../components/Screen';
 import { PageHeader } from '../components/PageHeader';
+import { SearchField } from '../components/SearchField';
 import { Checkbox, EmptyRules, Ledger, SectionLabel } from '../components/Ledger';
 import { TaskRow } from '../components/TaskRow';
 import { SwipeableRow } from '../components/SwipeableRow';
@@ -34,6 +36,10 @@ export function TodayScreen({
   const leftN = list.filter((k) => !done[k.id]).length;
   const allDone = leftN === 0;
 
+  const [query, setQuery] = useState('');
+  const visible = list.filter((k) => matches(k.title, query));
+  const showHabit = matches(t.habit1, query);
+
   const swipeActions = [
     { name: 'complete', label: t.done },
     { name: 'snooze', label: t.tomorrow },
@@ -46,6 +52,8 @@ export function TodayScreen({
       <Animated.ScrollView
         onScroll={onScroll}
         scrollEventThrottle={16}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
         contentContainerStyle={{ paddingBottom: metrics.tabBar }}
       >
         <PageHeader
@@ -54,9 +62,10 @@ export function TodayScreen({
           trailing={leftN ? `${leftN} ${t.left}` : t.allDoneShort}
           scrollY={scrollY}
         />
+        <SearchField value={query} onChangeText={setQuery} />
 
         <Ledger>
-          {list.map((k) => (
+          {visible.map((k) => (
             <SwipeableRow
               key={k.id}
               onComplete={() => toggle(k.id)}
@@ -84,34 +93,40 @@ export function TodayScreen({
             </SwipeableRow>
           ))}
 
-          <SectionLabel label={t.habits} />
+          {visible.length === 0 && !showHabit ? <SectionLabel label={t.noMatches} /> : null}
 
-          <View
-            style={[
-              {
-                height: metrics.row,
-                flexDirection: row(rtl),
-                alignItems: 'center',
-                gap: 14,
-                borderBottomWidth: 1,
-                borderBottomColor: c.rule,
-              },
-              pad(rtl, 16, metrics.gutter),
-            ]}
-          >
-            <Checkbox circle color={c.moss} />
-            <Text
-              numberOfLines={1}
-              maxFontSizeMultiplier={1.6}
-              style={[ui(17, 400, 22), { flex: 1, color: c.ink }, marginStart(rtl, 16)]}
-            >
-              {t.habit1}
-            </Text>
-            <View style={{ flexDirection: row(rtl), alignItems: 'center' }}>
-              <StreakTallyIcon color={c.moss} flip={rtl} />
-              <Text style={[mono(12, 500), { color: c.moss }, marginStart(rtl, 6)]}>12</Text>
-            </View>
-          </View>
+          {showHabit ? (
+            <>
+              <SectionLabel label={t.habits} />
+
+              <View
+                style={[
+                  {
+                    height: metrics.row,
+                    flexDirection: row(rtl),
+                    alignItems: 'center',
+                    gap: 14,
+                    borderBottomWidth: 1,
+                    borderBottomColor: c.rule,
+                  },
+                  pad(rtl, 16, metrics.gutter),
+                ]}
+              >
+                <Checkbox circle color={c.moss} />
+                <Text
+                  numberOfLines={1}
+                  maxFontSizeMultiplier={1.6}
+                  style={[ui(17, 400, 22), { flex: 1, color: c.ink }, marginStart(rtl, 16)]}
+                >
+                  {t.habit1}
+                </Text>
+                <View style={{ flexDirection: row(rtl), alignItems: 'center' }}>
+                  <StreakTallyIcon color={c.moss} flip={rtl} />
+                  <Text style={[mono(12, 500), { color: c.moss }, marginStart(rtl, 6)]}>12</Text>
+                </View>
+              </View>
+            </>
+          ) : null}
 
           <EmptyRules count={4} />
         </Ledger>

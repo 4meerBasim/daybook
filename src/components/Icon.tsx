@@ -63,6 +63,23 @@ export function SearchIcon({ size = 24, color }: Props) {
   );
 }
 
+export function CloseIcon({ size = 24, color }: Props) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+      <Path d="M6 6l12 12M18 6L6 18" stroke={color} {...stroke} />
+    </Svg>
+  );
+}
+
+export function ProfileIcon({ size = 24, color }: Props) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+      <Circle cx={12} cy={8} r={4} stroke={color} fill="none" strokeWidth={1.5} />
+      <Path d="M4 20c0-3.5 3.5-6 8-6s8 2.5 8 6" stroke={color} {...stroke} />
+    </Svg>
+  );
+}
+
 export function CheckIcon({ width = 12, height = 10, color }: { width?: number; height?: number; color: string }) {
   return (
     <Svg width={width} height={height} viewBox="0 0 12 10">

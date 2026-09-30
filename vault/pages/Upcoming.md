@@ -5,7 +5,7 @@ Summary: Scheduled work grouped by day — tomorrow, a named weekday, and next w
 
 ## Related
 - Connects to: [[Main Tabs]], [[Calendar]] — long-press the Upcoming tab, [[Quick Add Sheet]] — pen FAB
-- Features: [[Ledger Paper Chrome]], [[Collapsing Page Header]], [[Pen FAB Tab Bar]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]]
+- Features: [[Inline Page Search]], [[Ledger Paper Chrome]], [[Collapsing Page Header]], [[Pen FAB Tab Bar]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]]
 - Bugs: [[Swipe Actions Not Wired Into Task Lists]]
 - Enhancements: none
 

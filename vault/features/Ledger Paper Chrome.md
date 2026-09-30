@@ -12,9 +12,9 @@ Summary: Every list in the app is drawn as a page of ruled ledger paper — a re
 - `EmptyRules` — n empty ruled rows, used to run the lines past the end of the content so the page never just stops.
 - `Checkbox` / `Dot` — the 22pt square box (or moss circle for habits) and the coloured project dot.
 
-Metrics come from `src/theme/tokens.ts` and are shared with every screen, which is why the rules line up across [[Today]], [[Upcoming]], [[Inbox]], [[Project Detail]], [[Search]], [[Task Detail]], [[Page Closed]] and [[Swipe States]] even where those screens lay out rows themselves. [[Inbox Empty]], [[Calendar]] and [[Search]] redraw the margin rule inline using the same `insetStart(rtl, metrics.marginLine)` so it mirrors correctly in Arabic.
+Metrics come from `src/theme/tokens.ts` and are shared with every screen, which is why the rules line up across [[Today]], [[Upcoming]], [[Inbox]], [[Project Detail]], [[Task Detail]], [[Page Closed]] and [[Swipe States]] even where those screens lay out rows themselves. [[Inbox Empty]] and [[Calendar]] redraw the margin rule inline using the same `insetStart(rtl, metrics.marginLine)` so it mirrors correctly in Arabic.
 
 ## Related
-- Page: [[Today]], [[Upcoming]], [[Inbox]], [[Inbox Empty]], [[Search]], [[Project Detail]], [[Task Detail]], [[Calendar]], [[Page Closed]], [[Swipe States]]
+- Page: [[Today]], [[Upcoming]], [[Inbox]], [[Inbox Empty]], [[Project Detail]], [[Task Detail]], [[Calendar]], [[Page Closed]], [[Swipe States]]
 - Features: [[Light and Dark Paper Palettes]], [[In-App RTL and Arabic Typography]], [[Ink Strike-Through Completion]], [[Collapsing Page Header]]
 - Bugs: none

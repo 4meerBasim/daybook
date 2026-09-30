@@ -8,7 +8,7 @@ import { TodayScreen } from '../screens/TodayScreen';
 import { UpcomingScreen } from '../screens/UpcomingScreen';
 import { InboxScreen } from '../screens/InboxScreen';
 import { InboxEmptyScreen } from '../screens/InboxEmptyScreen';
-import { SearchScreen } from '../screens/SearchScreen';
+import { ProfileScreen } from '../screens/ProfileScreen';
 import { OnboardingScreen } from '../screens/OnboardingScreen';
 import { ProjectScreen } from '../screens/ProjectScreen';
 import { TaskDetailScreen } from '../screens/TaskDetailScreen';
@@ -49,7 +49,12 @@ function MainTabs({ navigation }: { navigation: { navigate: (r: keyof RootParams
       ) : null}
       {tab === 'upcoming' ? <UpcomingScreen /> : null}
       {tab === 'inbox' ? <InboxScreen /> : null}
-      {tab === 'search' ? <SearchScreen onOpenProject={() => navigation.navigate('Project')} /> : null}
+      {tab === 'profile' ? (
+        <ProfileScreen
+          onOpenProject={() => navigation.navigate('Project')}
+          onOpenSettings={() => navigation.navigate('Settings')}
+        />
+      ) : null}
 
       <TabBar
         active={tab}
