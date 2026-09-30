@@ -27,7 +27,7 @@ export function TodayScreen({
     scrollY.value = e.contentOffset.y;
   });
 
-  const leftN = useTasks().filter((k) => k.list === 'today' && !done[k.id]).length;
+  const leftN = useTasks().filter((k) => k.list === 'today' && !k.later && !done[k.id]).length;
   const allDone = leftN === 0;
 
   const [query, setQuery] = useState('');

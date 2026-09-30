@@ -31,10 +31,9 @@ export function QuickAddSheet({ open, onClose }: { open: boolean; onClose: () =>
   }, [open, reduced]);
 
   const parsed = parse(qa, ar);
-  const list: ListKey = parsed.isToday ? 'today' : parsed.hasDate ? 'upcoming' : 'inbox';
+  const list: ListKey = parsed.hasDate ? 'today' : 'inbox';
   const dest = {
     today: ar ? 'يُحفظ في اليوم' : 'Saved to Today',
-    upcoming: ar ? 'يُحفظ في القادم' : 'Saved to Upcoming',
     inbox: ar ? 'يُحفظ في الوارد' : 'Saved to Inbox',
   }[list];
 
@@ -52,7 +51,7 @@ export function QuickAddSheet({ open, onClose }: { open: boolean; onClose: () =>
       const when = parsed.chips
         .filter((ch) => ch.kind !== 'tag' && ch.kind !== 'pri' && ch.label !== t.today)
         .map((ch) => ch.label);
-      addTask({ title, meta: when.join(' · '), list, projectId });
+      addTask({ title, meta: when.join(' · '), list, projectId, later: parsed.hasLaterDay });
       setQa('');
       setProjectId(null);
     }

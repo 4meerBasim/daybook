@@ -4,13 +4,13 @@ import * as Haptics from 'expo-haptics';
 import { useTheme } from '../theme/ThemeProvider';
 import { metrics, penShadow, radius } from '../theme/tokens';
 import { row } from '../lib/rtl';
-import { CalendarIcon, PageIcon, PenIcon, ProfileIcon, TrayIcon } from './Icon';
+import { ClockIcon, PageIcon, PenIcon, ProfileIcon, TrayIcon } from './Icon';
 
-export type TabKey = 'today' | 'upcoming' | 'inbox' | 'profile';
+export type TabKey = 'today' | 'recent' | 'inbox' | 'profile';
 
 const icons = {
   today: PageIcon,
-  upcoming: CalendarIcon,
+  recent: ClockIcon,
   inbox: TrayIcon,
   profile: ProfileIcon,
 };
@@ -28,7 +28,7 @@ export function TabBar({
 }) {
   const { c, t, rtl, dark } = useTheme();
 
-  const items: TabKey[] = ['today', 'upcoming', 'inbox', 'profile'];
+  const items: TabKey[] = ['today', 'recent', 'inbox', 'profile'];
 
   return (
     <View

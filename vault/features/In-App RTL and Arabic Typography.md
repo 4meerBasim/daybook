@@ -23,6 +23,6 @@ Because the native layout direction stays LTR, a `Text` resolves its base direct
 Language is set from two places: the English / العربية pair on [[Onboarding]] and the Language row on [[Settings]].
 
 ## Related
-- Page: [[Onboarding]], [[Settings]], [[Main Tabs]], [[Today]], [[Upcoming]], [[Inbox]], [[Inbox Empty]], [[Profile]], [[Quick Add Sheet]], [[Calendar]], [[Project Detail]], [[Task Detail]], [[Focus Mode]], [[Page Closed]], [[Swipe States]]
+- Page: [[Onboarding]], [[Settings]], [[Main Tabs]], [[Today]], [[Recent]], [[Inbox]], [[Inbox Empty]], [[Profile]], [[Quick Add Sheet]], [[Calendar]], [[Project Detail]], [[Task Detail]], [[Focus Mode]], [[Page Closed]], [[Swipe States]]
 - Features: [[Light and Dark Paper Palettes]], [[Ledger Paper Chrome]], [[Swipe Row Actions]], [[Natural Language Quick Add]], [[Project Grouped Tasks]]
 - Bugs: none

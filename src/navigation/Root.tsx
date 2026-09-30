@@ -6,7 +6,7 @@ import { ListKey } from '../data/seed';
 import { Screen } from '../components/Screen';
 import { TabBar, TabKey } from '../components/TabBar';
 import { TodayScreen } from '../screens/TodayScreen';
-import { UpcomingScreen } from '../screens/UpcomingScreen';
+import { RecentScreen } from '../screens/RecentScreen';
 import { InboxScreen } from '../screens/InboxScreen';
 import { InboxEmptyScreen } from '../screens/InboxEmptyScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
@@ -50,7 +50,12 @@ function MainTabs({ navigation }: NativeStackScreenProps<RootParams, 'Main'>) {
           onOpenProject={openProject('today')}
         />
       ) : null}
-      {tab === 'upcoming' ? <UpcomingScreen onOpenProject={openProject('upcoming')} /> : null}
+      {tab === 'recent' ? (
+        <RecentScreen
+          onOpenTask={() => navigation.navigate('TaskDetail')}
+          onPickDate={() => navigation.navigate('Calendar')}
+        />
+      ) : null}
       {tab === 'inbox' ? <InboxScreen onOpenProject={openProject('inbox')} /> : null}
       {tab === 'profile' ? (
         <ProfileScreen
@@ -65,7 +70,6 @@ function MainTabs({ navigation }: NativeStackScreenProps<RootParams, 'Main'>) {
         onPen={() => setAdding(true)}
         onLongPress={(k) => {
           if (k === 'today') navigation.navigate('Settings');
-          if (k === 'upcoming') navigation.navigate('Calendar');
           if (k === 'inbox') navigation.navigate('InboxEmpty');
         }}
       />

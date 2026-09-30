@@ -1,7 +1,7 @@
 import { Palette } from '../theme/palette';
 import { Strings } from '../i18n/strings';
 
-export type ListKey = 'today' | 'upcoming' | 'inbox';
+export type ListKey = 'today' | 'inbox';
 
 export type Project = { id: string; name: string; color: keyof Palette };
 
@@ -12,6 +12,7 @@ export type Task = {
   list: ListKey;
   projectId: string | null;
   over?: boolean;
+  later?: boolean;
 };
 
 export function projects(t: Strings): Project[] {
@@ -33,35 +34,40 @@ export function tasks(t: Strings, ar: boolean): Task[] {
       id: 'u1',
       title: ar ? 'موعد طبيب الأسنان' : 'Dentist appointment',
       meta: `${t.tomorrow} · 15:00`,
-      list: 'upcoming',
+      list: 'today',
+      later: true,
       projectId: 'home',
     },
     {
       id: 'u2',
       title: ar ? 'مراجعة أسبوعية' : 'Weekly review',
       meta: `${t.tomorrow} · 17:00`,
-      list: 'upcoming',
+      list: 'today',
+      later: true,
       projectId: 'work',
     },
     {
       id: 'u3',
       title: ar ? 'تجديد التأمين' : 'Renew car insurance',
       meta: ar ? 'الأحد' : 'Sun',
-      list: 'upcoming',
+      list: 'today',
+      later: true,
       projectId: 'home',
     },
     {
       id: 'u4',
       title: ar ? 'إطلاق موقع الاستوديو' : 'Launch Studio website',
       meta: ar ? 'الثلاثاء' : 'Tue',
-      list: 'upcoming',
+      list: 'today',
+      later: true,
       projectId: 'studio',
     },
     {
       id: 'u5',
       title: ar ? 'حجز فندق عمّان' : 'Book Amman hotel',
       meta: ar ? 'الأربعاء' : 'Wed',
-      list: 'upcoming',
+      list: 'today',
+      later: true,
       projectId: 'studio',
     },
     {

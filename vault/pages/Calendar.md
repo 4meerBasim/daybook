@@ -4,7 +4,7 @@ Route: `Calendar` (native stack)
 Summary: A month grid where each day carries tally marks for its workload, with the selected day's tasks listed underneath.
 
 ## Related
-- Connects to: [[Upcoming]] — reached by long-pressing the Upcoming tab; returns via the system back gesture, [[Project Detail]] — reached by swiping a task row past the pick-date threshold, [[Main Tabs]]
+- Connects to: [[Project Detail]], [[Recent]] — reached by swiping a task row past the pick-date threshold on either, the only way in; returns via the system back gesture, [[Main Tabs]]
 - Features: [[Calendar Tally Marks]], [[Swipe Row Actions]], [[Ledger Paper Chrome]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]]
 - Bugs: none found
 - Enhancements: none

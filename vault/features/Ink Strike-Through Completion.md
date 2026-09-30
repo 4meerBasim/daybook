@@ -13,11 +13,11 @@ The bar is absolutely positioned at `top: 11` and anchored to `left: -2` or `rig
 
 Completion state itself is the `done` map in `src/state/store.tsx`, keyed by task id.
 
-The animated rows are on [[Project Detail]]. `ProjectScreen.tsx` used to draw its own static full-width bar for finished rows; it now renders `TaskRow`, so it is the one place the stroke animates. [[Today]] no longer renders task rows at all since [[Project Grouped Tasks]] — it shows the result only as the done/total count on each project row and in the header tally.
+The animated rows are on [[Project Detail]] and [[Recent]]. `ProjectScreen.tsx` used to draw its own static full-width bar for finished rows; it now renders `TaskRow`, as does `RecentScreen.tsx`, so those are the two places the stroke animates. [[Today]] no longer renders task rows at all since [[Project Grouped Tasks]] — it shows the result only as the done/total count on each project row and in the header tally.
 
 Static end-state renderings remain on [[Page Closed]] and the subtasks on [[Task Detail]], which use plain `textDecorationLine: 'line-through'`. That split is the design's, not an inconsistency to tidy away: those rows arrive already struck or toggle without ceremony, and have nothing to animate.
 
 ## Related
-- Page: [[Project Detail]], [[Page Closed]], [[Task Detail]]
+- Page: [[Project Detail]], [[Recent]], [[Page Closed]], [[Task Detail]]
 - Features: [[Project Grouped Tasks]], [[Swipe Row Actions]], [[Wax Page Closed Stamp]], [[Reduced Motion Mode]], [[Ledger Paper Chrome]]
 - Bugs: none

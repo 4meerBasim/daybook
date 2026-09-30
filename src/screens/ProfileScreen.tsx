@@ -18,7 +18,7 @@ export function ProfileScreen({
   const { c, t, ui, mono, display, rtl } = useTheme();
   const { done } = useStore();
 
-  const doneToday = useTasks().filter((k) => k.list === 'today' && done[k.id]).length;
+  const doneToday = useTasks().filter((k) => k.list === 'today' && !k.later && done[k.id]).length;
 
   return (
     <Screen>

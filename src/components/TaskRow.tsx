@@ -83,7 +83,7 @@ export function TaskRow({
       android_ripple={null}
       accessibilityRole="checkbox"
       accessibilityState={{ checked: done }}
-      accessibilityLabel={title}
+      accessibilityLabel={meta ? `${title}, ${meta}` : title}
       accessibilityActions={accessibilityActions}
       onAccessibilityAction={onAccessibilityAction}
       style={({ pressed }) => [

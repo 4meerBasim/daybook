@@ -45,6 +45,15 @@ export function CalendarIcon({ size = 24, color }: Props) {
   );
 }
 
+export function ClockIcon({ size = 24, color }: Props) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+      <Circle cx={12} cy={12} r={8} stroke={color} fill="none" strokeWidth={1.5} />
+      <Path d="M12 8v4l3 2" stroke={color} {...stroke} />
+    </Svg>
+  );
+}
+
 export function TrayIcon({ size = 24, color }: Props) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24">

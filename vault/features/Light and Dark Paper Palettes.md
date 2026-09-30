@@ -17,6 +17,6 @@ The accent roles carry meaning consistently: vermilion is the margin rule, the o
 Controlled from the Appearance segmented control on [[Settings]].
 
 ## Related
-- Page: [[Settings]], [[Onboarding]], [[Main Tabs]], [[Today]], [[Upcoming]], [[Inbox]], [[Inbox Empty]], [[Profile]], [[Quick Add Sheet]], [[Calendar]], [[Project Detail]], [[Task Detail]], [[Focus Mode]], [[Page Closed]], [[Swipe States]]
+- Page: [[Settings]], [[Onboarding]], [[Main Tabs]], [[Today]], [[Recent]], [[Inbox]], [[Inbox Empty]], [[Profile]], [[Quick Add Sheet]], [[Calendar]], [[Project Detail]], [[Task Detail]], [[Focus Mode]], [[Page Closed]], [[Swipe States]]
 - Features: [[Ledger Paper Chrome]], [[In-App RTL and Arabic Typography]], [[Natural Language Quick Add]], [[Wax Page Closed Stamp]]
 - Bugs: none
