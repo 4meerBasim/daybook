@@ -3,6 +3,10 @@ import { Strings } from '../i18n/strings';
 
 export type ListKey = 'today' | 'inbox';
 
+export type Priority = 'none' | 'low' | 'medium' | 'high';
+
+export type Status = 'todo' | 'doing' | 'waiting';
+
 export type Project = { id: string; name: string; color: keyof Palette };
 
 export type Task = {
@@ -13,6 +17,9 @@ export type Task = {
   projectId: string | null;
   over?: boolean;
   later?: boolean;
+  desc?: string;
+  priority?: Priority;
+  status?: Status;
 };
 
 export function projects(t: Strings): Project[] {
@@ -25,10 +32,27 @@ export function projects(t: Strings): Project[] {
 
 export function tasks(t: Strings, ar: boolean): Task[] {
   return [
-    { id: 't1', title: t.task1, meta: '10:00', list: 'today', projectId: 'studio' },
+    {
+      id: 't1',
+      title: t.task1,
+      meta: '10:00',
+      list: 'today',
+      projectId: 'studio',
+      desc: t.noteBody,
+      priority: 'high',
+      status: 'doing',
+    },
     { id: 't2', title: t.task2, meta: '14:00', list: 'today', projectId: 'work' },
     { id: 't3', title: t.task3, meta: '', list: 'today', projectId: null },
-    { id: 't4', title: t.task4, meta: t.yesterday, list: 'today', projectId: 'home', over: true },
+    {
+      id: 't4',
+      title: t.task4,
+      meta: t.yesterday,
+      list: 'today',
+      projectId: 'home',
+      over: true,
+      priority: 'medium',
+    },
     { id: 't5', title: t.task5, meta: '', list: 'today', projectId: 'studio' },
     {
       id: 'u1',

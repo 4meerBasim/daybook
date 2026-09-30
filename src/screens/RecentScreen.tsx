@@ -15,7 +15,7 @@ export function RecentScreen({
   onOpenTask,
   onPickDate,
 }: {
-  onOpenTask: () => void;
+  onOpenTask: (taskId: string) => void;
   onPickDate: () => void;
 }) {
   const { c, t } = useTheme();
@@ -58,7 +58,7 @@ export function RecentScreen({
               onSnooze={() => clear(k.id)}
               onPickDate={onPickDate}
               onDelete={() => clear(k.id)}
-              onLongPress={onOpenTask}
+              onLongPress={() => onOpenTask(k.id)}
             >
               <TaskRow
                 title={k.title}

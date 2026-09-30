@@ -3,7 +3,7 @@ import { Keyboard, Pressable, ScrollView, Text, TextInput, View } from 'react-na
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '../theme/ThemeProvider';
-import { maxFontSizeMultiplier, metrics, penShadow, radius } from '../theme/tokens';
+import { maxFontSizeMultiplier, metrics, penShadow, priorityColors, radius } from '../theme/tokens';
 import { align, marginStart, pad, row } from '../lib/rtl';
 import { useStore, useTasks } from '../state/store';
 import { projects } from '../data/seed';
@@ -119,11 +119,20 @@ export function ProjectScreen({ route, navigation }: NativeStackScreenProps<Root
               onSnooze={() => clear(k.id)}
               onPickDate={onPickDate}
               onDelete={() => clear(k.id)}
-              onLongPress={() => navigation.navigate('TaskDetail')}
+              onLongPress={() => navigation.navigate('TaskDetail', { taskId: k.id })}
             >
               <TaskRow
                 title={k.title}
-                meta={k.meta}
+                meta={[
+                  !done[k.id] && k.status && k.status !== 'todo' ? t[k.status] : '',
+                  k.priority && k.priority !== 'none' ? t[k.priority] : '',
+                  k.meta,
+                ]
+                  .filter(Boolean)
+                  .join(' · ')}
+                dotColor={
+                  k.priority && k.priority !== 'none' ? c[priorityColors[k.priority].fg] : undefined
+                }
                 done={!!done[k.id]}
                 overdue={k.over}
                 onToggle={() => toggle(k.id)}

@@ -4,7 +4,7 @@ Status: shipped
 Summary: Every task belongs to a project or to none, the Today and Inbox tabs show one row per project instead of the tasks themselves, and tapping a project opens its tasks for that list.
 
 ## Details
-The data is one list. `tasks(t, ar)` in `src/data/seed.ts` returns every task with a `list` (`today` | `inbox`), a `projectId` (or `null`) and a `meta` string for its time or day; `projects(t)` returns the three projects — Studio (blue), Work (ochre) and Home (moss). The separate `upcoming()`, `inbox()` and `project()` seeds are gone, and with them the task's own `color` and `time` fields: colour now belongs to the project.
+The data is one list. `tasks(t, ar)` in `src/data/seed.ts` returns every task with a `list` (`today` | `inbox`), a `projectId` (or `null`) and a `meta` string for its time or day; `projects(t)` returns the three projects — Studio (blue), Work (ochre) and Home (moss). The separate `upcoming()`, `inbox()` and `project()` seeds are gone, and with them the task's own `color` and `time` fields: colour now belongs to the project. A task can also carry a description, a priority and a status — see [[Task Details]].
 
 `src/state/store.tsx` adds an `added` array and `addTask`, which appends a task under a generated id (`a1`, `a2`, …), and a `useTasks()` hook that returns seed plus added tasks minus anything in `cleared`. Every screen that counts or lists tasks reads from that hook, so a task captured in [[Quick Add Sheet]] shows up everywhere at once. Added tasks live in memory only.
 
@@ -20,6 +20,6 @@ Seeded distribution: Today holds Studio 4, Work 2, Home 3 and one unassigned; In
 
 ## Related
 - Page: [[Today]], [[Recent]], [[Inbox]], [[Project Detail]], [[Profile]], [[Main Tabs]], [[Quick Add Sheet]]
-- Features: [[Add Task Inside Project]], [[Inline Page Search]], [[Swipe Row Actions]], [[Ink Strike-Through Completion]], [[Natural Language Quick Add]], [[Ledger Paper Chrome]], [[In-App RTL and Arabic Typography]]
+- Features: [[Task Details]], [[Add Task Inside Project]], [[Inline Page Search]], [[Swipe Row Actions]], [[Ink Strike-Through Completion]], [[Natural Language Quick Add]], [[Ledger Paper Chrome]], [[In-App RTL and Arabic Typography]]
 - Bugs: [[Quick Add Does Not Create Tasks]], [[Swipe Actions Not Wired Into Task Lists]]
 - Enhancements: [[Inbox Triage Chips]]

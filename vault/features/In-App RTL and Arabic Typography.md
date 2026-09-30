@@ -18,7 +18,7 @@ Digit-bearing elements that must stay in order — the focus countdown and its s
 
 The design's mirror list also names the tally bundle stroke, so `StreakTallyIcon` takes a `flip` prop and [[Today]]'s habit row and the [[Habit]] header pass `rtl`, mirroring the diagonal that binds the first five marks. The vertical marks of [[Calendar Tally Marks]] need no flip — they are symmetrical.
 
-Because the native layout direction stays LTR, a `Text` resolves its base direction from its first strong character, which gives Arabic strings RTL order for free and keeps Latin runs like `invoice-0918.pdf` intact. The one place that broke was [[Task Detail]]'s attachment caption, where the filename and the Arabic hint shared a single `Text` separated by a newline: the Latin filename won the base direction and dragged the Arabic line LTR with it. They are now two `Text` elements, which is the isolation the design asks for.
+Because the native layout direction stays LTR, a `Text` resolves its base direction from its first strong character, which gives Arabic strings RTL order for free and keeps Latin runs such as a filename intact. The one place that broke was the attachment caption [[Task Detail]] used to have, where a Latin filename and the Arabic hint shared a single `Text` separated by a newline: the filename won the base direction and dragged the Arabic line LTR with it. Splitting them into two `Text` elements was the fix; the attachment has since been removed from that page, so the rule stands for any future mixed-script caption rather than for code that exists today.
 
 Language is set from two places: the English / العربية pair on [[Onboarding]] and the Language row on [[Settings]].
 

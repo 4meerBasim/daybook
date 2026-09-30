@@ -2,23 +2,32 @@ import React from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '../theme/ThemeProvider';
-import { maxFontSizeMultiplier, metrics, radius } from '../theme/tokens';
-import { align, insetStart, marginStart, pad, row } from '../lib/rtl';
-import { useStore } from '../state/store';
+import { maxFontSizeMultiplier, metrics, priorityColors, radius } from '../theme/tokens';
+import { align, row } from '../lib/rtl';
+import { useStore, useTasks } from '../state/store';
+import { projects } from '../data/seed';
 import { Screen, useHeaderTop } from '../components/Screen';
 import { Checkbox } from '../components/Ledger';
-import { ChevronBackIcon, EllipsisIcon, PaperclipIcon } from '../components/Icon';
+import { Chip } from '../components/Chip';
+import { ChevronBackIcon, EllipsisIcon } from '../components/Icon';
 
-export function TaskDetailScreen({ onBack, onFocus }: { onBack: () => void; onFocus: () => void }) {
+export function TaskDetailScreen({
+  taskId,
+  onBack,
+  onFocus,
+}: {
+  taskId: string;
+  onBack: () => void;
+  onFocus: () => void;
+}) {
   const { c, t, ui, mono, display, rtl } = useTheme();
   const { done, toggle } = useStore();
   const top = useHeaderTop();
 
-  const subs = [
-    { id: 'd1', label: t.sub1, checked: true },
-    { id: 'd2', label: t.sub2, checked: false },
-    { id: 'd3', label: t.sub3, checked: false },
-  ];
+  const task = useTasks().find((k) => k.id === taskId);
+  const project = projects(t).find((p) => p.id === task?.projectId);
+  const checked = !!done[taskId];
+  const priority = task?.priority ?? 'none';
 
   return (
     <Screen>
@@ -41,7 +50,9 @@ export function TaskDetailScreen({ onBack, onFocus }: { onBack: () => void; onFo
           >
             <ChevronBackIcon color={c.ink2} flip={rtl} />
           </Pressable>
-          <Text style={[mono(12, 500, 0.1), { color: c.ink2 }]}>{t.studio}</Text>
+          <Text style={[mono(12, 500, 0.1, true), { color: c.ink2 }]}>
+            {task ? (project ? project.name : t.noProject) : ''}
+          </Text>
           <Pressable
             onPress={onFocus}
             hitSlop={metrics.hitSlop}
@@ -53,248 +64,125 @@ export function TaskDetailScreen({ onBack, onFocus }: { onBack: () => void; onFo
           </Pressable>
         </View>
 
-        <View
-          style={[
-            {
-              paddingTop: 20,
-              paddingBottom: 16,
-              flexDirection: row(rtl),
-              gap: 14,
-              alignItems: 'flex-start',
-            },
-            pad(rtl, metrics.gutter, metrics.gutter),
-          ]}
-        >
-          <View
-            style={{
-              width: 26,
-              height: 26,
-              borderWidth: 1.5,
-              borderColor: c.ink,
-              borderRadius: 5,
-              marginTop: 6,
-            }}
-          />
-          <Text
-            allowFontScaling
-            maxFontSizeMultiplier={maxFontSizeMultiplier}
-            style={[display(30, { lineHeight: 36 }), { flex: 1, color: c.ink, textAlign: align(rtl) }]}
-          >
-            {t.task1}
-          </Text>
-        </View>
-
-        <View style={{ borderTopWidth: 1, borderTopColor: c.rule }}>
-          <View
-            style={[
-              {
-                height: metrics.row,
-                flexDirection: row(rtl),
-                alignItems: 'center',
-                gap: 12,
-                borderBottomWidth: 1,
-                borderBottomColor: c.rule,
-              },
-              pad(rtl, metrics.gutter, metrics.gutter),
-            ]}
-          >
-            <Text style={[mono(11, 500, 0.1, true), { width: metrics.labelColumn, color: c.ink3, textAlign: align(rtl) }]}>
-              {t.when}
-            </Text>
-            <Text style={[ui(15), { lineHeight: undefined, color: c.ink }]}>
-              {t.today}
-              {' · '}
-              <Text style={mono(15)}>10:00</Text>
-            </Text>
-            <View style={{ flex: 1 }} />
-            <Text style={[mono(12, 500), { color: c.ink3 }]}>{'↻ '}{t.weekly}</Text>
-          </View>
-
-          <View
-            style={[
-              {
-                height: metrics.row,
-                flexDirection: row(rtl),
-                alignItems: 'center',
-                gap: 12,
-                borderBottomWidth: 1,
-                borderBottomColor: c.rule,
-              },
-              pad(rtl, metrics.gutter, metrics.gutter),
-            ]}
-          >
-            <Text style={[mono(11, 500, 0.1, true), { width: metrics.labelColumn, color: c.ink3, textAlign: align(rtl) }]}>
-              {t.reminder}
-            </Text>
-            <Text style={[ui(15), { lineHeight: undefined, color: c.ink }]}>
-              09:30{' · '}{t.snoozeHint}
-            </Text>
-          </View>
-
-          <View
-            style={[
-              {
-                height: metrics.row,
-                flexDirection: row(rtl),
-                alignItems: 'center',
-                gap: 12,
-                borderBottomWidth: 1,
-                borderBottomColor: c.rule,
-              },
-              pad(rtl, metrics.gutter, metrics.gutter),
-            ]}
-          >
-            <Text style={[mono(11, 500, 0.1, true), { width: metrics.labelColumn, color: c.ink3, textAlign: align(rtl) }]}>
-              {t.priority}
-            </Text>
-            <View
+        {task ? (
+          <>
+            <Pressable
+              onPress={() => {
+                if (!checked) Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                toggle(taskId);
+              }}
+              android_ripple={null}
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked }}
+              accessibilityLabel={task.title}
               style={{
-                height: 26,
-                paddingHorizontal: 10,
-                borderRadius: radius.chip,
-                backgroundColor: c.verS,
-                alignItems: 'center',
-                justifyContent: 'center',
+                paddingTop: 24,
+                paddingBottom: 16,
+                paddingHorizontal: metrics.gutter,
+                flexDirection: row(rtl),
+                gap: 16,
+                alignItems: 'flex-start',
               }}
             >
-              <Text style={[ui(12, 500), { lineHeight: undefined, color: c.ver }]}>{t.high}</Text>
-            </View>
-            <View
-              style={{
-                height: 26,
-                paddingHorizontal: 10,
-                borderRadius: radius.chip,
-                backgroundColor: c.blueS,
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <Text style={[ui(12, 500), { lineHeight: undefined, color: c.blue }]}>#invoice</Text>
-            </View>
-          </View>
+              <View style={{ marginTop: 8 }}>
+                <Checkbox checked={checked} />
+              </View>
+              <Text
+                maxFontSizeMultiplier={maxFontSizeMultiplier}
+                style={[
+                  display(30, { lineHeight: 36 }),
+                  {
+                    flex: 1,
+                    color: checked ? c.ink3 : c.ink,
+                    textDecorationLine: checked ? 'line-through' : 'none',
+                    textAlign: align(rtl),
+                  },
+                ]}
+              >
+                {task.title}
+              </Text>
+            </Pressable>
 
-          <View
-            style={[
-              {
-                height: metrics.row,
-                flexDirection: row(rtl),
-                alignItems: 'center',
-                gap: 12,
-                borderBottomWidth: 1,
-                borderBottomColor: c.rule,
-              },
-              pad(rtl, metrics.gutter, metrics.gutter),
-            ]}
-          >
-            <Text style={[mono(11, 500, 0.1, true), { width: metrics.labelColumn, color: c.ink3, textAlign: align(rtl) }]}>
-              {t.subtasks}
-            </Text>
-            <Text style={[mono(13, 500), { color: c.ink2 }]}>1 / 3</Text>
-          </View>
-
-          <View style={{ position: 'relative' }}>
-            <View
-              pointerEvents="none"
-              style={[
-                { position: 'absolute', top: 0, bottom: 0, width: 1, backgroundColor: c.ver, opacity: 0.6 },
-                insetStart(rtl, metrics.marginLine),
-              ]}
-            />
-            {subs.map((s) => {
-              const checked = s.checked ? !done[s.id] : !!done[s.id];
-              return (
-                <Pressable
-                  key={s.id}
-                  onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                    toggle(s.id);
-                  }}
-                  accessibilityRole="checkbox"
-                  accessibilityState={{ checked }}
-                  accessibilityLabel={s.label}
-                  android_ripple={null}
+            <View style={{ borderTopWidth: 1, borderTopColor: c.rule }}>
+              <Field label={t.when}>
+                <Text
                   style={[
-                    {
-                      flexDirection: row(rtl),
-                      alignItems: 'center',
-                      gap: 14,
-                      height: metrics.row,
-                      borderBottomWidth: 1,
-                      borderBottomColor: c.rule,
-                    },
-                    pad(rtl, 16, metrics.gutter),
+                    ui(15),
+                    { lineHeight: undefined, color: task.over && !checked ? c.ver : c.ink },
                   ]}
                 >
-                  <Checkbox checked={checked} />
-                  <Text
-                    numberOfLines={1}
-                    style={[
-                      ui(15),
-                      marginStart(rtl, 16),
-                      {
-                        flex: 1,
-                        lineHeight: undefined,
-                        color: checked ? c.ink3 : c.ink,
-                        textAlign: align(rtl),
-                        textDecorationLine: checked ? 'line-through' : 'none',
-                      },
-                    ]}
-                  >
-                    {s.label}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
+                  {task.meta || t[task.list]}
+                </Text>
+              </Field>
 
-          <View
-            style={{
-              paddingVertical: 14,
-              paddingHorizontal: metrics.gutter,
-              borderBottomWidth: 1,
-              borderBottomColor: c.rule,
-            }}
-          >
-            <Text style={[mono(11, 500, 0.1), { color: c.ink3, marginBottom: 6, textAlign: align(rtl) }]}>
-              {t.notes}
-            </Text>
-            <Text style={[ui(15, 400, 22), { color: c.ink2, textAlign: align(rtl) }]}>
-              {t.noteBody}
-            </Text>
-          </View>
+              <Field label={t.priority}>
+                {priority === 'none' ? (
+                  <Chip label={t.none} outline />
+                ) : (
+                  <Chip
+                    label={t[priority]}
+                    bg={c[priorityColors[priority].bg]}
+                    fg={c[priorityColors[priority].fg]}
+                  />
+                )}
+              </Field>
 
-          <View
-            style={[
-              { paddingVertical: 14, flexDirection: row(rtl), gap: 10, alignItems: 'center' },
-              pad(rtl, metrics.gutter, metrics.gutter),
-            ]}
-          >
-            <View
-              style={{
-                width: 56,
-                height: 56,
-                borderRadius: radius.card,
-                backgroundColor: c.paper2,
-                borderWidth: 1,
-                borderColor: c.rule,
-                borderStyle: 'dashed',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <PaperclipIcon size={20} color={c.ink3} />
+              <Field label={t.status}>
+                <Chip label={checked ? t.done : t[task.status ?? 'todo']} outline />
+              </Field>
+
+              <View
+                style={{
+                  paddingVertical: 16,
+                  paddingHorizontal: metrics.gutter,
+                  gap: 8,
+                  borderBottomWidth: 1,
+                  borderBottomColor: c.rule,
+                }}
+              >
+                <Text style={[mono(11, 500, 0.1, true), { color: c.ink3, textAlign: align(rtl) }]}>
+                  {t.description}
+                </Text>
+                <Text
+                  style={[
+                    ui(15, 400, 22),
+                    { color: task.desc ? c.ink2 : c.ink3, textAlign: align(rtl) },
+                  ]}
+                >
+                  {task.desc || t.none}
+                </Text>
+              </View>
             </View>
-            <View>
-              <Text style={[ui(13, 400, 18), { color: c.ink3, textAlign: align(rtl) }]}>
-                invoice-0918.pdf {'·'} 240 KB
-              </Text>
-              <Text style={[ui(13, 400, 18), { color: c.ink3, textAlign: align(rtl) }]}>
-                {t.attachHint}
-              </Text>
-            </View>
-          </View>
-        </View>
+          </>
+        ) : null}
       </ScrollView>
     </Screen>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  const { c, mono, rtl } = useTheme();
+  return (
+    <View
+      style={{
+        height: metrics.row,
+        flexDirection: row(rtl),
+        alignItems: 'center',
+        gap: 12,
+        paddingHorizontal: metrics.gutter,
+        borderBottomWidth: 1,
+        borderBottomColor: c.rule,
+      }}
+    >
+      <Text
+        style={[
+          mono(11, 500, 0.1, true),
+          { width: metrics.labelColumn, color: c.ink3, textAlign: align(rtl) },
+        ]}
+      >
+        {label}
+      </Text>
+      {children}
+    </View>
   );
 }

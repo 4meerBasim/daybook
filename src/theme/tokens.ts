@@ -47,3 +47,9 @@ export function penShadow(c: Palette, dark: boolean): ViewStyle {
 }
 
 export const maxFontSizeMultiplier = 1.6;
+
+export const priorityColors = {
+  low: { fg: 'blue', bg: 'blueS' },
+  medium: { fg: 'och', bg: 'ochS' },
+  high: { fg: 'ver', bg: 'verS' },
+} as const;

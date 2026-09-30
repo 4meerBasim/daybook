@@ -26,7 +26,7 @@ export type RootParams = {
   Main: undefined;
   Calendar: undefined;
   Project: { projectId: string | null; list?: ListKey };
-  TaskDetail: undefined;
+  TaskDetail: { taskId: string };
   Focus: undefined;
   Habit: undefined;
   Settings: undefined;
@@ -55,7 +55,7 @@ function MainTabs({ navigation }: NativeStackScreenProps<RootParams, 'Main'>) {
       ) : null}
       {tab === 'recent' ? (
         <RecentScreen
-          onOpenTask={() => navigation.navigate('TaskDetail')}
+          onOpenTask={(taskId) => navigation.navigate('TaskDetail', { taskId })}
           onPickDate={() => navigation.navigate('Calendar')}
         />
       ) : null}
@@ -100,8 +100,9 @@ export function Root() {
         <Stack.Screen name="Calendar" component={CalendarScreen} />
         <Stack.Screen name="Project" component={ProjectScreen} />
         <Stack.Screen name="TaskDetail">
-          {({ navigation }) => (
+          {({ navigation, route }) => (
             <TaskDetailScreen
+              taskId={route.params.taskId}
               onBack={() => navigation.goBack()}
               onFocus={() => navigation.navigate('Focus')}
             />

@@ -2,17 +2,21 @@ import React, { useCallback, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import BottomSheet, {
   BottomSheetBackdrop,
+  BottomSheetScrollView,
   BottomSheetTextInput,
-  BottomSheetView,
 } from '@gorhom/bottom-sheet';
 import type { BottomSheetBackdropProps } from '@gorhom/bottom-sheet';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../theme/ThemeProvider';
 import { radius } from '../theme/tokens';
 import { align, row } from '../lib/rtl';
 import { useStore } from '../state/store';
-import { ListKey, projects } from '../data/seed';
+import { ListKey, Priority, projects, Status } from '../data/seed';
 import { chipColors, parse, tokenColor } from '../lib/parse';
 import { CalendarIcon, FlagIcon, HashIcon, PaperclipIcon } from '../components/Icon';
+
+const priorities: Priority[] = ['none', 'low', 'medium', 'high'];
+const statuses: Status[] = ['todo', 'doing', 'waiting'];
 
 export function QuickAddSheet({
   initialProjectId = null,
@@ -25,8 +29,12 @@ export function QuickAddSheet({
 }) {
   const { c, t, ar, ui, display, rtl, reduced } = useTheme();
   const { qa, setQa, addTask } = useStore();
+  const [desc, setDesc] = useState('');
+  const [pickedPriority, setPickedPriority] = useState<Priority | null>(null);
+  const [status, setStatus] = useState<Status>('todo');
   const [projectId, setProjectId] = useState(initialProjectId);
   const sheetRef = useRef<BottomSheet>(null);
+  const topInset = useSafeAreaInsets().top;
 
   const parsed = parse(qa, ar);
   const list: ListKey = parsed.hasDate ? 'today' : undatedList;
@@ -34,8 +42,8 @@ export function QuickAddSheet({
     today: ar ? 'يُحفظ في اليوم' : 'Saved to Today',
     inbox: ar ? 'يُحفظ في الوارد' : 'Saved to Inbox',
   }[list];
-
-  const projectChoices = [{ id: null as string | null, name: t.noProject }, ...projects(t)];
+  const priority =
+    pickedPriority ?? (parsed.chips.some((ch) => ch.kind === 'pri') ? 'high' : 'none');
 
   const submit = () => {
     const plain = parsed.tokens
@@ -49,7 +57,16 @@ export function QuickAddSheet({
       const when = parsed.chips
         .filter((ch) => ch.kind !== 'tag' && ch.kind !== 'pri' && ch.label !== t.today)
         .map((ch) => ch.label);
-      addTask({ title, meta: when.join(' · '), list, projectId, later: parsed.hasLaterDay });
+      addTask({
+        title,
+        meta: when.join(' · '),
+        list,
+        projectId,
+        later: parsed.hasLaterDay,
+        desc: desc.trim(),
+        priority,
+        status,
+      });
       setQa('');
     }
     sheetRef.current?.forceClose();
@@ -80,7 +97,11 @@ export function QuickAddSheet({
       keyboardBlurBehavior="restore"
       android_keyboardInputMode="adjustResize"
       enablePanDownToClose
-      onClose={onClose}
+      onClose={() => {
+        setQa('');
+        onClose();
+      }}
+      topInset={topInset}
       animateOnMount={!reduced}
       backdropComponent={renderBackdrop}
       handleComponent={null}
@@ -92,7 +113,10 @@ export function QuickAddSheet({
         borderTopColor: c.rule,
       }}
     >
-      <BottomSheetView style={{ paddingTop: 14, paddingHorizontal: 20, paddingBottom: 16 }}>
+      <BottomSheetScrollView
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{ paddingTop: 14, paddingHorizontal: 20, paddingBottom: 16 }}
+      >
         <View
           style={{
             width: 36,
@@ -145,24 +169,28 @@ export function QuickAddSheet({
             minHeight: 28,
           }}
         >
-          {parsed.chips.map((ch, i) => {
-            const col = chipColors(ch.kind, c);
-            return (
-              <View
-                key={i}
-                style={{
-                  height: 28,
-                  paddingHorizontal: 10,
-                  borderRadius: radius.chip,
-                  backgroundColor: col.bg,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <Text style={[ui(12, 500), { lineHeight: undefined, color: col.fg }]}>{ch.label}</Text>
-              </View>
-            );
-          })}
+          {parsed.chips
+            .filter((ch) => ch.kind !== 'pri')
+            .map((ch, i) => {
+              const col = chipColors(ch.kind, c);
+              return (
+                <View
+                  key={i}
+                  style={{
+                    height: 28,
+                    paddingHorizontal: 10,
+                    borderRadius: radius.chip,
+                    backgroundColor: col.bg,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Text style={[ui(12, 500), { lineHeight: undefined, color: col.fg }]}>
+                    {ch.label}
+                  </Text>
+                </View>
+              );
+            })}
           <View
             style={{
               height: 28,
@@ -179,50 +207,59 @@ export function QuickAddSheet({
           </View>
         </View>
 
-        <View
-          accessibilityRole="radiogroup"
-          accessibilityLabel={t.project}
-          style={{ flexDirection: row(rtl), gap: 8, marginTop: 4, flexWrap: 'wrap' }}
-        >
-          {projectChoices.map((p) => {
-            const on = p.id === projectId;
-            return (
-              <Pressable
-                key={p.id ?? 'none'}
-                onPress={() => setProjectId(p.id)}
-                android_ripple={null}
-                accessibilityRole="radio"
-                accessibilityState={{ checked: on }}
-                accessibilityLabel={p.name}
-                style={{ height: 44, justifyContent: 'center' }}
-              >
-                <View
-                  style={{
-                    height: 28,
-                    paddingHorizontal: 12,
-                    borderRadius: radius.chip,
-                    backgroundColor: on ? c.ink : 'transparent',
-                    borderWidth: 1,
-                    borderColor: on ? c.ink : c.rule,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <Text style={[ui(12, 500), { lineHeight: undefined, color: on ? c.paper : c.ink2 }]}>
-                    {p.name}
-                  </Text>
-                </View>
-              </Pressable>
-            );
-          })}
-        </View>
+        <BottomSheetTextInput
+          value={desc}
+          onChangeText={setDesc}
+          placeholder={t.descPlaceholder}
+          placeholderTextColor={c.ink3}
+          selectionColor={c.ink}
+          accessibilityLabel={t.description}
+          multiline
+          style={[
+            ui(15, 400, 22),
+            {
+              minHeight: 44,
+              maxHeight: 82,
+              marginTop: 12,
+              paddingVertical: 8,
+              paddingHorizontal: 0,
+              color: c.ink,
+              borderBottomWidth: 1,
+              borderBottomColor: c.rule,
+              textAlign: align(rtl),
+              textAlignVertical: 'top',
+            },
+          ]}
+        />
+
+        <ChoiceChips
+          label={t.priority}
+          options={priorities.map((p) => ({ key: p, label: t[p] }))}
+          value={priority}
+          onChange={setPickedPriority}
+        />
+        <ChoiceChips
+          label={t.status}
+          options={statuses.map((s) => ({ key: s, label: t[s] }))}
+          value={status}
+          onChange={setStatus}
+        />
+        <ChoiceChips
+          label={t.project}
+          options={[
+            { key: null, label: t.noProject },
+            ...projects(t).map((p) => ({ key: p.id as string | null, label: p.name })),
+          ]}
+          value={projectId}
+          onChange={setProjectId}
+        />
 
         <View
           style={{
             flexDirection: row(rtl),
             alignItems: 'center',
             justifyContent: 'space-between',
-            marginTop: 14,
+            marginTop: 12,
           }}
         >
           <View
@@ -252,7 +289,63 @@ export function QuickAddSheet({
             <Text style={[ui(15, 500), { lineHeight: undefined, color: c.paper }]}>{t.add}</Text>
           </Pressable>
         </View>
-      </BottomSheetView>
+      </BottomSheetScrollView>
     </BottomSheet>
+  );
+}
+
+function ChoiceChips<T extends string | null>({
+  label,
+  options,
+  value,
+  onChange,
+}: {
+  label: string;
+  options: { key: T; label: string }[];
+  value: T;
+  onChange: (key: T) => void;
+}) {
+  const { c, ui, mono, rtl } = useTheme();
+  return (
+    <View style={{ marginTop: 12 }}>
+      <Text style={[mono(11, 500, 0.1, true), { color: c.ink3, textAlign: align(rtl) }]}>{label}</Text>
+      <View
+        accessibilityRole="radiogroup"
+        accessibilityLabel={label}
+        style={{ flexDirection: row(rtl), gap: 8, flexWrap: 'wrap' }}
+      >
+        {options.map((o) => {
+          const on = o.key === value;
+          return (
+            <Pressable
+              key={o.key ?? 'none'}
+              onPress={() => onChange(o.key)}
+              android_ripple={null}
+              accessibilityRole="radio"
+              accessibilityState={{ checked: on }}
+              accessibilityLabel={o.label}
+              style={{ height: 44, minWidth: 44, alignItems: 'center', justifyContent: 'center' }}
+            >
+              <View
+                style={{
+                  height: 28,
+                  paddingHorizontal: 12,
+                  borderRadius: radius.chip,
+                  backgroundColor: on ? c.ink : 'transparent',
+                  borderWidth: 1,
+                  borderColor: on ? c.ink : c.rule,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Text style={[ui(12, 500), { lineHeight: undefined, color: on ? c.paper : c.ink2 }]}>
+                  {o.label}
+                </Text>
+              </View>
+            </Pressable>
+          );
+        })}
+      </View>
+    </View>
   );
 }
