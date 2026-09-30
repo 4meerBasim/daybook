@@ -1,9 +1,9 @@
 import React from 'react';
-import { Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { useTheme } from '../theme/ThemeProvider';
 import { metrics, radius } from '../theme/tokens';
-import { insetStart, pad, row } from '../lib/rtl';
-import { CheckIcon } from './Icon';
+import { align, insetStart, marginStart, pad, row } from '../lib/rtl';
+import { CheckIcon, PlusIcon } from './Icon';
 
 export function Ledger({ children }: { children?: React.ReactNode }) {
   const { c, rtl } = useTheme();
@@ -106,4 +106,35 @@ export function Checkbox({
 
 export function Dot({ color, size = 7 }: { color: string; size?: number }) {
   return <View style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: color }} />;
+}
+
+export function AddRow({ label, onPress }: { label: string; onPress: () => void }) {
+  const { c, ui, rtl } = useTheme();
+  return (
+    <Pressable
+      onPress={onPress}
+      android_ripple={null}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      style={({ pressed }) => [
+        {
+          height: metrics.row,
+          flexDirection: row(rtl),
+          alignItems: 'center',
+          gap: 12,
+          borderBottomWidth: 1,
+          borderBottomColor: c.rule,
+          backgroundColor: pressed ? c.paper2 : 'transparent',
+        },
+        pad(rtl, 16, metrics.gutter),
+      ]}
+    >
+      <View style={{ width: metrics.checkbox, alignItems: 'center' }}>
+        <PlusIcon size={20} color={c.ink3} />
+      </View>
+      <Text style={[ui(17, 400, 22), { flex: 1, color: c.ink3, textAlign: align(rtl) }, marginStart(rtl, 16)]}>
+        {label}
+      </Text>
+    </Pressable>
+  );
 }

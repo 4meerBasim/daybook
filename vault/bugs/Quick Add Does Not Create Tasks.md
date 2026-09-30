@@ -23,8 +23,8 @@ Fixed as part of [[Project Grouped Tasks]], which supplied the missing task coll
 
 The routing was simplified later, when the Upcoming tab became [[Recent]]: the `upcoming` list and `isToday` were removed, any dated task is filed on `today` (flagged `later` from `hasLaterDay` when the day is not today) and an undated one on `inbox`, and the chip reads "Saved to Today" or "Saved to Inbox". The fix itself is unchanged, and a task added this way is the first row on [[Recent]].
 
-Still open after the fix: the four tool buttons remain decorative, `qa` is still seeded with the dentist example on first launch, added tasks are held in memory only, and tags and priority are parsed and shown as chips but not stored on the task (date, time and repeat chips are kept as the task's `meta` text).
+Still open after the fix: `qa` is still seeded with the dentist example on first launch, added tasks are held in memory only, and tags and priority are parsed and shown as chips but not stored on the task (date, time and repeat chips are kept as the task's `meta` text). The four tool buttons, which stayed decorative after the fix, were later removed from the sheet altogether when it gained its Task / Habit / Project switch — see [[Add Habits and Projects]] — and the button now reads "Add task".
 
 ## Related
-- Feature: [[Natural Language Quick Add]], [[Project Grouped Tasks]], [[Pen FAB Tab Bar]]
+- Feature: [[Natural Language Quick Add]], [[Project Grouped Tasks]], [[Pen FAB Tab Bar]], [[Add Habits and Projects]]
 - Page: [[Quick Add Sheet]], [[Today]], [[Recent]], [[Inbox]]

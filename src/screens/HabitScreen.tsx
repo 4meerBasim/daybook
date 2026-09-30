@@ -4,7 +4,7 @@ import * as Haptics from 'expo-haptics';
 import { useTheme } from '../theme/ThemeProvider';
 import { maxFontSizeMultiplier, metrics, radius } from '../theme/tokens';
 import { align, marginStart, row } from '../lib/rtl';
-import { useStore } from '../state/store';
+import { useHabits, useStore } from '../state/store';
 import { Screen, useHeaderTop } from '../components/Screen';
 import { CheckIcon, StreakTallyIcon } from '../components/Icon';
 
@@ -16,9 +16,11 @@ const timeOfDay = (ms: number) => {
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 };
 
-export function HabitScreen({ onClose }: { onClose: () => void }) {
+export function HabitScreen({ habitId, onClose }: { habitId: string; onClose: () => void }) {
   const { c, t, rtl, display, ui, mono } = useTheme();
   const { habitSessions, addHabitSession } = useStore();
+  const habit = useHabits().find((h) => h.id === habitId);
+  const sessions = habitSessions.filter((s) => s.habitId === habitId);
   const [startedAt, setStartedAt] = useState<number | null>(null);
   const [elapsed, setElapsed] = useState(0);
   const top = useHeaderTop();
@@ -26,7 +28,7 @@ export function HabitScreen({ onClose }: { onClose: () => void }) {
 
   const record = (from: number) => {
     const seconds = Math.floor((Date.now() - from) / 1000);
-    if (seconds > 0) addHabitSession({ startedAt: from, seconds });
+    if (seconds > 0) addHabitSession({ habitId, startedAt: from, seconds });
     return seconds;
   };
 
@@ -61,7 +63,7 @@ export function HabitScreen({ onClose }: { onClose: () => void }) {
     `${Math.floor(seconds / 60)} ${t.minutes} ${seconds % 60} ${t.seconds}`;
 
   const runLabel = running ? t.stop : t.startTimer;
-  const history = habitSessions.map((s, i) => ({ ...s, n: i + 1 })).reverse();
+  const history = sessions.map((s, i) => ({ ...s, n: i + 1 })).reverse();
 
   return (
     <Screen paper2>
@@ -76,14 +78,18 @@ export function HabitScreen({ onClose }: { onClose: () => void }) {
           }}
         >
           <Text style={[mono(12, 500, 0.1), { color: c.ink3 }]}>{t.habits}</Text>
-          <View
-            accessible
-            accessibilityLabel={`${t.streak} 12`}
-            style={{ flexDirection: row(rtl), alignItems: 'center' }}
-          >
-            <StreakTallyIcon color={c.moss} flip={rtl} />
-            <Text style={[mono(12, 500), { color: c.moss }, marginStart(rtl, 6)]}>12</Text>
-          </View>
+          {habit && habit.streak > 0 ? (
+            <View
+              accessible
+              accessibilityLabel={`${t.streak} ${habit.streak}`}
+              style={{ flexDirection: row(rtl), alignItems: 'center' }}
+            >
+              <StreakTallyIcon color={c.moss} flip={rtl} />
+              <Text style={[mono(12, 500), { color: c.moss }, marginStart(rtl, 6)]}>
+                {habit.streak}
+              </Text>
+            </View>
+          ) : null}
         </View>
 
         <Text
@@ -93,7 +99,7 @@ export function HabitScreen({ onClose }: { onClose: () => void }) {
             { color: c.ink, paddingTop: 48, paddingHorizontal: 24, textAlign: align(rtl) },
           ]}
         >
-          {t.habit1}
+          {habit?.name}
         </Text>
 
         <Text
@@ -118,7 +124,7 @@ export function HabitScreen({ onClose }: { onClose: () => void }) {
 
         <View
           accessible
-          accessibilityLabel={`${t.sessionsToday}: ${habitSessions.length}`}
+          accessibilityLabel={`${t.sessionsToday}: ${sessions.length}`}
           style={{ gap: 4, paddingVertical: 24, paddingHorizontal: 24 }}
         >
           <Text style={[mono(11, 500, 0.1), { color: c.ink3, textAlign: align(rtl) }]}>
@@ -128,7 +134,7 @@ export function HabitScreen({ onClose }: { onClose: () => void }) {
             allowFontScaling={false}
             style={[mono(34, 500), { color: c.moss, textAlign: align(rtl) }]}
           >
-            {habitSessions.length}
+            {sessions.length}
           </Text>
         </View>
 

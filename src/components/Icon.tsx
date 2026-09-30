@@ -36,15 +36,6 @@ export function PageIcon({ size = 24, color, paper }: Props & { paper?: string }
   );
 }
 
-export function CalendarIcon({ size = 24, color }: Props) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 24 24">
-      <Path d="M4 8h16v12H4z" stroke={color} {...stroke} />
-      <Path d="M4 12h16M8 5v3M16 5v3" stroke={color} {...stroke} />
-    </Svg>
-  );
-}
-
 export function ClockIcon({ size = 24, color }: Props) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24">
@@ -68,6 +59,14 @@ export function SearchIcon({ size = 24, color }: Props) {
     <Svg width={size} height={size} viewBox="0 0 24 24">
       <Circle cx={11} cy={11} r={6} stroke={color} fill="none" strokeWidth={1.5} strokeLinecap="round" />
       <Path d="M20 20l-4.5-4.5" stroke={color} fill="none" strokeWidth={1.5} strokeLinecap="round" />
+    </Svg>
+  );
+}
+
+export function PlusIcon({ size = 24, color }: Props) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+      <Path d="M12 5v14M5 12h14" stroke={color} {...stroke} />
     </Svg>
   );
 }
@@ -118,36 +117,6 @@ export function EllipsisIcon({ size = 24, color }: Props) {
       <Circle cx={5} cy={12} r={1.8} fill={color} />
       <Circle cx={12} cy={12} r={1.8} fill={color} />
       <Circle cx={19} cy={12} r={1.8} fill={color} />
-    </Svg>
-  );
-}
-
-export function PaperclipIcon({ size = 24, color }: Props) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 24 24">
-      <Path
-        d="M8 12l7-7a3.5 3.5 0 015 5l-9 9a5 5 0 01-7-7l8-8"
-        stroke={color}
-        fill="none"
-        strokeWidth={1.5}
-        strokeLinecap="round"
-      />
-    </Svg>
-  );
-}
-
-export function FlagIcon({ size = 24, color }: Props) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 24 24">
-      <Path d="M5 4v16M5 4h11l-2 4 2 4H5" stroke={color} fill="none" strokeWidth={1.5} strokeLinecap="round" />
-    </Svg>
-  );
-}
-
-export function HashIcon({ size = 24, color }: Props) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 24 24">
-      <Path d="M9 4L7 20M17 4l-2 16M4 9h17M3 15h17" stroke={color} fill="none" strokeWidth={1.5} strokeLinecap="round" />
     </Svg>
   );
 }

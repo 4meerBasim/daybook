@@ -5,8 +5,7 @@ import * as Haptics from 'expo-haptics';
 import { useTheme } from '../theme/ThemeProvider';
 import { maxFontSizeMultiplier, metrics, penShadow, priorityColors, radius } from '../theme/tokens';
 import { align, marginStart, pad, row } from '../lib/rtl';
-import { useStore, useTasks } from '../state/store';
-import { projects } from '../data/seed';
+import { useProjects, useStore, useTasks } from '../state/store';
 import type { RootParams } from '../navigation/Root';
 import { Screen, useHeaderTop } from '../components/Screen';
 import { Dot, EmptyRules, Ledger } from '../components/Ledger';
@@ -26,7 +25,7 @@ export function ProjectScreen({ route, navigation }: NativeStackScreenProps<Root
   const scrollY = useRef(0);
   const top = useHeaderTop();
 
-  const project = projects(t).find((p) => p.id === projectId);
+  const project = useProjects().find((p) => p.id === projectId);
   const rows = useTasks().filter((k) => k.projectId === projectId && (!list || k.list === list));
   const doneN = rows.filter((k) => done[k.id]).length;
 

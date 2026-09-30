@@ -19,7 +19,7 @@ import { HabitScreen } from '../screens/HabitScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
 import { PageClosedScreen } from '../screens/PageClosedScreen';
 import { SwipeStatesScreen } from '../screens/SwipeStatesScreen';
-import { QuickAddSheet } from '../screens/QuickAddSheet';
+import { AddKind, QuickAddSheet } from '../screens/QuickAddSheet';
 
 export type RootParams = {
   Onboarding: undefined;
@@ -28,7 +28,7 @@ export type RootParams = {
   Project: { projectId: string | null; list?: ListKey };
   TaskDetail: { taskId: string };
   Focus: undefined;
-  Habit: undefined;
+  Habit: { habitId: string };
   Settings: undefined;
   PageClosed: undefined;
   SwipeStates: undefined;
@@ -39,7 +39,7 @@ const Stack = createNativeStackNavigator<RootParams>();
 
 function MainTabs({ navigation }: NativeStackScreenProps<RootParams, 'Main'>) {
   const [tab, setTab] = useState<TabKey>('today');
-  const [adding, setAdding] = useState(false);
+  const [adding, setAdding] = useState<AddKind | null>(null);
 
   const openProject = (list: ListKey) => (projectId: string | null) =>
     navigation.navigate('Project', { projectId, list });
@@ -50,7 +50,9 @@ function MainTabs({ navigation }: NativeStackScreenProps<RootParams, 'Main'>) {
         <TodayScreen
           onStamp={() => navigation.navigate('PageClosed')}
           onOpenProject={openProject('today')}
-          onOpenHabit={() => navigation.navigate('Habit')}
+          onOpenHabit={(habitId) => navigation.navigate('Habit', { habitId })}
+          onAddProject={() => setAdding('project')}
+          onAddHabit={() => setAdding('habit')}
         />
       ) : null}
       {tab === 'recent' ? (
@@ -59,7 +61,7 @@ function MainTabs({ navigation }: NativeStackScreenProps<RootParams, 'Main'>) {
           onPickDate={() => navigation.navigate('Calendar')}
         />
       ) : null}
-      {tab === 'inbox' ? <InboxScreen onOpenProject={openProject('inbox')} /> : null}
+      {tab === 'inbox' ? <InboxScreen onOpenProject={openProject('inbox')} onAddProject={() => setAdding('project')} /> : null}
       {tab === 'profile' ? (
         <ProfileScreen
           onOpenProject={() => navigation.navigate('Project', { projectId: 'studio' })}
@@ -70,14 +72,14 @@ function MainTabs({ navigation }: NativeStackScreenProps<RootParams, 'Main'>) {
       <TabBar
         active={tab}
         onSelect={setTab}
-        onPen={() => setAdding(true)}
+        onPen={() => setAdding('task')}
         onLongPress={(k) => {
           if (k === 'today') navigation.navigate('Settings');
           if (k === 'inbox') navigation.navigate('InboxEmpty');
         }}
       />
 
-      {adding ? <QuickAddSheet onClose={() => setAdding(false)} /> : null}
+      {adding ? <QuickAddSheet initialKind={adding} onClose={() => setAdding(null)} /> : null}
     </Screen>
   );
 }
@@ -112,7 +114,9 @@ export function Root() {
           {({ navigation }) => <FocusScreen onClose={() => navigation.goBack()} />}
         </Stack.Screen>
         <Stack.Screen name="Habit" options={{ presentation: 'fullScreenModal' }}>
-          {({ navigation }) => <HabitScreen onClose={() => navigation.goBack()} />}
+          {({ navigation, route }) => (
+            <HabitScreen habitId={route.params.habitId} onClose={() => navigation.goBack()} />
+          )}
         </Stack.Screen>
         <Stack.Screen name="Settings">
           {({ navigation }) => <SettingsScreen onOpenGestures={() => navigation.navigate('SwipeStates')} />}

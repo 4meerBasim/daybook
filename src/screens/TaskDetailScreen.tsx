@@ -4,8 +4,7 @@ import * as Haptics from 'expo-haptics';
 import { useTheme } from '../theme/ThemeProvider';
 import { maxFontSizeMultiplier, metrics, priorityColors, radius } from '../theme/tokens';
 import { align, row } from '../lib/rtl';
-import { useStore, useTasks } from '../state/store';
-import { projects } from '../data/seed';
+import { useProjects, useStore, useTasks } from '../state/store';
 import { Screen, useHeaderTop } from '../components/Screen';
 import { Checkbox } from '../components/Ledger';
 import { Chip } from '../components/Chip';
@@ -25,7 +24,7 @@ export function TaskDetailScreen({
   const top = useHeaderTop();
 
   const task = useTasks().find((k) => k.id === taskId);
-  const project = projects(t).find((p) => p.id === task?.projectId);
+  const project = useProjects().find((p) => p.id === task?.projectId);
   const checked = !!done[taskId];
   const priority = task?.priority ?? 'none';
 

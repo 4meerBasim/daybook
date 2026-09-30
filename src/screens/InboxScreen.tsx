@@ -10,8 +10,10 @@ import { ProjectRows } from '../components/ProjectRows';
 
 export function InboxScreen({
   onOpenProject,
+  onAddProject,
 }: {
   onOpenProject: (projectId: string | null) => void;
+  onAddProject: () => void;
 }) {
   const { t } = useTheme();
   const scrollY = useSharedValue(0);
@@ -33,7 +35,7 @@ export function InboxScreen({
         <PageHeader title={t.inbox} trailing={String(count)} scrollY={scrollY} />
 
         <Ledger>
-          <ProjectRows list="inbox" query={query} onOpen={onOpenProject} />
+          <ProjectRows list="inbox" query={query} onOpen={onOpenProject} onAdd={onAddProject} />
 
           {query.trim() ? null : <SectionLabel label={`${t.someday} · 4`} />}
 

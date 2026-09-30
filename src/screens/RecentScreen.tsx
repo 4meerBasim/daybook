@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
 import { useTheme } from '../theme/ThemeProvider';
 import { matches } from '../lib/matches';
-import { useStore, useTasks } from '../state/store';
-import { projects } from '../data/seed';
+import { useProjects, useStore, useTasks } from '../state/store';
 import { Screen } from '../components/Screen';
 import { PageHeader } from '../components/PageHeader';
 import { SearchField, searchFieldInset } from '../components/SearchField';
@@ -26,7 +25,7 @@ export function RecentScreen({
   });
   const [query, setQuery] = useState('');
 
-  const byId = new Map(projects(t).map((p) => [p.id, p]));
+  const byId = new Map(useProjects().map((p) => [p.id, p]));
   const rows = useTasks()
     .reverse()
     .map((k) => ({ ...k, project: k.projectId ? byId.get(k.projectId) : undefined }))

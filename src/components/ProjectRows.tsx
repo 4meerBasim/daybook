@@ -4,10 +4,10 @@ import { useTheme } from '../theme/ThemeProvider';
 import { maxFontSizeMultiplier, metrics } from '../theme/tokens';
 import { align, marginStart, pad, row } from '../lib/rtl';
 import { matches } from '../lib/matches';
-import { useStore, useTasks } from '../state/store';
-import { ListKey, projects } from '../data/seed';
+import { useProjects, useStore, useTasks } from '../state/store';
+import { ListKey } from '../data/seed';
 import { Palette } from '../theme/palette';
-import { Dot, SectionLabel } from './Ledger';
+import { AddRow, Dot, SectionLabel } from './Ledger';
 import { ChevronBackIcon } from './Icon';
 
 type Entry = { id: string | null; name: string; color: keyof Palette };
@@ -16,40 +16,39 @@ export function ProjectRows({
   list,
   query,
   onOpen,
+  onAdd,
 }: {
   list: ListKey;
   query: string;
   onOpen: (projectId: string | null) => void;
+  onAdd: () => void;
 }) {
   const { c, t, ui, mono, rtl } = useTheme();
   const { done } = useStore();
   const inList = useTasks().filter((k) => k.list === list);
+  const searching = query.trim() !== '';
 
-  const entries: Entry[] = [...projects(t), { id: null, name: t.noProject, color: 'ink3' }];
+  const entries: Entry[] = [...useProjects(), { id: null, name: t.noProject, color: 'ink3' }];
   const visible = entries
     .map((p) => ({ ...p, items: inList.filter((k) => k.projectId === p.id) }))
+    .filter((p) => p.id !== null || p.items.length > 0)
     .filter(
       (p) =>
-        p.items.length > 0 &&
-        (matches(p.name, query) || p.items.some((k) => matches(k.title, query)))
+        !searching || matches(p.name, query) || p.items.some((k) => matches(k.title, query))
     );
-
-  if (visible.length === 0) {
-    return query.trim() ? <SectionLabel label={t.noMatches} /> : null;
-  }
 
   return (
     <>
       {visible.map((p) => {
         const doneN = p.items.filter((k) => done[k.id]).length;
-        const count = `${doneN}/${p.items.length}`;
+        const total = p.items.length;
         return (
           <Pressable
             key={p.id ?? 'none'}
             onPress={() => onOpen(p.id)}
             android_ripple={null}
             accessibilityRole="button"
-            accessibilityLabel={`${p.name}, ${doneN} ${t.of} ${p.items.length}`}
+            accessibilityLabel={total ? `${p.name}, ${doneN} ${t.of} ${total}` : p.name}
             style={({ pressed }) => [
               {
                 height: metrics.row,
@@ -77,11 +76,17 @@ export function ProjectRows({
             >
               {p.name}
             </Text>
-            <Text style={[mono(12, 500), { color: c.ink3 }]}>{count}</Text>
+            {total ? (
+              <Text style={[mono(12, 500), { color: c.ink3 }]}>{`${doneN}/${total}`}</Text>
+            ) : null}
             <ChevronBackIcon size={16} color={c.ink3} flip={!rtl} />
           </Pressable>
         );
       })}
+
+      {searching && visible.length === 0 ? <SectionLabel label={t.noMatches} /> : null}
+
+      {searching ? null : <AddRow label={t.newProject} onPress={onAdd} />}
     </>
   );
 }
