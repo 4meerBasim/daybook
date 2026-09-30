@@ -94,7 +94,7 @@ export function Checkbox({
         borderWidth: 1.5,
         borderColor: border,
         borderRadius: circle ? size / 2 : radius.checkbox,
-        backgroundColor: checked ? c.ink : 'transparent',
+        backgroundColor: checked ? border : 'transparent',
         alignItems: 'center',
         justifyContent: 'center',
       }}

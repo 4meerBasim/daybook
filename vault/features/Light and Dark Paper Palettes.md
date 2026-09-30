@@ -12,11 +12,11 @@ Summary: The whole app renders from one fifteen-token palette with a cream-paper
 
 `ThemeProvider` resolves `appearance` (`light` | `dark` | `auto`) against `systemDark`, which `App.tsx` feeds from `useColorScheme()`. The result flows out as `c` and every screen styles from it — there are no inline hex values in `src/screens/` or `src/components/`. `Root.tsx` also rebuilds the React Navigation theme from the palette so stack transitions do not flash white, and `App.tsx` swaps the status bar style off `dark`.
 
-The accent roles carry meaning consistently: vermilion is the margin rule, the overdue marker and the wax stamp; blue is dates and times; ochre is tags; moss is habits, completion and sync.
+The accent roles carry meaning consistently: vermilion is the margin rule, the overdue marker and the wax stamp; blue is dates and times; ochre is tags; moss is habits, completion and sync — including the filled habit circle and session count of [[Habit Session Timer]].
 
 Controlled from the Appearance segmented control on [[Settings]].
 
 ## Related
-- Page: [[Settings]], [[Onboarding]], [[Main Tabs]], [[Today]], [[Recent]], [[Inbox]], [[Inbox Empty]], [[Profile]], [[Quick Add Sheet]], [[Calendar]], [[Project Detail]], [[Task Detail]], [[Focus Mode]], [[Page Closed]], [[Swipe States]]
-- Features: [[Ledger Paper Chrome]], [[In-App RTL and Arabic Typography]], [[Natural Language Quick Add]], [[Wax Page Closed Stamp]]
+- Page: [[Settings]], [[Onboarding]], [[Main Tabs]], [[Today]], [[Recent]], [[Inbox]], [[Inbox Empty]], [[Profile]], [[Quick Add Sheet]], [[Calendar]], [[Project Detail]], [[Task Detail]], [[Focus Mode]], [[Habit]], [[Page Closed]], [[Swipe States]]
+- Features: [[Ledger Paper Chrome]], [[In-App RTL and Arabic Typography]], [[Natural Language Quick Add]], [[Wax Page Closed Stamp]], [[Habit Session Timer]]
 - Bugs: none

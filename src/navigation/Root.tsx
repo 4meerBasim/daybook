@@ -15,6 +15,7 @@ import { ProjectScreen } from '../screens/ProjectScreen';
 import { TaskDetailScreen } from '../screens/TaskDetailScreen';
 import { CalendarScreen } from '../screens/CalendarScreen';
 import { FocusScreen } from '../screens/FocusScreen';
+import { HabitScreen } from '../screens/HabitScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
 import { PageClosedScreen } from '../screens/PageClosedScreen';
 import { SwipeStatesScreen } from '../screens/SwipeStatesScreen';
@@ -27,6 +28,7 @@ export type RootParams = {
   Project: { projectId: string | null; list?: ListKey };
   TaskDetail: undefined;
   Focus: undefined;
+  Habit: undefined;
   Settings: undefined;
   PageClosed: undefined;
   SwipeStates: undefined;
@@ -48,6 +50,7 @@ function MainTabs({ navigation }: NativeStackScreenProps<RootParams, 'Main'>) {
         <TodayScreen
           onStamp={() => navigation.navigate('PageClosed')}
           onOpenProject={openProject('today')}
+          onOpenHabit={() => navigation.navigate('Habit')}
         />
       ) : null}
       {tab === 'recent' ? (
@@ -106,6 +109,9 @@ export function Root() {
         </Stack.Screen>
         <Stack.Screen name="Focus" options={{ presentation: 'fullScreenModal' }}>
           {({ navigation }) => <FocusScreen onClose={() => navigation.goBack()} />}
+        </Stack.Screen>
+        <Stack.Screen name="Habit" options={{ presentation: 'fullScreenModal' }}>
+          {({ navigation }) => <HabitScreen onClose={() => navigation.goBack()} />}
         </Stack.Screen>
         <Stack.Screen name="Settings">
           {({ navigation }) => <SettingsScreen onOpenGestures={() => navigation.navigate('SwipeStates')} />}

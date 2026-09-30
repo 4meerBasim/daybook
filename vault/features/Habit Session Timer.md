@@ -1,0 +1,27 @@
+# Habit Session Timer
+
+Status: shipped
+Summary: A count-up timer for the daily habit that records each run as a session, shows how many sessions there are today, and lists every one with its start time and duration.
+
+## Details
+The sessions live in `src/state/store.tsx` as `habitSessions`, an array of `{ startedAt, seconds }` (`HabitSession`), appended to by `addHabitSession`. It is plain `useState` like the rest of the store — in memory only, gone on restart, and never filtered by date, so "today" means since the app was launched.
+
+The clock itself is local to `src/screens/HabitScreen.tsx`, like the countdown of [[Focus Timer]], the sibling it is modelled on. `startedAt` holds the start timestamp or `null`; while it is set, a one-second `setInterval` recomputes `elapsed` from `Date.now() - startedAt`, so the display cannot drift. It renders as `mm:ss` at 64pt monospace with `tabular-nums`, `allowFontScaling={false}` and the `timer` accessibility role. Minutes are not capped at 59 — a run past an hour reads `60:00` and up.
+
+The primary button calls `toggleRun` with a medium impact haptic:
+
+- Start — zeroes `elapsed` and stamps `startedAt`. The button relabels to Stop (`t.startTimer` / `t.stop`) and stays ink, since paper text on vermilion falls just short of AA contrast in the light palette.
+- Stop — appends `{ startedAt, seconds }` to the store through `record` and leaves the final time on the clock. A run of zero seconds is not recorded.
+
+A run that is still going is saved whenever the screen goes away: an unmount cleanup reads the start time from a ref and calls `record`. That covers the outlined check button, which only calls `onClose`, and the Android back button alike, and it cannot double-record because Stop clears the start time first.
+
+Below the clock, the session count is `habitSessions.length` in 34pt moss under the `t.sessionsToday` caption. Screen readers get worded labels: the clock and each history row announce minutes and seconds, and a row reads as its number, when it started and how long it lasted. The history list numbers the sessions in the order they were recorded and reverses them, so the newest is on top: session number, start time as 24-hour `HH:mm`, and duration as `mm:ss`. An empty list shows `t.noSessions`.
+
+On [[Today]] the habit row is a `Pressable` that opens the page, greys to `paper2` while pressed, and announces the name with the session count. Its circle is `checked` once there is at least one session. `Checkbox` in `src/components/Ledger.tsx` now fills with its own border colour when checked rather than always ink, so the circle fills moss while task boxes, which pass no colour, still fill ink — see [[Ledger Paper Chrome]].
+
+The clock, the start times and the durations are pinned to `writingDirection: 'ltr'` so the digits keep their order in Arabic, and the tally icon takes `flip={rtl}` — see [[In-App RTL and Arabic Typography]]. The new strings have Arabic counterparts in `src/i18n/strings.ts`. The streak of 12 on both screens is still a literal and does not move with sessions.
+
+## Related
+- Page: [[Habit]], [[Today]]
+- Features: [[Focus Timer]], [[Ledger Paper Chrome]], [[Light and Dark Paper Palettes]], [[In-App RTL and Arabic Typography]]
+- Bugs: none

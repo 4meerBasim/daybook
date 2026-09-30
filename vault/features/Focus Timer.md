@@ -10,7 +10,9 @@ The clock is app-level, not screen-level: `src/state/store.tsx` holds `left` (se
 
 The primary button calls `toggleRun` and relabels itself Pause / Resume from `t.pause` / `t.resume`; the outlined check button closes the session. Under [[Reduced Motion Mode]] the strips change colour instantly.
 
+[[Habit Session Timer]] is the count-up sibling modelled on this screen: the same clock face and button pair, but it records each run as a session.
+
 ## Related
 - Page: [[Focus Mode]]
-- Features: [[Reduced Motion Mode]], [[Light and Dark Paper Palettes]], [[In-App RTL and Arabic Typography]]
+- Features: [[Habit Session Timer]], [[Reduced Motion Mode]], [[Light and Dark Paper Palettes]], [[In-App RTL and Arabic Typography]]
 - Bugs: [[Focus Mode Unreachable]]

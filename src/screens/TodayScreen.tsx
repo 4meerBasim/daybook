@@ -16,12 +16,14 @@ import { StreakTallyIcon } from '../components/Icon';
 export function TodayScreen({
   onStamp,
   onOpenProject,
+  onOpenHabit,
 }: {
   onStamp: () => void;
   onOpenProject: (projectId: string | null) => void;
+  onOpenHabit: () => void;
 }) {
   const { c, t, ui, mono, rtl } = useTheme();
-  const { done } = useStore();
+  const { done, habitSessions } = useStore();
   const scrollY = useSharedValue(0);
   const onScroll = useAnimatedScrollHandler((e) => {
     scrollY.value = e.contentOffset.y;
@@ -56,8 +58,12 @@ export function TodayScreen({
             <>
               <SectionLabel label={t.habits} />
 
-              <View
-                style={[
+              <Pressable
+                onPress={onOpenHabit}
+                android_ripple={null}
+                accessibilityRole="button"
+                accessibilityLabel={`${t.habit1}, ${t.sessionsToday}: ${habitSessions.length}`}
+                style={({ pressed }) => [
                   {
                     height: metrics.row,
                     flexDirection: row(rtl),
@@ -65,11 +71,12 @@ export function TodayScreen({
                     gap: 14,
                     borderBottomWidth: 1,
                     borderBottomColor: c.rule,
+                    backgroundColor: pressed ? c.paper2 : 'transparent',
                   },
                   pad(rtl, 16, metrics.gutter),
                 ]}
               >
-                <Checkbox circle color={c.moss} />
+                <Checkbox circle color={c.moss} checked={habitSessions.length > 0} />
                 <Text
                   numberOfLines={1}
                   maxFontSizeMultiplier={1.6}
@@ -81,7 +88,7 @@ export function TodayScreen({
                   <StreakTallyIcon color={c.moss} flip={rtl} />
                   <Text style={[mono(12, 500), { color: c.moss }, marginStart(rtl, 6)]}>12</Text>
                 </View>
-              </View>
+              </Pressable>
             </>
           )}
 
