@@ -13,6 +13,8 @@ Fixed by wrapping each [[Today]] row in `SwipeableRow`. `onComplete` calls the e
 
 [[Inbox]] and [[Upcoming]] were deliberately left without swipe. The mock specifies one-tap triage chips and long-press-for-project on Inbox, and day sub-headings on Upcoming; neither note mentions swipe, and their seed rows carry no stable ids.
 
+Since [[Project Grouped Tasks]] the three tabs list projects rather than tasks, so the swipeable rows described above now live on [[Project Detail]], with the same wiring, and cover Upcoming and Inbox tasks as well as Today's. The fix stands; only its location moved.
+
 ## Related
-- Feature: [[Swipe Row Actions]]
-- Page: [[Swipe States]], [[Today]], [[Inbox]], [[Upcoming]]
+- Feature: [[Swipe Row Actions]], [[Project Grouped Tasks]]
+- Page: [[Swipe States]], [[Project Detail]], [[Today]], [[Inbox]], [[Upcoming]]

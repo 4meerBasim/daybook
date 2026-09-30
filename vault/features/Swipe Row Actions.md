@@ -17,7 +17,7 @@ Three absolutely positioned action layers sit behind the row face and cross-fade
 
 Direction is mirrored by a `sign` derived from `rtl`, so "leading" is a right-drag in English and a left-drag in Arabic. `activeOffsetX([-12, 12])` with `failOffsetY([-10, 10])` keeps vertical list scrolling intact. A simultaneous `Gesture.LongPress` at 320ms lifts the row onto `paper2` for reordering. Every threshold crossing fires a medium impact haptic; under [[Reduced Motion Mode]] the settle is an instant assignment instead of a timed spring.
 
-Mounted on every [[Today]] row. Complete calls `toggle(id)`; snooze and delete call `clear(id)`, which takes the task off today's page; pick-date opens [[Calendar]]. The wrapper owns the row height, the ledger rule and the clipping; `TaskRow` is `flex: 1` inside the sliding face and declares no height or border of its own, so the rule stays printed on the paper while the face slides over it. Sizing the row in both places would overhang the wrapper's border by a pixel and let a completed row's paper background paint out its own rule.
+Mounted on every task row of [[Project Detail]], which is where tasks are listed since [[Project Grouped Tasks]] turned the tabs into project lists — so it now covers Upcoming and Inbox tasks as well as today's. Complete calls `toggle(id)`; snooze and delete call `clear(id)`, which takes the task out of `useTasks()` and so off every page; pick-date opens [[Calendar]]; the long-press opens [[Task Detail]]. The wrapper owns the row height, the ledger rule and the clipping; `TaskRow` is `flex: 1` inside the sliding face and declares no height or border of its own, so the rule stays printed on the paper while the face slides over it. Sizing the row in both places would overhang the wrapper's border by a pixel and let a completed row's paper background paint out its own rule.
 
 The face is transparent at rest so the red margin line shows through, and only turns opaque paper once the drag starts, which is what hides the action layers between gestures.
 
@@ -28,6 +28,6 @@ Pan and long-press are composed with `Gesture.Race`, not `Simultaneous`: a hold 
 The thresholds are documented on-screen by the annotation rows in [[Swipe States]], whose copy lives in `src/i18n/strings.ts` as `swipe1`–`swipe4`. That screen draws its own static illustration rather than driving this component, so the reference rows cannot be knocked out of position by a stray touch.
 
 ## Related
-- Page: [[Today]], [[Swipe States]], [[Settings]], [[Calendar]]
-- Features: [[Reduced Motion Mode]], [[In-App RTL and Arabic Typography]], [[Ink Strike-Through Completion]]
+- Page: [[Project Detail]], [[Swipe States]], [[Settings]], [[Calendar]], [[Task Detail]]
+- Features: [[Project Grouped Tasks]], [[Reduced Motion Mode]], [[In-App RTL and Arabic Typography]], [[Ink Strike-Through Completion]]
 - Bugs: [[Swipe Actions Not Wired Into Task Lists]]

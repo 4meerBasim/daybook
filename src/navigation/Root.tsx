@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createNativeStackNavigator, NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useTheme } from '../theme/ThemeProvider';
+import { ListKey } from '../data/seed';
 import { Screen } from '../components/Screen';
 import { TabBar, TabKey } from '../components/TabBar';
 import { TodayScreen } from '../screens/TodayScreen';
@@ -23,7 +24,7 @@ export type RootParams = {
   Onboarding: undefined;
   Main: undefined;
   Calendar: undefined;
-  Project: undefined;
+  Project: { projectId: string | null; list?: ListKey };
   TaskDetail: undefined;
   Focus: undefined;
   Settings: undefined;
@@ -34,24 +35,26 @@ export type RootParams = {
 
 const Stack = createNativeStackNavigator<RootParams>();
 
-function MainTabs({ navigation }: { navigation: { navigate: (r: keyof RootParams) => void } }) {
+function MainTabs({ navigation }: NativeStackScreenProps<RootParams, 'Main'>) {
   const [tab, setTab] = useState<TabKey>('today');
   const [adding, setAdding] = useState(false);
+
+  const openProject = (list: ListKey) => (projectId: string | null) =>
+    navigation.navigate('Project', { projectId, list });
 
   return (
     <Screen>
       {tab === 'today' ? (
         <TodayScreen
           onStamp={() => navigation.navigate('PageClosed')}
-          onOpenTask={() => navigation.navigate('TaskDetail')}
-          onPickDate={() => navigation.navigate('Calendar')}
+          onOpenProject={openProject('today')}
         />
       ) : null}
-      {tab === 'upcoming' ? <UpcomingScreen /> : null}
-      {tab === 'inbox' ? <InboxScreen /> : null}
+      {tab === 'upcoming' ? <UpcomingScreen onOpenProject={openProject('upcoming')} /> : null}
+      {tab === 'inbox' ? <InboxScreen onOpenProject={openProject('inbox')} /> : null}
       {tab === 'profile' ? (
         <ProfileScreen
-          onOpenProject={() => navigation.navigate('Project')}
+          onOpenProject={() => navigation.navigate('Project', { projectId: 'studio' })}
           onOpenSettings={() => navigation.navigate('Settings')}
         />
       ) : null}

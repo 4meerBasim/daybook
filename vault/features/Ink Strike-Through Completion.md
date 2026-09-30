@@ -13,11 +13,11 @@ The bar is absolutely positioned at `top: 11` and anchored to `left: -2` or `rig
 
 Completion state itself is the `done` map in `src/state/store.tsx`, keyed by task id.
 
-Static end-state renderings of the same stroke appear elsewhere: `ProjectScreen.tsx` draws the bar at full width for finished rows, and [[Page Closed]] and the subtasks on [[Task Detail]] use plain `textDecorationLine: 'line-through'`.
+The animated rows are on [[Project Detail]]. `ProjectScreen.tsx` used to draw its own static full-width bar for finished rows; it now renders `TaskRow`, so it is the one place the stroke animates. [[Today]] no longer renders task rows at all since [[Project Grouped Tasks]] — it shows the result only as the done/total count on each project row and in the header tally.
 
-That split is the design's, not an inconsistency to tidy away. Only the [[Today]] rows animate the stroke, and only those are given the absolutely positioned bar with a transitioning width; every other screen in the design uses `text-decoration: line-through` directly, because the row arrives already struck and has nothing to animate.
+Static end-state renderings remain on [[Page Closed]] and the subtasks on [[Task Detail]], which use plain `textDecorationLine: 'line-through'`. That split is the design's, not an inconsistency to tidy away: those rows arrive already struck or toggle without ceremony, and have nothing to animate.
 
 ## Related
-- Page: [[Today]], [[Project Detail]], [[Page Closed]], [[Task Detail]]
-- Features: [[Reduced Motion Mode]], [[Ledger Paper Chrome]]
+- Page: [[Project Detail]], [[Page Closed]], [[Task Detail]]
+- Features: [[Project Grouped Tasks]], [[Swipe Row Actions]], [[Wax Page Closed Stamp]], [[Reduced Motion Mode]], [[Ledger Paper Chrome]]
 - Bugs: none

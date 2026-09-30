@@ -10,4 +10,4 @@ Summary: A gesture reference page showing each swipe threshold held open — com
 - Enhancements: none
 
 ## Notes
-`src/screens/SwipeStatesScreen.tsx`. The demo rows are a static illustration, not live `SwipeableRow` instances — each one hardcodes its own action pane and a fixed face offset, sign-flipped for RTL, exactly as the mock does. Keeping them inert means the reference positions cannot be knocked out of place by a touch, and it lets the delete row show the vermilion pane even though its 200pt offset is only about half the row width, below the real 70% threshold. The live gestures are on [[Today]].
+`src/screens/SwipeStatesScreen.tsx`. The demo rows are a static illustration, not live `SwipeableRow` instances — each one hardcodes its own action pane and a fixed face offset, sign-flipped for RTL, exactly as the mock does. Keeping them inert means the reference positions cannot be knocked out of place by a touch, and it lets the delete row show the vermilion pane even though its 200pt offset is only about half the row width, below the real 70% threshold. The live gestures are on the task rows of [[Project Detail]].

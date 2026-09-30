@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import BottomSheet, {
   BottomSheetBackdrop,
@@ -10,12 +10,14 @@ import { useTheme } from '../theme/ThemeProvider';
 import { radius } from '../theme/tokens';
 import { align, row } from '../lib/rtl';
 import { useStore } from '../state/store';
+import { ListKey, projects } from '../data/seed';
 import { chipColors, parse, tokenColor } from '../lib/parse';
 import { CalendarIcon, FlagIcon, HashIcon, PaperclipIcon } from '../components/Icon';
 
 export function QuickAddSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { c, t, ar, ui, display, rtl, reduced } = useTheme();
-  const { qa, setQa } = useStore();
+  const { qa, setQa, addTask } = useStore();
+  const [projectId, setProjectId] = useState<string | null>(null);
   const sheetRef = useRef<BottomSheet>(null);
   const inputRef = useRef<React.ComponentRef<typeof BottomSheetTextInput>>(null);
 
@@ -29,13 +31,33 @@ export function QuickAddSheet({ open, onClose }: { open: boolean; onClose: () =>
   }, [open, reduced]);
 
   const parsed = parse(qa, ar);
-  const dest = parsed.hasDate
-    ? ar
-      ? 'يُحفظ في القادم'
-      : 'Saved to Upcoming'
-    : ar
-      ? 'يُحفظ في الوارد'
-      : 'Saved to Inbox';
+  const list: ListKey = parsed.isToday ? 'today' : parsed.hasDate ? 'upcoming' : 'inbox';
+  const dest = {
+    today: ar ? 'يُحفظ في اليوم' : 'Saved to Today',
+    upcoming: ar ? 'يُحفظ في القادم' : 'Saved to Upcoming',
+    inbox: ar ? 'يُحفظ في الوارد' : 'Saved to Inbox',
+  }[list];
+
+  const projectChoices = [{ id: null as string | null, name: t.noProject }, ...projects(t)];
+
+  const submit = () => {
+    const plain = parsed.tokens
+      .filter((tk) => tk.kind === 'plain')
+      .map((tk) => tk.text)
+      .join(' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    const title = plain || qa.trim();
+    if (title) {
+      const when = parsed.chips
+        .filter((ch) => ch.kind !== 'tag' && ch.kind !== 'pri' && ch.label !== t.today)
+        .map((ch) => ch.label);
+      addTask({ title, meta: when.join(' · '), list, projectId });
+      setQa('');
+      setProjectId(null);
+    }
+    onClose();
+  };
 
   const renderBackdrop = useCallback(
     (props: BottomSheetBackdropProps) => (
@@ -112,6 +134,7 @@ export function QuickAddSheet({ open, onClose }: { open: boolean; onClose: () =>
             selectionColor={c.ink}
             accessibilityLabel={t.newTask}
             multiline={false}
+            onSubmitEditing={submit}
             style={[lineStyle, { color: 'transparent', padding: 0, textAlign: align(rtl) }]}
           />
         </View>
@@ -160,6 +183,44 @@ export function QuickAddSheet({ open, onClose }: { open: boolean; onClose: () =>
         </View>
 
         <View
+          accessibilityRole="radiogroup"
+          accessibilityLabel={t.project}
+          style={{ flexDirection: row(rtl), gap: 8, marginTop: 4, flexWrap: 'wrap' }}
+        >
+          {projectChoices.map((p) => {
+            const on = p.id === projectId;
+            return (
+              <Pressable
+                key={p.id ?? 'none'}
+                onPress={() => setProjectId(p.id)}
+                android_ripple={null}
+                accessibilityRole="radio"
+                accessibilityState={{ checked: on }}
+                accessibilityLabel={p.name}
+                style={{ height: 44, justifyContent: 'center' }}
+              >
+                <View
+                  style={{
+                    height: 28,
+                    paddingHorizontal: 12,
+                    borderRadius: radius.chip,
+                    backgroundColor: on ? c.ink : 'transparent',
+                    borderWidth: 1,
+                    borderColor: on ? c.ink : c.rule,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <Text style={[ui(12, 500), { lineHeight: undefined, color: on ? c.paper : c.ink2 }]}>
+                    {p.name}
+                  </Text>
+                </View>
+              </Pressable>
+            );
+          })}
+        </View>
+
+        <View
           style={{
             flexDirection: row(rtl),
             alignItems: 'center',
@@ -178,7 +239,7 @@ export function QuickAddSheet({ open, onClose }: { open: boolean; onClose: () =>
             <PaperclipIcon size={22} color={c.ink2} />
           </View>
           <Pressable
-            onPress={onClose}
+            onPress={submit}
             accessibilityRole="button"
             accessibilityLabel={t.add}
             android_ripple={null}

@@ -10,11 +10,11 @@ Summary: Every list in the app is drawn as a page of ruled ledger paper — a re
 - `LedgerRow` — a 56pt row (`metrics.row`) with a bottom hairline, start padding 16 and end padding at the 20pt gutter.
 - `SectionLabel` — a full-height row carrying a tracked 11pt monospace caption, so headings occupy a ruled line instead of breaking the rhythm.
 - `EmptyRules` — n empty ruled rows, used to run the lines past the end of the content so the page never just stops.
-- `Checkbox` / `Dot` — the 22pt square box (or moss circle for habits) and the coloured project dot.
+- `Checkbox` / `Dot` — the 22pt square box (or moss circle for habits) and the coloured project dot, 7pt by default with a `size` prop for the 8pt dots on project rows and the project header.
 
-Metrics come from `src/theme/tokens.ts` and are shared with every screen, which is why the rules line up across [[Today]], [[Upcoming]], [[Inbox]], [[Project Detail]], [[Task Detail]], [[Page Closed]] and [[Swipe States]] even where those screens lay out rows themselves. [[Inbox Empty]] and [[Calendar]] redraw the margin rule inline using the same `insetStart(rtl, metrics.marginLine)` so it mirrors correctly in Arabic.
+Metrics come from `src/theme/tokens.ts` and are shared with every screen, which is why the rules line up across [[Today]], [[Upcoming]], [[Inbox]], [[Project Detail]], [[Task Detail]], [[Page Closed]] and [[Swipe States]] even where those screens lay out rows themselves. The project rows of [[Project Grouped Tasks]] are one such case: `ProjectRows` draws its own 56pt pressable row with the same padding and bottom rule, putting the dot in the checkbox column so the name sits on the same text edge as a task title. With the tabs no longer listing captures, no screen currently uses `LedgerRow` itself; task rows on [[Project Detail]] get their rule from the swipe wrapper. [[Inbox Empty]] and [[Calendar]] redraw the margin rule inline using the same `insetStart(rtl, metrics.marginLine)` so it mirrors correctly in Arabic.
 
 ## Related
 - Page: [[Today]], [[Upcoming]], [[Inbox]], [[Inbox Empty]], [[Project Detail]], [[Task Detail]], [[Calendar]], [[Page Closed]], [[Swipe States]]
-- Features: [[Light and Dark Paper Palettes]], [[In-App RTL and Arabic Typography]], [[Ink Strike-Through Completion]], [[Collapsing Page Header]]
+- Features: [[Project Grouped Tasks]], [[Light and Dark Paper Palettes]], [[In-App RTL and Arabic Typography]], [[Ink Strike-Through Completion]], [[Collapsing Page Header]]
 - Bugs: none

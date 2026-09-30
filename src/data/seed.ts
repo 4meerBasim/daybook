@@ -1,76 +1,90 @@
 import { Palette } from '../theme/palette';
 import { Strings } from '../i18n/strings';
 
+export type ListKey = 'today' | 'upcoming' | 'inbox';
+
+export type Project = { id: string; name: string; color: keyof Palette };
+
 export type Task = {
   id: string;
   title: string;
-  time: string;
-  color: keyof Palette;
+  meta: string;
+  list: ListKey;
+  projectId: string | null;
   over?: boolean;
 };
 
-export function tasks(t: Strings): Task[] {
+export function projects(t: Strings): Project[] {
   return [
-    { id: 't1', title: t.task1, time: '10:00', color: 'blue' },
-    { id: 't2', title: t.task2, time: '14:00', color: 'och' },
-    { id: 't3', title: t.task3, time: '', color: 'moss' },
-    { id: 't4', title: t.task4, time: t.yesterday, color: 'ver', over: true },
-    { id: 't5', title: t.task5, time: '', color: 'blue' },
+    { id: 'studio', name: t.studio, color: 'blue' },
+    { id: 'work', name: t.work, color: 'och' },
+    { id: 'home', name: t.home, color: 'moss' },
   ];
 }
 
-export type UpcomingGroup = {
-  day: string;
-  date: string;
-  count: string;
-  items: { title: string; meta: string; color: keyof Palette }[];
-};
-
-export function upcoming(t: Strings, ar: boolean): UpcomingGroup[] {
+export function tasks(t: Strings, ar: boolean): Task[] {
   return [
+    { id: 't1', title: t.task1, meta: '10:00', list: 'today', projectId: 'studio' },
+    { id: 't2', title: t.task2, meta: '14:00', list: 'today', projectId: 'work' },
+    { id: 't3', title: t.task3, meta: '', list: 'today', projectId: null },
+    { id: 't4', title: t.task4, meta: t.yesterday, list: 'today', projectId: 'home', over: true },
+    { id: 't5', title: t.task5, meta: '', list: 'today', projectId: 'studio' },
     {
-      day: t.tomorrow,
-      date: ar ? 'الجمعة ١٩' : 'Fri 19',
-      count: '2',
-      items: [
-        { title: ar ? 'موعد طبيب الأسنان' : 'Dentist appointment', meta: '15:00', color: 'moss' },
-        { title: ar ? 'مراجعة أسبوعية' : 'Weekly review', meta: '↻ 17:00', color: 'och' },
-      ],
+      id: 'u1',
+      title: ar ? 'موعد طبيب الأسنان' : 'Dentist appointment',
+      meta: `${t.tomorrow} · 15:00`,
+      list: 'upcoming',
+      projectId: 'home',
     },
     {
-      day: ar ? 'الأحد' : 'Sunday',
-      date: ar ? '٢١ سبتمبر' : 'Sep 21',
-      count: '1',
-      items: [{ title: ar ? 'تجديد التأمين' : 'Renew car insurance', meta: '', color: 'ver' }],
+      id: 'u2',
+      title: ar ? 'مراجعة أسبوعية' : 'Weekly review',
+      meta: `${t.tomorrow} · 17:00`,
+      list: 'upcoming',
+      projectId: 'work',
     },
     {
-      day: ar ? 'الأسبوع القادم' : 'Next week',
-      date: ar ? '٢٢–٢٨' : '22–28',
-      count: '3',
-      items: [
-        { title: ar ? 'إطلاق موقع الاستوديو' : 'Launch Studio website', meta: ar ? 'الثلاثاء' : 'Tue', color: 'blue' },
-        { title: ar ? 'حجز فندق عمّان' : 'Book Amman hotel', meta: ar ? 'الأربعاء' : 'Wed', color: 'blue' },
-      ],
+      id: 'u3',
+      title: ar ? 'تجديد التأمين' : 'Renew car insurance',
+      meta: ar ? 'الأحد' : 'Sun',
+      list: 'upcoming',
+      projectId: 'home',
     },
-  ];
-}
-
-export function inbox(ar: boolean): { title: string }[] {
-  return [
-    { title: ar ? 'فكرة: لوحة قراءة شهرية' : 'Idea: monthly reading board' },
-    { title: ar ? 'سؤال سامي عن الضرائب' : 'Ask Sami about taxes' },
-    { title: ar ? 'إصلاح مصباح المطبخ' : 'Fix kitchen lamp' },
-  ];
-}
-
-export type ProjectItem = { title: string; meta: string; done: boolean };
-
-export function project(t: Strings, ar: boolean): ProjectItem[] {
-  return [
-    { title: ar ? 'ملخص المشروع' : 'Project brief', meta: ar ? 'الإثنين' : 'Mon', done: true },
-    { title: ar ? 'لوحات المزاج' : 'Moodboards', meta: ar ? 'الثلاثاء' : 'Tue', done: true },
-    { title: t.task1, meta: '10:00', done: false },
-    { title: ar ? 'إطلاق موقع الاستوديو' : 'Launch Studio website', meta: ar ? 'الثلاثاء' : 'Tue', done: false },
+    {
+      id: 'u4',
+      title: ar ? 'إطلاق موقع الاستوديو' : 'Launch Studio website',
+      meta: ar ? 'الثلاثاء' : 'Tue',
+      list: 'upcoming',
+      projectId: 'studio',
+    },
+    {
+      id: 'u5',
+      title: ar ? 'حجز فندق عمّان' : 'Book Amman hotel',
+      meta: ar ? 'الأربعاء' : 'Wed',
+      list: 'upcoming',
+      projectId: 'studio',
+    },
+    {
+      id: 'i1',
+      title: ar ? 'فكرة: لوحة قراءة شهرية' : 'Idea: monthly reading board',
+      meta: '',
+      list: 'inbox',
+      projectId: null,
+    },
+    {
+      id: 'i2',
+      title: ar ? 'سؤال سامي عن الضرائب' : 'Ask Sami about taxes',
+      meta: '',
+      list: 'inbox',
+      projectId: null,
+    },
+    {
+      id: 'i3',
+      title: ar ? 'إصلاح مصباح المطبخ' : 'Fix kitchen lamp',
+      meta: '',
+      list: 'inbox',
+      projectId: 'home',
+    },
   ];
 }
 

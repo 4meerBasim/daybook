@@ -3,8 +3,7 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 import { useTheme } from '../theme/ThemeProvider';
 import { maxFontSizeMultiplier, metrics, radius } from '../theme/tokens';
 import { align, marginStart, row } from '../lib/rtl';
-import { useStore } from '../state/store';
-import { tasks } from '../data/seed';
+import { useStore, useTasks } from '../state/store';
 import { Screen } from '../components/Screen';
 import { PageHeader } from '../components/PageHeader';
 import { ChevronBackIcon, StreakTallyIcon } from '../components/Icon';
@@ -17,9 +16,9 @@ export function ProfileScreen({
   onOpenSettings: () => void;
 }) {
   const { c, t, ui, mono, display, rtl } = useTheme();
-  const { done, cleared } = useStore();
+  const { done } = useStore();
 
-  const doneToday = tasks(t).filter((k) => !cleared[k.id] && done[k.id]).length;
+  const doneToday = useTasks().filter((k) => k.list === 'today' && done[k.id]).length;
 
   return (
     <Screen>

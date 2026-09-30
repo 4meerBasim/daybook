@@ -4,48 +4,34 @@ import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native
 import { useTheme } from '../theme/ThemeProvider';
 import { metrics } from '../theme/tokens';
 import { marginStart, pad, row } from '../lib/rtl';
-import { matches } from '../lib/matches';
-import { useStore } from '../state/store';
-import { tasks } from '../data/seed';
+import { useStore, useTasks } from '../state/store';
 import { Screen } from '../components/Screen';
 import { PageHeader } from '../components/PageHeader';
 import { SearchField, searchFieldInset } from '../components/SearchField';
 import { Checkbox, EmptyRules, Ledger, SectionLabel } from '../components/Ledger';
-import { TaskRow } from '../components/TaskRow';
-import { SwipeableRow } from '../components/SwipeableRow';
+import { ProjectRows } from '../components/ProjectRows';
 import { Stamp } from '../components/Stamp';
 import { StreakTallyIcon } from '../components/Icon';
 
 export function TodayScreen({
   onStamp,
-  onOpenTask,
-  onPickDate,
+  onOpenProject,
 }: {
   onStamp: () => void;
-  onOpenTask: () => void;
-  onPickDate: () => void;
+  onOpenProject: (projectId: string | null) => void;
 }) {
   const { c, t, ui, mono, rtl } = useTheme();
-  const { done, toggle, cleared, clear } = useStore();
+  const { done } = useStore();
   const scrollY = useSharedValue(0);
   const onScroll = useAnimatedScrollHandler((e) => {
     scrollY.value = e.contentOffset.y;
   });
 
-  const list = tasks(t).filter((k) => !cleared[k.id]);
-  const leftN = list.filter((k) => !done[k.id]).length;
+  const leftN = useTasks().filter((k) => k.list === 'today' && !done[k.id]).length;
   const allDone = leftN === 0;
 
   const [query, setQuery] = useState('');
-  const visible = list.filter((k) => matches(k.title, query));
-  const showHabit = matches(t.habit1, query);
-
-  const swipeActions = [
-    { name: 'complete', label: t.done },
-    { name: 'snooze', label: t.tomorrow },
-    { name: 'pickDate', label: t.pickDate },
-    { name: 'delete', label: t.delete },
-  ];
+  const searching = query.trim() !== '';
 
   return (
     <Screen>
@@ -64,37 +50,9 @@ export function TodayScreen({
         />
 
         <Ledger>
-          {visible.map((k) => (
-            <SwipeableRow
-              key={k.id}
-              onComplete={() => toggle(k.id)}
-              onSnooze={() => clear(k.id)}
-              onPickDate={onPickDate}
-              onDelete={() => clear(k.id)}
-              onLongPress={onOpenTask}
-            >
-              <TaskRow
-                title={k.title}
-                meta={k.time}
-                dotColor={c[k.color]}
-                done={!!done[k.id]}
-                overdue={k.over}
-                onToggle={() => toggle(k.id)}
-                accessibilityActions={swipeActions}
-                onAccessibilityAction={(e) => {
-                  const action = e.nativeEvent.actionName;
-                  if (action === 'complete') toggle(k.id);
-                  if (action === 'snooze') clear(k.id);
-                  if (action === 'pickDate') onPickDate();
-                  if (action === 'delete') clear(k.id);
-                }}
-              />
-            </SwipeableRow>
-          ))}
+          <ProjectRows list="today" query={query} onOpen={onOpenProject} />
 
-          {visible.length === 0 && !showHabit ? <SectionLabel label={t.noMatches} /> : null}
-
-          {showHabit ? (
+          {searching ? null : (
             <>
               <SectionLabel label={t.habits} />
 
@@ -125,7 +83,7 @@ export function TodayScreen({
                 </View>
               </View>
             </>
-          ) : null}
+          )}
 
           <EmptyRules count={4} />
         </Ledger>

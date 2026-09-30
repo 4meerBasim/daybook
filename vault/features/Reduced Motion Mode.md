@@ -19,6 +19,6 @@ Summary: A single settings toggle turns every animation in the app into an insta
 Controlled from the Reduce motion row on [[Settings]].
 
 ## Related
-- Page: [[Settings]], [[Today]], [[Focus Mode]], [[Quick Add Sheet]], [[Swipe States]], [[Page Closed]]
+- Page: [[Settings]], [[Today]], [[Project Detail]], [[Focus Mode]], [[Quick Add Sheet]], [[Swipe States]], [[Page Closed]]
 - Features: [[Ink Strike-Through Completion]], [[Swipe Row Actions]], [[Wax Page Closed Stamp]], [[Collapsing Page Header]], [[Focus Timer]]
 - Bugs: none

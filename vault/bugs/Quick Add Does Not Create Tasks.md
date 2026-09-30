@@ -1,10 +1,12 @@
 # Quick Add Does Not Create Tasks
 
-Status: not-fixed
+Status: fixed
 Found: `src/screens/QuickAddSheet.tsx:204`
-Summary: The Add button in the quick-add sheet has no `onPress`, so a composed task is parsed and previewed but never committed to any list.
+Summary: The Add button in the quick-add sheet had no `onPress`, so a composed task was parsed and previewed but never committed to any list.
 
 ## Details
+As found:
+
 The sheet parses the query live and shows the destination chip ("Saved to Upcoming" / "Saved to Inbox"), but the dark Add `Pressable` at the bottom right declares only `accessibilityRole`, `accessibilityLabel` and styling — no handler. The four tool buttons beside it (calendar, flag, hash, paperclip) are in the same state.
 
 Consequences:
@@ -17,6 +19,10 @@ The parsing side is complete and correct — see [[Natural Language Quick Add]].
 
 Worth confirming with the user whether this was left out deliberately for the design transcription pass.
 
+Fixed as part of [[Project Grouped Tasks]], which supplied the missing task collection. `src/state/store.tsx` now holds an `added` array with an `addTask` action, and every list reads seed plus added tasks through `useTasks()`. In `src/screens/QuickAddSheet.tsx` the Add button and the input's `onSubmitEditing` both call `submit`, which builds the title from the plain tokens, takes the list from the parser — `today` when `isToday` (new in `src/lib/parse.ts`, set by today / tonight / اليوم), `upcoming` when `hasDate`, otherwise `inbox` — attaches the project picked from the new row of project chips, calls `addTask`, clears `qa` and closes the sheet. The destination chip gained a "Saved to Today" state to match.
+
+Still open after the fix: the four tool buttons remain decorative, `qa` is still seeded with the dentist example on first launch, added tasks are held in memory only, and tags and priority are parsed and shown as chips but not stored on the task (date, time and repeat chips are kept as the task's `meta` text).
+
 ## Related
-- Feature: [[Natural Language Quick Add]], [[Pen FAB Tab Bar]]
+- Feature: [[Natural Language Quick Add]], [[Project Grouped Tasks]], [[Pen FAB Tab Bar]]
 - Page: [[Quick Add Sheet]], [[Today]], [[Upcoming]], [[Inbox]]
