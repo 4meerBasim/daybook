@@ -9,4 +9,4 @@ Per-task reminders are scheduled through `src/lib/notifications.ts` and set from
 ## Related
 - Page: [[Task Detail]], [[Settings]]
 - Features: [[Due-date picker]], [[Recurring tasks]], [[Local notification module]]
-- Bugs: [[Reminders not reconciled or re-localized]]
+- Bugs: [[Reminders not reconciled or re-localized]], [[Expo Go crashes on launch from native-only modules]]

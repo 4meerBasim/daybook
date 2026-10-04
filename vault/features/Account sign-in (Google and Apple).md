@@ -21,3 +21,4 @@ UI: sign-in / sign-out rows live in [[Settings]] under the Cloud sync group (EN 
 ## Related
 - Page: [[Settings]]
 - Features: [[Cloud sync (Supabase)]], [[Real-time shared lists (Supabase)]], [[Home-screen widget]]
+- Bugs: [[Expo Go crashes on launch from native-only modules]]

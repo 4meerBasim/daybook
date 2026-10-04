@@ -6,7 +6,7 @@ Summary: One ruled row per preference — language, appearance, week start, remi
 ## Related
 - Connects to: [[Today]] — reached by long-pressing the Today tab; returns via the system back gesture, [[Profile]] — the Settings row, [[Main Tabs]], [[Swipe States]] — the Shortcuts row calls `onOpenGestures`
 - Features: [[Auto context metadata (time, location, weather)]], [[Journaling streak + nudge]], [[On This Day]], [[Local notification module]], [[Light and Dark Paper Palettes]], [[Reduced Motion Mode]], [[In-App RTL and Arabic Typography]], [[Swipe Row Actions]], [[Persistence layer]], [[Local reminders]], [[Device calendar overlay]], [[Biometric app lock]], [[Export JSON and Markdown]], [[Home-screen widget]], [[Cloud sync (Supabase)]], [[Account sign-in (Google and Apple)]], [[Real-time shared lists (Supabase)]]
-- Bugs: [[Reminders not reconciled or re-localized]]
+- Bugs: [[Reminders not reconciled or re-localized]], [[Expo Go crashes on launch from native-only modules]]
 - Enhancements: none
 
 ## Notes

@@ -22,3 +22,4 @@ Native projects — Continuous Native Generation (CNG): the `android/` and `ios/
 - Page: [[Today]], [[Settings]]
 - Features: [[Persistence layer]], [[Account sign-in (Google and Apple)]]
 - Enhancements: [[iOS home-screen widget]]
+- Bugs: [[Expo Go crashes on launch from native-only modules]]

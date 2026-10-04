@@ -1,11 +1,5 @@
 import { Platform } from 'react-native';
 import * as AppleAuthentication from 'expo-apple-authentication';
-import {
-  GoogleSignin,
-  isErrorWithCode,
-  isSuccessResponse,
-  statusCodes,
-} from '@react-native-google-signin/google-signin';
 import type { Session } from '@supabase/supabase-js';
 import { supabase, googleWebClientId, googleIosClientId } from './supabase';
 
@@ -28,8 +22,19 @@ export async function isAppleAvailable(): Promise<boolean> {
   }
 }
 
+type GoogleSigninModule = typeof import('@react-native-google-signin/google-signin');
+
+// Required lazily: the native module is absent in Expo Go and throws on import.
+function loadGoogle(): GoogleSigninModule | null {
+  try {
+    return require('@react-native-google-signin/google-signin');
+  } catch {
+    return null;
+  }
+}
+
 let googleConfigured = false;
-function configureGoogle(): void {
+function configureGoogle({ GoogleSignin }: GoogleSigninModule): void {
   if (googleConfigured || googleWebClientId === '') return;
   GoogleSignin.configure({
     webClientId: googleWebClientId,
@@ -40,8 +45,11 @@ function configureGoogle(): void {
 
 export async function signInWithGoogle(): Promise<AuthResult> {
   if (!isGoogleConfigured() || !supabase) return { ok: false, error: 'unconfigured' };
+  const google = loadGoogle();
+  if (!google) return { ok: false, error: 'unconfigured' };
+  const { GoogleSignin, isErrorWithCode, isSuccessResponse, statusCodes } = google;
   try {
-    configureGoogle();
+    configureGoogle(google);
     await GoogleSignin.hasPlayServices();
     const response = await GoogleSignin.signIn();
     if (!isSuccessResponse(response)) return { ok: false, error: 'cancelled' };
@@ -88,7 +96,7 @@ export async function signOut(): Promise<void> {
     // ignore — best effort
   }
   try {
-    if (googleConfigured) await GoogleSignin.signOut();
+    if (googleConfigured) await loadGoogle()?.GoogleSignin.signOut();
   } catch {
     // ignore — best effort
   }

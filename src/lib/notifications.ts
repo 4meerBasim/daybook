@@ -1,5 +1,13 @@
 import { Platform } from 'react-native';
-import * as Notifications from 'expo-notifications';
+import Constants, { ExecutionEnvironment } from 'expo-constants';
+
+type NotificationsModule = typeof import('expo-notifications');
+
+// Expo Go on Android no longer ships expo-notifications, and loading it there fails at startup.
+const isExpoGoAndroid =
+  Platform.OS === 'android' && Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
+const Notifications: NotificationsModule | null =
+  Platform.OS === 'web' || isExpoGoAndroid ? null : require('expo-notifications');
 
 export type DailyTime = { hour: number; minute: number };
 
@@ -8,7 +16,7 @@ export const REMINDER_IDS: { journal: string; onThisDay: string } = {
   onThisDay: 'on-this-day-reminder',
 };
 
-Notifications.setNotificationHandler({
+Notifications?.setNotificationHandler({
   handleNotification: async () => ({
     shouldPlaySound: true,
     shouldSetBadge: false,
@@ -18,7 +26,7 @@ Notifications.setNotificationHandler({
 });
 
 export async function requestNotificationPermission(): Promise<boolean> {
-  if (Platform.OS === 'web') return false;
+  if (!Notifications) return false;
   try {
     const current = await Notifications.getPermissionsAsync();
     if (current.granted) return true;
@@ -34,7 +42,7 @@ export async function scheduleDailyReminder(
   time: DailyTime,
   content: { title: string; body: string },
 ): Promise<boolean> {
-  if (Platform.OS === 'web') return false;
+  if (!Notifications) return false;
   try {
     const granted = await requestNotificationPermission();
     if (!granted) return false;
@@ -55,7 +63,7 @@ export async function scheduleDailyReminder(
 }
 
 export async function cancelReminder(id: string): Promise<void> {
-  if (Platform.OS === 'web') return;
+  if (!Notifications) return;
   try {
     await Notifications.cancelScheduledNotificationAsync(id);
   } catch {
@@ -64,7 +72,7 @@ export async function cancelReminder(id: string): Promise<void> {
 }
 
 export async function isReminderScheduled(id: string): Promise<boolean> {
-  if (Platform.OS === 'web') return false;
+  if (!Notifications) return false;
   try {
     const scheduled = await Notifications.getAllScheduledNotificationsAsync();
     return scheduled.some((request) => request.identifier === id);
@@ -96,7 +104,7 @@ export async function scheduleTaskReminder(
   when: Date,
   content: { title: string; body: string },
 ): Promise<boolean> {
-  if (Platform.OS === 'web') return false;
+  if (!Notifications) return false;
   try {
     const granted = await requestNotificationPermission();
     if (!granted) return false;
@@ -128,7 +136,7 @@ export async function reconcileReminders(
   dailies: DesiredDaily[],
   dates: DesiredDate[],
 ): Promise<void> {
-  if (Platform.OS === 'web') return;
+  if (!Notifications) return;
   try {
     const granted = await requestNotificationPermission();
     if (!granted) return;

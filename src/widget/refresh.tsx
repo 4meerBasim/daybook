@@ -1,12 +1,13 @@
 import React from 'react';
 import { Platform } from 'react-native';
-import { requestWidgetUpdate } from 'react-native-android-widget';
 import { TodayWidget } from './TodayWidget';
 import { loadWidgetState, widgetLabels } from './widget-data';
 
 export async function refreshTodayWidget(): Promise<void> {
   if (Platform.OS !== 'android') return;
   try {
+    const { requestWidgetUpdate } =
+      require('react-native-android-widget') as typeof import('react-native-android-widget');
     const { tasks, lang } = await loadWidgetState();
     const labels = widgetLabels(lang);
     await requestWidgetUpdate({
