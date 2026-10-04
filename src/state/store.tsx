@@ -21,6 +21,7 @@ import { computeStreak, dayKey, monthDayKey, startOfToday } from '../lib/day';
 import { nextOccurrence, RecurrenceRule } from '../lib/recurrence';
 import { deleteAttachmentFile } from '../lib/attachments';
 import { newOwnerId } from '../lib/supabase';
+import { newId } from '../lib/id';
 import { refreshTodayWidget } from '../widget/refresh';
 import {
   addHabitSessionRow,
@@ -134,14 +135,6 @@ type Store = {
 
 const StoreContext = createContext<Store | null>(null);
 
-function maxIdSeq(ids: string[], prefix: string): number {
-  return ids.reduce((max, id) => {
-    if (!id.startsWith(prefix)) return max;
-    const n = Number(id.slice(prefix.length));
-    return Number.isFinite(n) && n > max ? n : max;
-  }, 0);
-}
-
 const emptySnapshot: StoreSnapshot = {
   done: {},
   cleared: {},
@@ -183,16 +176,6 @@ export function StoreProvider({
   const [qa, setQa] = useState('Call dentist tomorrow 3pm #health');
   const [sel, setSel] = useState(18);
   const addedRef = useRef<Task[]>(initial.added);
-  const taskSeq = useRef(maxIdSeq(initial.added.map((tk) => tk.id), 'a'));
-  const projectSeq = useRef(maxIdSeq(initial.addedProjects.map((p) => p.id), 'p'));
-  const habitSeq = useRef(maxIdSeq(initial.addedHabits.map((h) => h.id), 'g'));
-  const focusSeq = useRef(maxIdSeq(initial.focusSessions.map((s) => s.id), 'fs'));
-  const subtaskSeq = useRef(maxIdSeq(initial.subtasks.map((s) => s.id), 'st'));
-  const smartListSeq = useRef(maxIdSeq(initial.smartLists.map((l) => l.id), 'sl'));
-  const attachmentSeq = useRef(maxIdSeq(initial.attachments.map((a) => a.id), 'att'));
-  const journalSeq = useRef(maxIdSeq(initial.journals.map((j) => j.id), 'j'));
-  const entrySeq = useRef(maxIdSeq(initial.entries.map((e) => e.id), 'e'));
-  const templateSeq = useRef(maxIdSeq(initial.templates.map((tpl) => tpl.id), 'tpl-u'));
   const ownerIdRef = useRef(initial.prefs.syncOwnerId);
 
   const value = useMemo<Store>(() => {
@@ -243,8 +226,7 @@ export function StoreProvider({
       },
       added,
       addTask: (task) => {
-        taskSeq.current += 1;
-        const created: Task = { ...task, id: `a${taskSeq.current}` };
+        const created: Task = { ...task, id: newId() };
         writeAdded([...addedRef.current, created]);
         upsertTask(created);
         setTaskTags(created.id, created.tags ?? []);
@@ -315,9 +297,8 @@ export function StoreProvider({
       },
       subtasks,
       addSubtask: (taskId, title) => {
-        subtaskSeq.current += 1;
         const position = subtasks.filter((s) => s.taskId === taskId).length;
-        const created: Subtask = { id: `st${subtaskSeq.current}`, taskId, title, done: false, position };
+        const created: Subtask = { id: newId(), taskId, title, done: false, position };
         setSubtasks((list) => [...list, created]);
         upsertSubtask(created);
       },
@@ -354,8 +335,7 @@ export function StoreProvider({
       },
       smartLists,
       addSmartList: (name, rules) => {
-        smartListSeq.current += 1;
-        const created: SmartList = { id: `sl${smartListSeq.current}`, name, rules, position: smartLists.length };
+        const created: SmartList = { id: newId(), name, rules, position: smartLists.length };
         setSmartLists((list) => [...list, created]);
         upsertSmartList(created);
       },
@@ -372,8 +352,7 @@ export function StoreProvider({
       },
       attachments,
       addAttachment: (a) => {
-        attachmentSeq.current += 1;
-        const created: Attachment = { ...a, id: `att${attachmentSeq.current}`, createdAt: Date.now() };
+        const created: Attachment = { ...a, id: newId(), createdAt: Date.now() };
         setAttachments((list) => [...list, created]);
         upsertAttachment(created);
         return created;
@@ -386,15 +365,13 @@ export function StoreProvider({
       },
       addedProjects,
       addProject: (project) => {
-        projectSeq.current += 1;
-        const created: Project = { ...project, id: `p${projectSeq.current}` };
+        const created: Project = { ...project, id: newId() };
         setAddedProjects((p) => [...p, created]);
         upsertProject(created);
       },
       addedHabits,
       addHabit: (name, minutes) => {
-        habitSeq.current += 1;
-        const created: Habit = { id: `g${habitSeq.current}`, name, streak: 0, minutes };
+        const created: Habit = { id: newId(), name, streak: 0, minutes };
         setAddedHabits((h) => [...h, created]);
         upsertHabit(created);
       },
@@ -405,15 +382,13 @@ export function StoreProvider({
       },
       focusSessions,
       addFocusSession: (session) => {
-        focusSeq.current += 1;
-        const created: FocusSession = { ...session, id: `fs${focusSeq.current}` };
+        const created: FocusSession = { ...session, id: newId() };
         setFocusSessions((list) => [...list, created]);
         upsertFocusSession(created);
       },
       addedJournals,
       addJournal: (journal) => {
-        journalSeq.current += 1;
-        const created: Journal = { ...journal, id: `j${journalSeq.current}` };
+        const created: Journal = { ...journal, id: newId() };
         setAddedJournals((j) => [...j, created]);
         upsertJournal(created);
         return created;
@@ -445,8 +420,7 @@ export function StoreProvider({
       },
       entries,
       addEntry: (entry) => {
-        entrySeq.current += 1;
-        const created: Entry = { ...entry, id: `e${entrySeq.current}`, createdAt: Date.now() };
+        const created: Entry = { ...entry, id: newId(), createdAt: Date.now() };
         setEntries((list) => [...list, created]);
         upsertEntry(created);
         return created;
@@ -465,8 +439,7 @@ export function StoreProvider({
       },
       addedTemplates,
       addTemplate: (template) => {
-        templateSeq.current += 1;
-        const created: EntryTemplate = { ...template, id: `tpl-u${templateSeq.current}`, builtIn: false };
+        const created: EntryTemplate = { ...template, id: newId(), builtIn: false };
         setAddedTemplates((list) => [...list, created]);
         upsertEntryTemplate(created);
         return created;
@@ -542,16 +515,6 @@ export function StoreProvider({
         setAttachments(snap.attachments);
         setPrefs(snap.prefs);
         ownerIdRef.current = snap.prefs.syncOwnerId || ownerIdRef.current;
-        taskSeq.current = maxIdSeq(snap.added.map((tk) => tk.id), 'a');
-        projectSeq.current = maxIdSeq(snap.addedProjects.map((p) => p.id), 'p');
-        habitSeq.current = maxIdSeq(snap.addedHabits.map((h) => h.id), 'g');
-        focusSeq.current = maxIdSeq(snap.focusSessions.map((s) => s.id), 'fs');
-        subtaskSeq.current = maxIdSeq(snap.subtasks.map((s) => s.id), 'st');
-        smartListSeq.current = maxIdSeq(snap.smartLists.map((l) => l.id), 'sl');
-        attachmentSeq.current = maxIdSeq(snap.attachments.map((a) => a.id), 'att');
-        journalSeq.current = maxIdSeq(snap.journals.map((j) => j.id), 'j');
-        entrySeq.current = maxIdSeq(snap.entries.map((e) => e.id), 'e');
-        templateSeq.current = maxIdSeq(snap.templates.map((tpl) => tpl.id), 'tpl-u');
         void refreshTodayWidget();
       },
       qa,

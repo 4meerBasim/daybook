@@ -19,6 +19,7 @@ import type { RecurrenceRule } from './recurrence';
 import type { JournalIconKey } from '../components/Icon';
 import type { FocusSession, Habit, HabitSession } from '../state/store';
 import type { Appearance, Lang, Motion } from '../theme/ThemeProvider';
+import { newId } from './id';
 
 export type SettingsSnapshot = { lang: Lang; appearance: Appearance; motion: Motion };
 
@@ -235,7 +236,7 @@ CREATE INDEX IF NOT EXISTS idx_attachments_task ON attachments (taskId);
 CREATE INDEX IF NOT EXISTS idx_attachments_entry ON attachments (entryId);
 `;
 
-const USER_VERSION = 1;
+const USER_VERSION = 2;
 
 const TASK_COLUMNS_V1: { name: string; type: string }[] = [
   { name: 'dueAt', type: 'INTEGER' },
@@ -337,17 +338,121 @@ function db(): SQLiteDatabase {
 
 const now = () => Date.now();
 
+// v2: entity ids moved from sequential per-device strings (`a{n}`, `p{n}`, …) to
+// UUIDs so they no longer collide across devices under newer-wins sync. Seed /
+// built-in ids (`t*`/`u*`/`i*` tasks, `studio`/`work`/`home` projects, `default`
+// journal, `tpl-*` templates, `h1` habit) are deterministic and identical on every
+// device, so they are left intact; only user-created rows are rewritten. The schema
+// declares no FOREIGN KEY constraints, so ids and references are remapped by value.
+async function buildIdMap(
+  d: SQLiteDatabase,
+  table: string,
+  pattern: RegExp
+): Promise<Map<string, string>> {
+  const rows = await d.getAllAsync<{ id: string }>(`SELECT id FROM "${table}"`);
+  const map = new Map<string, string>();
+  for (const row of rows) {
+    if (pattern.test(row.id)) map.set(row.id, newId());
+  }
+  return map;
+}
+
+async function migrateIdsToUuid(d: SQLiteDatabase): Promise<void> {
+  const ts = now();
+  const taskMap = await buildIdMap(d, 'tasks', /^a\d+$/);
+  const projectMap = await buildIdMap(d, 'projects', /^p\d+$/);
+  const habitMap = await buildIdMap(d, 'habits', /^g\d+$/);
+  const journalMap = await buildIdMap(d, 'journals', /^j\d+$/);
+  const entryMap = await buildIdMap(d, 'entries', /^e\d+$/);
+  const templateMap = await buildIdMap(d, 'entry_templates', /^tpl-u\d+$/);
+  const subtaskMap = await buildIdMap(d, 'subtasks', /^st\d+$/);
+  const smartListMap = await buildIdMap(d, 'smart_lists', /^sl\d+$/);
+  const attachmentMap = await buildIdMap(d, 'attachments', /^att\d+$/);
+  const focusMap = await buildIdMap(d, 'focus_sessions', /^fs\d+$/);
+
+  for (const [oldId, id] of taskMap) {
+    await d.runAsync('UPDATE tasks SET id = ?, updatedAt = ? WHERE id = ?', [id, ts, oldId]);
+    await d.runAsync('UPDATE task_tags SET taskId = ?, updatedAt = ? WHERE taskId = ?', [id, ts, oldId]);
+    await d.runAsync('UPDATE task_state SET taskId = ?, updatedAt = ? WHERE taskId = ?', [id, ts, oldId]);
+    await d.runAsync('UPDATE subtasks SET taskId = ?, updatedAt = ? WHERE taskId = ?', [id, ts, oldId]);
+    await d.runAsync('UPDATE attachments SET taskId = ?, updatedAt = ? WHERE taskId = ?', [id, ts, oldId]);
+    await d.runAsync('UPDATE focus_sessions SET taskId = ?, updatedAt = ? WHERE taskId = ?', [id, ts, oldId]);
+  }
+  for (const [oldId, id] of projectMap) {
+    await d.runAsync('UPDATE projects SET id = ?, updatedAt = ? WHERE id = ?', [id, ts, oldId]);
+    await d.runAsync('UPDATE tasks SET projectId = ?, updatedAt = ? WHERE projectId = ?', [id, ts, oldId]);
+  }
+  for (const [oldId, id] of habitMap) {
+    await d.runAsync('UPDATE habits SET id = ?, updatedAt = ? WHERE id = ?', [id, ts, oldId]);
+    await d.runAsync(
+      "UPDATE habit_sessions SET habitId = ?, id = ? || ':' || startedAt, updatedAt = ? WHERE habitId = ?",
+      [id, id, ts, oldId]
+    );
+  }
+  for (const [oldId, id] of journalMap) {
+    await d.runAsync('UPDATE journals SET id = ?, updatedAt = ? WHERE id = ?', [id, ts, oldId]);
+    await d.runAsync('UPDATE entries SET journalId = ?, updatedAt = ? WHERE journalId = ?', [id, ts, oldId]);
+    await d.runAsync("UPDATE settings SET value = ?, updatedAt = ? WHERE key = 'currentJournalId' AND value = ?", [id, ts, oldId]);
+  }
+  for (const [oldId, id] of templateMap) {
+    await d.runAsync('UPDATE entry_templates SET id = ?, updatedAt = ? WHERE id = ?', [id, ts, oldId]);
+    await d.runAsync('UPDATE entries SET templateId = ?, updatedAt = ? WHERE templateId = ?', [id, ts, oldId]);
+  }
+  for (const [oldId, id] of entryMap) {
+    await d.runAsync('UPDATE entries SET id = ?, updatedAt = ? WHERE id = ?', [id, ts, oldId]);
+    await d.runAsync('UPDATE attachments SET entryId = ?, updatedAt = ? WHERE entryId = ?', [id, ts, oldId]);
+  }
+  for (const [oldId, id] of subtaskMap) {
+    await d.runAsync('UPDATE subtasks SET id = ?, updatedAt = ? WHERE id = ?', [id, ts, oldId]);
+  }
+  for (const [oldId, id] of attachmentMap) {
+    await d.runAsync('UPDATE attachments SET id = ?, updatedAt = ? WHERE id = ?', [id, ts, oldId]);
+  }
+  for (const [oldId, id] of focusMap) {
+    await d.runAsync('UPDATE focus_sessions SET id = ?, updatedAt = ? WHERE id = ?', [id, ts, oldId]);
+  }
+  for (const [oldId, id] of smartListMap) {
+    await d.runAsync('UPDATE smart_lists SET id = ?, updatedAt = ? WHERE id = ?', [id, ts, oldId]);
+  }
+  if (projectMap.size) {
+    const lists = await d.getAllAsync<{ id: string; rules: string }>('SELECT id, rules FROM smart_lists');
+    for (const l of lists) {
+      try {
+        const parsed = JSON.parse(l.rules) as SmartListRule;
+        if (typeof parsed.projectId === 'string' && projectMap.has(parsed.projectId)) {
+          parsed.projectId = projectMap.get(parsed.projectId) as string;
+          await d.runAsync('UPDATE smart_lists SET rules = ?, updatedAt = ? WHERE id = ?', [
+            JSON.stringify(parsed),
+            ts,
+            l.id,
+          ]);
+        }
+      } catch {
+        // malformed rules JSON — leave as-is
+      }
+    }
+  }
+}
+
 async function migrate(d: SQLiteDatabase): Promise<void> {
   const row = await d.getFirstAsync<{ user_version: number }>('PRAGMA user_version');
   const version = row?.user_version ?? 0;
   if (version >= USER_VERSION) return;
 
-  const columns = await d.getAllAsync<{ name: string }>('PRAGMA table_info(tasks)');
-  const existing = new Set(columns.map((c) => c.name));
-  for (const col of TASK_COLUMNS_V1) {
-    if (!existing.has(col.name)) {
-      await d.execAsync(`ALTER TABLE tasks ADD COLUMN ${col.name} ${col.type}`);
+  if (version < 1) {
+    const columns = await d.getAllAsync<{ name: string }>('PRAGMA table_info(tasks)');
+    const existing = new Set(columns.map((c) => c.name));
+    for (const col of TASK_COLUMNS_V1) {
+      if (!existing.has(col.name)) {
+        await d.execAsync(`ALTER TABLE tasks ADD COLUMN ${col.name} ${col.type}`);
+      }
     }
+  }
+
+  if (version < 2) {
+    await d.withTransactionAsync(async () => {
+      await migrateIdsToUuid(d);
+    });
   }
 
   await d.execAsync(`PRAGMA user_version = ${USER_VERSION}`);

@@ -6,6 +6,7 @@ import { metrics } from '../theme/tokens';
 import { align, marginStart, pad, row } from '../lib/rtl';
 import { isOverdue, tomorrowMorning } from '../lib/day';
 import { collectTags, hasTag, matches } from '../lib/matches';
+import { isSeedTaskId } from '../data/seed';
 import { useProjects, useStore, useSubtaskProgress, useTasks } from '../state/store';
 import { Screen } from '../components/Screen';
 import { PageHeader } from '../components/PageHeader';
@@ -43,14 +44,14 @@ export function RecentScreen({
   const openPick = (id: string) => {
     const task = all.find((k) => k.id === id);
     if (!task) return;
-    if (!task.id.startsWith('a')) ensureTask(task);
+    if (isSeedTaskId(task.id)) ensureTask(task);
     setPickId(id);
   };
 
   const snooze = (id: string) => {
     const task = all.find((k) => k.id === id);
     if (!task) return;
-    if (!task.id.startsWith('a')) ensureTask(task);
+    if (isSeedTaskId(task.id)) ensureTask(task);
     setDue(id, tomorrowMorning(), false);
   };
 

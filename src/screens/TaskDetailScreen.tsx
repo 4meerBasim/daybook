@@ -6,6 +6,7 @@ import { maxFontSizeMultiplier, metrics, priorityColors, radius } from '../theme
 import { align, row } from '../lib/rtl';
 import { formatDay, formatTime, tomorrowMorning } from '../lib/day';
 import type { Priority, Status } from '../data/seed';
+import { isSeedTaskId } from '../data/seed';
 import { useProjects, useStore, useTasks } from '../state/store';
 import { Screen, useHeaderTop } from '../components/Screen';
 import { Checkbox } from '../components/Ledger';
@@ -40,7 +41,7 @@ export function TaskDetailScreen({
   const checked = !!done[taskId];
 
   useEffect(() => {
-    if (task && !task.id.startsWith('a')) ensureTask(task);
+    if (task && isSeedTaskId(task.id)) ensureTask(task);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [task?.id]);
 

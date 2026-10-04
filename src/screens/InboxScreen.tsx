@@ -8,6 +8,7 @@ import { align, pad, row } from '../lib/rtl';
 import { collectTags, hasTag, matches } from '../lib/matches';
 import { tomorrowMorning } from '../lib/day';
 import type { Task } from '../data/seed';
+import { isSeedTaskId } from '../data/seed';
 import { useStore, useTasks } from '../state/store';
 import { categorize, CATEGORY_LABEL_KEY, CATEGORY_ORDER } from '../lib/autoCategorize';
 import { Screen } from '../components/Screen';
@@ -56,12 +57,12 @@ export function InboxScreen({
   const openPick = (id: string) => {
     const task = inList.find((k) => k.id === id);
     if (!task) return;
-    if (!task.id.startsWith('a')) ensureTask(task);
+    if (isSeedTaskId(task.id)) ensureTask(task);
     setPickId(id);
   };
   const openTask = (taskId: string) => navigation.navigate('TaskDetail', { taskId });
   const snooze = (task: Task) => {
-    if (!task.id.startsWith('a')) ensureTask(task);
+    if (isSeedTaskId(task.id)) ensureTask(task);
     setDue(task.id, tomorrowMorning(), false);
   };
 

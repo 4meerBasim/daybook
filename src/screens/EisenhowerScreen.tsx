@@ -23,6 +23,7 @@ import { maxFontSizeMultiplier, metrics, priorityColors, radius } from '../theme
 import { align, pad, row } from '../lib/rtl';
 import { useStore, useTasks } from '../state/store';
 import type { Task } from '../data/seed';
+import { isSeedTaskId } from '../data/seed';
 import { Screen, useHeaderTop } from '../components/Screen';
 import { ChevronBackIcon } from '../components/Icon';
 
@@ -111,7 +112,7 @@ export function EisenhowerScreen() {
 
   const commit = useCallback(
     (task: Task, important: boolean, urgent: boolean) => {
-      if (!task.id.startsWith('a')) {
+      if (isSeedTaskId(task.id)) {
         ensureTask({ ...task, important, urgent });
       }
       setEisenhower(task.id, important, urgent);

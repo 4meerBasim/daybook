@@ -194,6 +194,16 @@ export function tasks(t: Strings, ar: boolean): Task[] {
   ];
 }
 
+const SEED_TASK_IDS = new Set([
+  't1', 't2', 't3', 't4', 't5',
+  'u1', 'u2', 'u3', 'u4', 'u5',
+  'i1', 'i2', 'i3',
+]);
+
+export function isSeedTaskId(id: string): boolean {
+  return SEED_TASK_IDS.has(id);
+}
+
 export const load: Record<number, number> = {
   3: 2,
   4: 1,

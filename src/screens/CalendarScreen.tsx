@@ -26,6 +26,7 @@ import { align, insetEnd, insetStart, marginStart, pad, row } from '../lib/rtl';
 import { formatTime, nextWeek, startOfToday, toArabicDigits, tomorrowMorning } from '../lib/day';
 import { useStore, useTasks } from '../state/store';
 import type { Task } from '../data/seed';
+import { isSeedTaskId } from '../data/seed';
 import { Screen, useHeaderTop } from '../components/Screen';
 import { TallyMarks } from '../components/TallyMarks';
 import { CheckIcon, ChevronBackIcon } from '../components/Icon';
@@ -184,7 +185,7 @@ export function CalendarScreen() {
         base ? base.getSeconds() : 0,
         0
       ).getTime();
-      if (!task.id.startsWith('a')) ensureTask(task);
+      if (isSeedTaskId(task.id)) ensureTask(task);
       setDue(task.id, target, false);
       const prevReminder = task.reminderAt ?? null;
       if (prevReminder != null && prevDue != null) {

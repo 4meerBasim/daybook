@@ -9,6 +9,7 @@ import { isOverdue, tomorrowMorning } from '../lib/day';
 import { collectTags, hasTag } from '../lib/matches';
 import type { RootParams } from '../navigation/Root';
 import type { Task } from '../data/seed';
+import { isSeedTaskId } from '../data/seed';
 import { useProjects, useStore, useSubtaskProgress, useTasks } from '../state/store';
 import { loadSnapshot } from '../lib/db';
 import { isSyncConfigured } from '../lib/supabase';
@@ -37,11 +38,11 @@ export function ProjectScreen({ route, navigation }: NativeStackScreenProps<Root
   const [pickId, setPickId] = useState<string | null>(null);
 
   const openPick = (task: Task) => {
-    if (!task.id.startsWith('a')) ensureTask(task);
+    if (isSeedTaskId(task.id)) ensureTask(task);
     setPickId(task.id);
   };
   const snooze = (task: Task) => {
-    if (!task.id.startsWith('a')) ensureTask(task);
+    if (isSeedTaskId(task.id)) ensureTask(task);
     setDue(task.id, tomorrowMorning(), false);
   };
   const scrollRef = useRef<ScrollView>(null);
