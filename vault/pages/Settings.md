@@ -5,7 +5,7 @@ Summary: One ruled row per preference — language, appearance, week start, remi
 
 ## Related
 - Connects to: [[Today]] — reached by long-pressing the Today tab; returns via the system back gesture, [[Profile]] — the Settings row, [[Main Tabs]], [[Swipe States]] — the Shortcuts row calls `onOpenGestures`
-- Features: [[Auto context metadata (time, location, weather)]], [[Journaling streak + nudge]], [[On This Day]], [[Local notification module]], [[Light and Dark Paper Palettes]], [[Reduced Motion Mode]], [[In-App RTL and Arabic Typography]], [[Swipe Row Actions]], [[Persistence layer]], [[Local reminders]], [[Device calendar overlay]], [[Biometric app lock]], [[Export JSON and Markdown]], [[Home-screen widget]], [[Cloud sync (Supabase)]], [[Real-time shared lists (Supabase)]]
+- Features: [[Auto context metadata (time, location, weather)]], [[Journaling streak + nudge]], [[On This Day]], [[Local notification module]], [[Light and Dark Paper Palettes]], [[Reduced Motion Mode]], [[In-App RTL and Arabic Typography]], [[Swipe Row Actions]], [[Persistence layer]], [[Local reminders]], [[Device calendar overlay]], [[Biometric app lock]], [[Export JSON and Markdown]], [[Home-screen widget]], [[Cloud sync (Supabase)]], [[Account sign-in (Google and Apple)]], [[Real-time shared lists (Supabase)]]
 - Bugs: [[Reminders not reconciled or re-localized]]
 - Enhancements: none
 
@@ -14,3 +14,5 @@ Summary: One ruled row per preference — language, appearance, week start, remi
 
 
 Phase 7 adds a Cloud sync group (after Data): an enable toggle, a "Sync now" row and a "Join a shared list" inline share-code field — see [[Cloud sync (Supabase)]] and [[Real-time shared lists (Supabase)]]. Every control no-ops with the `syncNotConfigured` helper when `EXPO_PUBLIC_SUPABASE_URL` / `EXPO_PUBLIC_SUPABASE_ANON_KEY` are unset. The static "Sync" status row is unchanged.
+
+The Cloud sync group now leads with account rows — see [[Account sign-in (Google and Apple)]]. Signed out (and only when the client ids are set), it shows "Continue with Google" and, on iOS, "Continue with Apple" rows plus a `signInToSyncDesc` helper; signed in, it shows the account email and a "Sign out" row. `onSignIn` hands the provider ID token to `supabase.auth.signInWithIdToken` and, when sync is enabled, kicks a full `since: 0` push so local data migrates under the authenticated owner. The buttons are hidden and sign-in no-ops when auth is unconfigured.

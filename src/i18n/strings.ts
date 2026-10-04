@@ -398,6 +398,14 @@ export const EN = {
   shareListBody: 'Others can join this project with the code below.',
   shareFailed: 'Could not create a share code.',
   syncRequiredToShare: 'Cloud sync is required to share a list.',
+  account: 'Account',
+  signInToSyncDesc: 'Sign in to back up your daybook and sync it across your devices.',
+  signInGoogle: 'Continue with Google',
+  signInApple: 'Continue with Apple',
+  signOut: 'Sign out',
+  signedIn: 'Signed in',
+  signInFailed: 'Could not sign in. Please try again.',
+  signInRequired: 'Sign in to enable cloud sync.',
 };
 
 export const AR: typeof EN = {
@@ -799,6 +807,14 @@ export const AR: typeof EN = {
   shareListBody: 'يمكن للآخرين الانضمام إلى هذا المشروع باستخدام الرمز أدناه.',
   shareFailed: 'تعذّر إنشاء رمز المشاركة.',
   syncRequiredToShare: 'المزامنة السحابية مطلوبة لمشاركة قائمة.',
+  account: 'الحساب',
+  signInToSyncDesc: 'سجّل الدخول لنسخ دفترك احتياطيًا ومزامنته عبر أجهزتك.',
+  signInGoogle: 'المتابعة باستخدام Google',
+  signInApple: 'المتابعة باستخدام Apple',
+  signOut: 'تسجيل الخروج',
+  signedIn: 'تم تسجيل الدخول',
+  signInFailed: 'تعذّر تسجيل الدخول. حاول مرّة أخرى.',
+  signInRequired: 'سجّل الدخول لتفعيل المزامنة السحابية.',
 };
 
 export type Strings = typeof EN;

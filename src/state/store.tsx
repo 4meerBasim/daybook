@@ -20,7 +20,6 @@ import {
 import { computeStreak, dayKey, monthDayKey, startOfToday } from '../lib/day';
 import { nextOccurrence, RecurrenceRule } from '../lib/recurrence';
 import { deleteAttachmentFile } from '../lib/attachments';
-import { newOwnerId } from '../lib/supabase';
 import { newId } from '../lib/id';
 import { refreshTodayWidget } from '../widget/refresh';
 import {
@@ -124,6 +123,9 @@ type Store = {
   setSyncEnabled: (v: boolean) => void;
   syncOwnerId: string;
   ensureOwnerId: () => string;
+  userId: string | null;
+  userEmail: string | null;
+  setSession: (session: { userId: string; email: string | null } | null) => void;
   lastSyncAt: number;
   setLastSyncAt: (ts: number) => void;
   hydrate: (snap: StoreSnapshot) => void;
@@ -175,8 +177,9 @@ export function StoreProvider({
   const [prefs, setPrefs] = useState<JournalPrefs>(initial.prefs);
   const [qa, setQa] = useState('Call dentist tomorrow 3pm #health');
   const [sel, setSel] = useState(18);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
   const addedRef = useRef<Task[]>(initial.added);
-  const ownerIdRef = useRef(initial.prefs.syncOwnerId);
 
   const value = useMemo<Store>(() => {
     const writeAdded = (next: Task[]) => {
@@ -486,13 +489,31 @@ export function StoreProvider({
         setSetting('syncEnabled', v ? '1' : '0');
       },
       syncOwnerId: prefs.syncOwnerId,
-      ensureOwnerId: () => {
-        if (ownerIdRef.current) return ownerIdRef.current;
-        const id = newOwnerId();
-        ownerIdRef.current = id;
-        setPrefs((p) => ({ ...p, syncOwnerId: id }));
-        setSetting('syncOwnerId', id);
-        return id;
+      ensureOwnerId: () => userId ?? '',
+      userId,
+      userEmail,
+      setSession: (session) => {
+        if (session) {
+          setUserId(session.userId);
+          setUserEmail(session.email);
+          // First sign-in (or a different account): re-push all local data under the
+          // authenticated owner so previously anonymous-owned rows migrate forward.
+          if (prefs.syncOwnerId && prefs.syncOwnerId !== session.userId) {
+            setPrefs((p) => ({ ...p, lastSyncAt: 0 }));
+            setSetting('lastSyncAt', '0');
+          }
+          if (prefs.syncOwnerId !== session.userId) {
+            setPrefs((p) => ({ ...p, syncOwnerId: session.userId }));
+            setSetting('syncOwnerId', session.userId);
+          }
+        } else {
+          setUserId(null);
+          setUserEmail(null);
+          if (prefs.syncOwnerId) {
+            setPrefs((p) => ({ ...p, syncOwnerId: '' }));
+            setSetting('syncOwnerId', '');
+          }
+        }
       },
       lastSyncAt: prefs.lastSyncAt,
       setLastSyncAt: (ts) => {
@@ -514,7 +535,6 @@ export function StoreProvider({
         setSmartLists(snap.smartLists);
         setAttachments(snap.attachments);
         setPrefs(snap.prefs);
-        ownerIdRef.current = snap.prefs.syncOwnerId || ownerIdRef.current;
         void refreshTodayWidget();
       },
       qa,
@@ -522,7 +542,7 @@ export function StoreProvider({
       sel,
       setSel,
     };
-  }, [done, cleared, added, subtasks, smartLists, attachments, addedProjects, addedHabits, habitSessions, focusSessions, addedJournals, entries, addedTemplates, prefs, qa, sel]);
+  }, [done, cleared, added, subtasks, smartLists, attachments, addedProjects, addedHabits, habitSessions, focusSessions, addedJournals, entries, addedTemplates, prefs, qa, sel, userId, userEmail]);
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
 }

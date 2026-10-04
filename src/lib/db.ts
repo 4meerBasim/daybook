@@ -736,11 +736,16 @@ export function upsertTask(task: Task): void {
 
 export function deleteTaskRow(id: string): void {
   if (!database) return;
-  void database.runAsync('UPDATE tasks SET deletedAt = ?, updatedAt = ? WHERE id = ?', [
-    now(),
-    now(),
-    id,
-  ]);
+  const ts = now();
+  void database.runAsync('UPDATE tasks SET deletedAt = ?, updatedAt = ? WHERE id = ?', [ts, ts, id]);
+  void database.runAsync(
+    'UPDATE task_state SET deletedAt = ?, updatedAt = ? WHERE taskId = ? AND deletedAt IS NULL',
+    [ts, ts, id]
+  );
+  void database.runAsync(
+    'UPDATE task_tags SET deletedAt = ?, updatedAt = ? WHERE taskId = ? AND deletedAt IS NULL',
+    [ts, ts, id]
+  );
 }
 
 export function upsertSubtask(s: Subtask): void {
@@ -811,10 +816,10 @@ export function setTaskTags(taskId: string, tags: string[]): void {
   if (!d) return;
   const ts = now();
   void d.withTransactionAsync(async () => {
-    await d.runAsync('UPDATE task_tags SET deletedAt = ? WHERE taskId = ? AND deletedAt IS NULL', [
-      ts,
-      taskId,
-    ]);
+    await d.runAsync(
+      'UPDATE task_tags SET deletedAt = ?, updatedAt = ? WHERE taskId = ? AND deletedAt IS NULL',
+      [ts, ts, taskId]
+    );
     for (const tag of tags) {
       await d.runAsync(
         `INSERT INTO task_tags (taskId, tag, updatedAt, deletedAt) VALUES (?, ?, ?, NULL)
@@ -901,27 +906,29 @@ export async function getChangedRows(
 
 export async function applyRemoteRows(
   table: string,
-  rows: Record<string, unknown>[]
+  rows: Record<string, unknown>[],
+  keys: string[] = ['id']
 ): Promise<void> {
   const d = database;
   if (!d || !rows.length) return;
   await d.withTransactionAsync(async () => {
     for (const row of rows) {
       const cols = Object.keys(row);
-      if (!cols.includes('id') || !cols.includes('updatedAt')) continue;
+      if (!keys.every((k) => cols.includes(k)) || !cols.includes('updatedAt')) continue;
       const columnList = cols.map((c) => `"${c}"`).join(', ');
       const placeholders = cols.map(() => '?').join(', ');
       const assignments = cols
-        .filter((c) => c !== 'id')
+        .filter((c) => !keys.includes(c))
         .map((c) => `"${c}" = excluded."${c}"`)
         .join(', ');
+      const conflict = keys.map((k) => `"${k}"`).join(', ');
       const values = cols.map((c) => {
         const v = row[c];
         return typeof v === 'boolean' ? (v ? 1 : 0) : (v as never);
       });
       await d.runAsync(
         `INSERT INTO "${table}" (${columnList}) VALUES (${placeholders})
-         ON CONFLICT(id) DO UPDATE SET ${assignments}
+         ON CONFLICT(${conflict}) DO UPDATE SET ${assignments}
          WHERE excluded.updatedAt > "${table}".updatedAt`,
         values
       );

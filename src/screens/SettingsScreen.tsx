@@ -13,6 +13,13 @@ import { isSyncConfigured } from '../lib/supabase';
 import { syncNow } from '../lib/sync';
 import { joinSharedList } from '../lib/shared';
 import {
+  isGoogleConfigured,
+  isAppleAvailable,
+  signInWithGoogle,
+  signInWithApple,
+  signOut,
+} from '../lib/auth';
+import {
   getCalendarAccessStatus,
   listDeviceCalendars,
   requestCalendarAccess,
@@ -49,10 +56,13 @@ export function SettingsScreen({ onOpenGestures }: { onOpenGestures: () => void 
     syncEnabled,
     setSyncEnabled,
     ensureOwnerId,
+    userId,
+    userEmail,
     lastSyncAt,
     setLastSyncAt,
     hydrate,
   } = store;
+  const signedIn = userId != null;
   const tasks = useTasks();
   const projects = useProjects();
   const journals = useJournals();
@@ -69,6 +79,17 @@ export function SettingsScreen({ onOpenGestures }: { onOpenGestures: () => void 
   const [syncMsg, setSyncMsg] = useState<string | null>(null);
   const [joining, setJoining] = useState(false);
   const [joinCode, setJoinCode] = useState('');
+  const [appleAvailable, setAppleAvailable] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+    void isAppleAvailable().then((v) => {
+      if (mounted) setAppleAvailable(v);
+    });
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (!deviceCalendarEnabled) {
@@ -173,17 +194,21 @@ export function SettingsScreen({ onOpenGestures }: { onOpenGestures: () => void 
     hydrate(snap.store);
   };
 
-  const runSync = async () => {
+  const runSync = async (opts?: { ownerId?: string; since?: number }) => {
     if (!syncConfigured) {
       setSyncMsg(t.syncNotConfigured);
       return;
     }
-    const ownerId = ensureOwnerId();
+    const ownerId = opts?.ownerId ?? ensureOwnerId();
+    if (!ownerId) {
+      setSyncMsg(t.signInRequired);
+      return;
+    }
     setSyncBusy(true);
     setSyncMsg(t.syncing);
     const res = await syncNow({
       ownerId,
-      since: lastSyncAt,
+      since: opts?.since ?? lastSyncAt,
       setLastSync: setLastSyncAt,
       onApplied: reloadStore,
     });
@@ -198,9 +223,23 @@ export function SettingsScreen({ onOpenGestures }: { onOpenGestures: () => void 
     }
     setSyncEnabled(v);
     if (v) {
-      ensureOwnerId();
-      void runSync();
+      if (signedIn) void runSync();
+      else setSyncMsg(t.signInRequired);
     }
+  };
+
+  const onSignIn = async (provider: 'google' | 'apple') => {
+    const res = provider === 'google' ? await signInWithGoogle() : await signInWithApple();
+    if (!res.ok) {
+      if (res.error !== 'cancelled') setSyncMsg(t.signInFailed);
+      return;
+    }
+    // First sign-in: push all local data up under the authenticated owner.
+    if (syncEnabled && res.userId) void runSync({ ownerId: res.userId, since: 0 });
+  };
+
+  const onSignOut = async () => {
+    await signOut();
   };
 
   const submitJoin = async () => {
@@ -210,6 +249,10 @@ export function SettingsScreen({ onOpenGestures }: { onOpenGestures: () => void 
     if (!code) return;
     if (!syncConfigured) {
       setSyncMsg(t.syncNotConfigured);
+      return;
+    }
+    if (!signedIn) {
+      setSyncMsg(t.signInRequired);
       return;
     }
     const ownerId = ensureOwnerId();
@@ -431,6 +474,29 @@ export function SettingsScreen({ onOpenGestures }: { onOpenGestures: () => void 
           </Row>
 
           <GroupHeader label={t.cloudSync} />
+
+          {syncConfigured ? (
+            signedIn ? (
+              <Row onPress={onSignOut} label={t.signOut}>
+                <RowLabel label={userEmail ?? t.signedIn} />
+                <Text style={[ui(15), { color: c.blue }]}>{t.signOut}</Text>
+              </Row>
+            ) : (
+              <>
+                {isGoogleConfigured() ? (
+                  <Row onPress={() => onSignIn('google')} label={t.signInGoogle}>
+                    <RowLabel label={t.signInGoogle} />
+                  </Row>
+                ) : null}
+                {appleAvailable ? (
+                  <Row onPress={() => onSignIn('apple')} label={t.signInApple}>
+                    <RowLabel label={t.signInApple} />
+                  </Row>
+                ) : null}
+                <HelperText label={t.signInToSyncDesc} />
+              </>
+            )
+          ) : null}
 
           <ToggleRow
             title={t.enableSync}

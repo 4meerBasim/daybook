@@ -1,18 +1,22 @@
 import { supabase, isSyncConfigured } from './supabase';
 import { getChangedRows, applyRemoteRows } from './db';
 
-export type SyncTable = { local: string; remote: string };
+export type SyncTable = { local: string; remote: string; key: string[] };
 
 export const SYNC_TABLES: SyncTable[] = [
-  { local: 'tasks', remote: 'tasks' },
-  { local: 'projects', remote: 'projects' },
-  { local: 'entries', remote: 'entries' },
-  { local: 'journals', remote: 'journals' },
-  { local: 'habits', remote: 'habits' },
-  { local: 'subtasks', remote: 'subtasks' },
-  { local: 'smart_lists', remote: 'smart_lists' },
-  { local: 'focus_sessions', remote: 'focus_sessions' },
-  { local: 'attachments', remote: 'attachments' },
+  { local: 'tasks', remote: 'tasks', key: ['id'] },
+  { local: 'projects', remote: 'projects', key: ['id'] },
+  { local: 'entries', remote: 'entries', key: ['id'] },
+  { local: 'journals', remote: 'journals', key: ['id'] },
+  { local: 'habits', remote: 'habits', key: ['id'] },
+  { local: 'subtasks', remote: 'subtasks', key: ['id'] },
+  { local: 'smart_lists', remote: 'smart_lists', key: ['id'] },
+  { local: 'focus_sessions', remote: 'focus_sessions', key: ['id'] },
+  { local: 'attachments', remote: 'attachments', key: ['id'] },
+  { local: 'task_state', remote: 'task_state', key: ['taskId'] },
+  { local: 'task_tags', remote: 'task_tags', key: ['taskId', 'tag'] },
+  { local: 'habit_sessions', remote: 'habit_sessions', key: ['id'] },
+  { local: 'entry_templates', remote: 'entry_templates', key: ['id'] },
 ];
 
 export type SyncReason = 'unconfigured' | 'disabled' | 'empty' | 'error';
@@ -55,7 +59,9 @@ export async function syncNow(params: {
       const local = await getChangedRows(table.local, since);
       if (local.length) {
         const payload = local.map((r) => toRemote(r, ownerId));
-        const { error } = await supabase.from(table.remote).upsert(payload, { onConflict: 'id' });
+        const { error } = await supabase
+          .from(table.remote)
+          .upsert(payload, { onConflict: table.key.join(',') });
         if (error) throw error;
         pushed += payload.length;
       }
@@ -70,7 +76,7 @@ export async function syncNow(params: {
       if (error) throw error;
       const rows = (data ?? []) as Record<string, unknown>[];
       if (rows.length) {
-        await applyRemoteRows(table.local, rows.map(toLocal));
+        await applyRemoteRows(table.local, rows.map(toLocal), table.key);
         pulled += rows.length;
       }
     }

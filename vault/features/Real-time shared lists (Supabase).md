@@ -18,8 +18,8 @@ UI:
 
 Backend (`supabase/schema.sql`): `shared_projects` (project_id PK, owner, unique `share_code`) and `project_members` (project_id + member PK). RLS lets the owner manage the share and lets members read/write the shared project's tasks via an `is_project_member()` check on the `tasks` policy; `tasks` is added to the realtime publication.
 
-Untested against a live backend — there are no real credentials in this build. Implemented correct-by-construction with every path guarded for the unconfigured case; true sharing requires real Supabase Auth (the anon owner id is a stand-in) and running `supabase/schema.sql`.
+The `ownerId` passed to `shareProject` / `joinSharedList` is now the signed-in `auth.uid()` (`ensureOwnerId()`), so `owner` / `member` rows and the `is_project_member()` RLS check line up with a real account — see [[Account sign-in (Google and Apple)]]. Untested against a live backend — there are no real credentials in this build. Implemented correct-by-construction with every path guarded for the unconfigured case; true sharing requires the providers enabled and `supabase/schema.sql` run.
 
 ## Related
 - Page: [[Project Detail]], [[Settings]]
-- Features: [[Cloud sync (Supabase)]], [[Persistence layer]], [[Project Grouped Tasks]]
+- Features: [[Cloud sync (Supabase)]], [[Account sign-in (Google and Apple)]], [[Persistence layer]], [[Project Grouped Tasks]]

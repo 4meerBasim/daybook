@@ -31,7 +31,8 @@ function TaskRowWithProgress({ taskId, ...rest }: Omit<TaskRowProps, 'progress'>
 export function ProjectScreen({ route, navigation }: NativeStackScreenProps<RootParams, 'Project'>) {
   const { projectId, list } = route.params;
   const { c, t, display, ui, mono, rtl, dark } = useTheme();
-  const { done, toggle, clear, addTask, ensureTask, setDue, ensureOwnerId, hydrate } = useStore();
+  const { done, toggle, clear, addTask, ensureTask, setDue, ensureOwnerId, userId, hydrate } =
+    useStore();
   const [draft, setDraft] = useState('');
   const [adding, setAdding] = useState(false);
   const [typing, setTyping] = useState(false);
@@ -84,6 +85,10 @@ export function ProjectScreen({ route, navigation }: NativeStackScreenProps<Root
     if (!projectId) return;
     if (!isSyncConfigured()) {
       Alert.alert(t.syncRequiredToShare);
+      return;
+    }
+    if (userId == null) {
+      Alert.alert(t.signInRequired);
       return;
     }
     const ownerId = ensureOwnerId();

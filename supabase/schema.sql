@@ -11,14 +11,18 @@
 --      (see .env.example). Then rebuild/restart Expo so EXPO_PUBLIC_* inline.
 --
 -- AUTH MODEL — READ THIS
---   The app ships with an ANONYMOUS owner id (a uuid generated on-device and
---   stored in the local settings table) as a stand-in for a real account. The
---   RLS policies below are written for real Supabase Auth: `owner = auth.uid()`.
---   For true multi-device / multi-user sync you MUST wire Supabase Auth (e.g.
---   anonymous sign-in or email) so that auth.uid() matches the stored owner id,
---   otherwise the anon key has no uid and these policies will reject every row.
---   Everything here is correct-by-construction but has NOT been run against a
---   live project in this build.
+--   The app signs in with real Supabase Auth via OpenID ID tokens
+--   (`supabase.auth.signInWithIdToken`) from Google and Apple, and stamps every
+--   synced row's `owner` with the authenticated user's id (`auth.uid()`). The RLS
+--   policies below enforce `owner = auth.uid()`, so each account sees only its own
+--   rows (plus tasks in projects shared with it). Enable the providers first:
+--     • Authentication → Providers → Google: add the Web client id as an
+--       "Authorized Client ID" (and the iOS client id if you use native iOS).
+--     • Authentication → Providers → Apple: enable it (Services ID / team as
+--       required for your Apple setup).
+--   The matching client ids go in the app environment as
+--   EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID / EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID
+--   (see .env.example). Not run against a live project in this build.
 --
 -- All `*At` style timestamps are epoch milliseconds (bigint) to mirror the
 -- on-device SQLite schema in src/lib/db.ts. Boolean-ish flags are stored as
@@ -146,6 +150,43 @@ create table if not exists public.attachments (
   deleted_at bigint
 );
 
+create table if not exists public.task_state (
+  "taskId" text primary key,
+  done integer not null default 0,
+  cleared integer not null default 0,
+  owner uuid not null,
+  updated_at bigint not null,
+  deleted_at bigint
+);
+
+create table if not exists public.task_tags (
+  "taskId" text not null,
+  tag text not null,
+  owner uuid not null,
+  updated_at bigint not null,
+  deleted_at bigint,
+  primary key ("taskId", tag)
+);
+
+create table if not exists public.habit_sessions (
+  id text primary key,
+  "habitId" text not null,
+  "startedAt" bigint not null,
+  seconds integer not null,
+  owner uuid not null,
+  updated_at bigint not null,
+  deleted_at bigint
+);
+
+create table if not exists public.entry_templates (
+  id text primary key,
+  name text not null,
+  body text not null,
+  owner uuid not null,
+  updated_at bigint not null,
+  deleted_at bigint
+);
+
 -- ---------------------------------------------------------------------------
 -- Shared-list tables (Feature 3)
 -- ---------------------------------------------------------------------------
@@ -182,6 +223,10 @@ alter table public.subtasks enable row level security;
 alter table public.smart_lists enable row level security;
 alter table public.focus_sessions enable row level security;
 alter table public.attachments enable row level security;
+alter table public.task_state enable row level security;
+alter table public.task_tags enable row level security;
+alter table public.habit_sessions enable row level security;
+alter table public.entry_templates enable row level security;
 alter table public.shared_projects enable row level security;
 alter table public.project_members enable row level security;
 
@@ -204,7 +249,8 @@ declare
   tbl text;
 begin
   foreach tbl in array array[
-    'projects','entries','journals','habits','subtasks','smart_lists','focus_sessions','attachments'
+    'projects','entries','journals','habits','subtasks','smart_lists','focus_sessions','attachments',
+    'task_state','task_tags','habit_sessions','entry_templates'
   ]
   loop
     execute format('drop policy if exists owner_all on public.%I;', tbl);
