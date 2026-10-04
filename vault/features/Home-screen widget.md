@@ -16,6 +16,8 @@ Code lives under `src/widget/`:
 
 Build requirement: the widget needs a dev/EAS build — it does NOT appear in Expo Go. iOS is not supported; a real iOS widget needs a native WidgetKit target, which is out of scope for a managed build.
 
+Native projects — Continuous Native Generation (CNG): the `android/` and `ios/` folders are NOT committed; they are git-ignored (`.gitignore` → "generated native folders") and regenerated with `npx expo prebuild`. `app.json` + `app.config.js` (plus the config plugins and `EXPO_PUBLIC_*` env) are the single source of truth, so native config is edited there, never in the generated folders. `npx expo prebuild --no-install` succeeds for Android on Windows (CocoaPods is unavailable there, so iOS pods must be installed on a macOS machine; `ios.bundleIdentifier` / `android.package` are both `com.daybook.app`). prebuild also rewrites the `android`/`ios` npm scripts to `expo run:*` (dev-build launch). One benign prebuild warning remains: `android: userInterfaceStyle: Install expo-system-ui in your project to enable this feature.` — the app already drives light/dark itself via the theme + `useColorScheme`, so it is informational; add `expo-system-ui` to silence it and honour the native `userInterfaceStyle` if desired.
+
 ## Related
 - Page: [[Today]], [[Settings]]
-- Features: [[Persistence layer]]
+- Features: [[Persistence layer]], [[Account sign-in (Google and Apple)]]
