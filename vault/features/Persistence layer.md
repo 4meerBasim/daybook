@@ -18,4 +18,4 @@ The schema is tag-ready for [[Persist + filter tags]]: `addTask` persists `Task.
 - Page: [[Today]], [[Inbox]], [[Habit]], [[Settings]], [[Focus Mode]]
 - Features: [[Daily note]], [[Multiple journals]], [[Entry templates]], [[Attachments]], [[Focus stats]], [[Biometric app lock]], [[Export JSON and Markdown]], [[Cloud sync (Supabase)]], [[Home-screen widget]]
 - Bugs: [[Phase 1 id counters collide after soft-delete]]
-- Enhancements: [[Persist + filter tags]]
+- Enhancements: [[Persist + filter tags]], [[iOS home-screen widget]]
