@@ -1,33 +1,61 @@
-import React, { useRef, useState } from 'react';
-import { Keyboard, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { Alert, Keyboard, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '../theme/ThemeProvider';
 import { maxFontSizeMultiplier, metrics, penShadow, priorityColors, radius } from '../theme/tokens';
 import { align, marginStart, pad, row } from '../lib/rtl';
-import { useProjects, useStore, useTasks } from '../state/store';
+import { isOverdue, tomorrowMorning } from '../lib/day';
+import { collectTags, hasTag } from '../lib/matches';
 import type { RootParams } from '../navigation/Root';
+import type { Task } from '../data/seed';
+import { useProjects, useStore, useSubtaskProgress, useTasks } from '../state/store';
+import { loadSnapshot } from '../lib/db';
+import { isSyncConfigured } from '../lib/supabase';
+import { getShareCode, shareProject, subscribeSharedProject } from '../lib/shared';
 import { Screen, useHeaderTop } from '../components/Screen';
 import { Dot, EmptyRules, Ledger } from '../components/Ledger';
-import { TaskRow } from '../components/TaskRow';
+import { TaskRow, TaskRowProps } from '../components/TaskRow';
 import { SwipeableRow } from '../components/SwipeableRow';
+import { DueDatePickerModal } from '../components/DueDatePicker';
+import { TagFilterBar } from '../components/TagFilterBar';
 import { ChevronBackIcon, PenIcon } from '../components/Icon';
 import { QuickAddSheet } from './QuickAddSheet';
+
+function TaskRowWithProgress({ taskId, ...rest }: Omit<TaskRowProps, 'progress'> & { taskId: string }) {
+  const progress = useSubtaskProgress(taskId);
+  return <TaskRow {...rest} progress={progress.total > 0 ? progress : undefined} />;
+}
 
 export function ProjectScreen({ route, navigation }: NativeStackScreenProps<RootParams, 'Project'>) {
   const { projectId, list } = route.params;
   const { c, t, display, ui, mono, rtl, dark } = useTheme();
-  const { done, toggle, clear, addTask } = useStore();
+  const { done, toggle, clear, addTask, ensureTask, setDue, ensureOwnerId, hydrate } = useStore();
   const [draft, setDraft] = useState('');
   const [adding, setAdding] = useState(false);
   const [typing, setTyping] = useState(false);
+  const [pickId, setPickId] = useState<string | null>(null);
+
+  const openPick = (task: Task) => {
+    if (!task.id.startsWith('a')) ensureTask(task);
+    setPickId(task.id);
+  };
+  const snooze = (task: Task) => {
+    if (!task.id.startsWith('a')) ensureTask(task);
+    setDue(task.id, tomorrowMorning(), false);
+  };
   const scrollRef = useRef<ScrollView>(null);
   const scrollY = useRef(0);
   const top = useHeaderTop();
 
   const project = useProjects().find((p) => p.id === projectId);
-  const rows = useTasks().filter((k) => k.projectId === projectId && (!list || k.list === list));
+  const projectTasks = useTasks().filter((k) => k.projectId === projectId && (!list || k.list === list));
+  const tags = collectTags(projectTasks);
+  const [tag, setTag] = useState<string | null>(null);
+  const sel = tag && tags.includes(tag) ? tag : null;
+  const rows = projectTasks.filter((k) => hasTag(k.tags, sel));
   const doneN = rows.filter((k) => done[k.id]).length;
+  const pickTask = pickId ? rows.find((k) => k.id === pickId) : undefined;
 
   const swipeActions = [
     { name: 'complete', label: t.done },
@@ -35,8 +63,6 @@ export function ProjectScreen({ route, navigation }: NativeStackScreenProps<Root
     { name: 'pickDate', label: t.pickDate },
     { name: 'delete', label: t.delete },
   ];
-  const onPickDate = () => navigation.navigate('Calendar');
-
   const addDraft = () => {
     const title = draft.trim();
     if (!title) {
@@ -47,6 +73,41 @@ export function ProjectScreen({ route, navigation }: NativeStackScreenProps<Root
     setDraft('');
     scrollRef.current?.scrollTo({ y: scrollY.current + metrics.row });
   };
+
+  const reloadStore = async () => {
+    const snap = await loadSnapshot();
+    hydrate(snap.store);
+  };
+
+  const onShare = async () => {
+    if (!projectId) return;
+    if (!isSyncConfigured()) {
+      Alert.alert(t.syncRequiredToShare);
+      return;
+    }
+    const ownerId = ensureOwnerId();
+    const code = await shareProject(projectId, ownerId);
+    if (code) Alert.alert(t.shareListTitle, `${t.shareListBody}\n\n${code}`);
+    else Alert.alert(t.shareFailed);
+  };
+
+  useEffect(() => {
+    if (!projectId || !isSyncConfigured()) return;
+    let active = true;
+    let unsubscribe: (() => void) | null = null;
+    (async () => {
+      const code = await getShareCode(projectId);
+      if (!active || !code) return;
+      unsubscribe = subscribeSharedProject(projectId, () => {
+        void reloadStore();
+      });
+    })();
+    return () => {
+      active = false;
+      if (unsubscribe) unsubscribe();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projectId]);
 
   return (
     <Screen>
@@ -61,7 +122,7 @@ export function ProjectScreen({ route, navigation }: NativeStackScreenProps<Root
         contentContainerStyle={{ paddingBottom: 32 + metrics.pen + 24 }}
       >
         <View style={{ paddingTop: top, paddingHorizontal: metrics.gutter, paddingBottom: 12, gap: 8 }}>
-          <View style={{ flexDirection: row(rtl) }}>
+          <View style={{ flexDirection: row(rtl), alignItems: 'center', justifyContent: 'space-between' }}>
             <Pressable
               onPress={() => navigation.goBack()}
               android_ripple={null}
@@ -74,6 +135,18 @@ export function ProjectScreen({ route, navigation }: NativeStackScreenProps<Root
             >
               <ChevronBackIcon color={c.ink} flip={rtl} />
             </Pressable>
+            {projectId ? (
+              <Pressable
+                onPress={onShare}
+                android_ripple={null}
+                accessibilityRole="button"
+                accessibilityLabel={t.shareList}
+                hitSlop={metrics.hitSlop}
+                style={{ height: 44, justifyContent: 'center' }}
+              >
+                <Text style={[mono(12, 500, 0.1, true), { color: c.blue }]}>{t.shareList}</Text>
+              </Pressable>
+            ) : null}
           </View>
 
           <View style={{ flexDirection: row(rtl), alignItems: 'center', gap: 8 }}>
@@ -110,17 +183,20 @@ export function ProjectScreen({ route, navigation }: NativeStackScreenProps<Root
           </View>
         </View>
 
+        <TagFilterBar tags={tags} selected={sel} onSelect={setTag} />
+
         <Ledger>
           {rows.map((k) => (
             <SwipeableRow
               key={k.id}
               onComplete={() => toggle(k.id)}
-              onSnooze={() => clear(k.id)}
-              onPickDate={onPickDate}
+              onSnooze={() => snooze(k)}
+              onPickDate={() => openPick(k)}
               onDelete={() => clear(k.id)}
               onLongPress={() => navigation.navigate('TaskDetail', { taskId: k.id })}
             >
-              <TaskRow
+              <TaskRowWithProgress
+                taskId={k.id}
                 title={k.title}
                 meta={[
                   !done[k.id] && k.status && k.status !== 'todo' ? t[k.status] : '',
@@ -132,15 +208,16 @@ export function ProjectScreen({ route, navigation }: NativeStackScreenProps<Root
                 dotColor={
                   k.priority && k.priority !== 'none' ? c[priorityColors[k.priority].fg] : undefined
                 }
+                color={k.color ?? undefined}
                 done={!!done[k.id]}
-                overdue={k.over}
+                overdue={isOverdue(k.dueAt, !!done[k.id])}
                 onToggle={() => toggle(k.id)}
                 accessibilityActions={swipeActions}
                 onAccessibilityAction={(e) => {
                   const action = e.nativeEvent.actionName;
                   if (action === 'complete') toggle(k.id);
-                  if (action === 'snooze') clear(k.id);
-                  if (action === 'pickDate') onPickDate();
+                  if (action === 'snooze') snooze(k);
+                  if (action === 'pickDate') openPick(k);
                   if (action === 'delete') clear(k.id);
                 }}
               />
@@ -227,6 +304,18 @@ export function ProjectScreen({ route, navigation }: NativeStackScreenProps<Root
           initialProjectId={projectId}
           undatedList={list ?? 'today'}
           onClose={() => setAdding(false)}
+        />
+      ) : null}
+
+      {pickTask ? (
+        <DueDatePickerModal
+          value={pickTask.dueAt ?? null}
+          someday={pickTask.someday}
+          onChange={(dueAt, someday) => {
+            setDue(pickTask.id, dueAt, someday);
+            setPickId(null);
+          }}
+          onClose={() => setPickId(null)}
         />
       ) : null}
     </Screen>

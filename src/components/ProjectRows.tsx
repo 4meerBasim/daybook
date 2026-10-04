@@ -3,7 +3,7 @@ import { Pressable, Text, View } from 'react-native';
 import { useTheme } from '../theme/ThemeProvider';
 import { maxFontSizeMultiplier, metrics } from '../theme/tokens';
 import { align, marginStart, pad, row } from '../lib/rtl';
-import { matches } from '../lib/matches';
+import { hasTag, matches } from '../lib/matches';
 import { useProjects, useStore, useTasks } from '../state/store';
 import { ListKey } from '../data/seed';
 import { Palette } from '../theme/palette';
@@ -15,23 +15,25 @@ type Entry = { id: string | null; name: string; color: keyof Palette };
 export function ProjectRows({
   list,
   query,
+  tagFilter = null,
   onOpen,
   onAdd,
 }: {
   list: ListKey;
   query: string;
+  tagFilter?: string | null;
   onOpen: (projectId: string | null) => void;
   onAdd: () => void;
 }) {
   const { c, t, ui, mono, rtl } = useTheme();
   const { done } = useStore();
-  const inList = useTasks().filter((k) => k.list === list);
+  const inList = useTasks().filter((k) => k.list === list && hasTag(k.tags, tagFilter));
   const searching = query.trim() !== '';
 
   const entries: Entry[] = [...useProjects(), { id: null, name: t.noProject, color: 'ink3' }];
   const visible = entries
     .map((p) => ({ ...p, items: inList.filter((k) => k.projectId === p.id) }))
-    .filter((p) => p.id !== null || p.items.length > 0)
+    .filter((p) => (tagFilter ? p.items.length > 0 : p.id !== null || p.items.length > 0))
     .filter(
       (p) =>
         !searching || matches(p.name, query) || p.items.some((k) => matches(k.title, query))

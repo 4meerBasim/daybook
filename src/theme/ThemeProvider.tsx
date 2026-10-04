@@ -3,6 +3,7 @@ import { TextStyle } from 'react-native';
 import { DARK, LIGHT, Palette } from './palette';
 import { displayFamily, monoFamily, uiFamily, Weight } from './fonts';
 import { AR, EN, Strings } from '../i18n/strings';
+import { setSetting } from '../lib/db';
 
 export type Lang = 'en' | 'ar';
 export type Appearance = 'light' | 'dark' | 'auto';
@@ -34,16 +35,31 @@ const ThemeContext = createContext<Theme | null>(null);
 export function ThemeProvider({
   children,
   systemDark = false,
+  initial,
 }: {
   children: React.ReactNode;
   systemDark?: boolean;
+  initial?: { lang: Lang; appearance: Appearance; motion: Motion };
 }) {
-  const [lang, setLang] = useState<Lang>('en');
-  const [appearance, setAppearance] = useState<Appearance>('light');
-  const [motion, setMotion] = useState<Motion>('full');
+  const [lang, setLangState] = useState<Lang>(initial?.lang ?? 'en');
+  const [appearance, setAppearanceState] = useState<Appearance>(initial?.appearance ?? 'light');
+  const [motion, setMotionState] = useState<Motion>(initial?.motion ?? 'full');
 
   const value = useMemo<Theme>(() => {
     const ar = lang === 'ar';
+
+    const setLang = (l: Lang) => {
+      setLangState(l);
+      setSetting('lang', l);
+    };
+    const setAppearance = (a: Appearance) => {
+      setAppearanceState(a);
+      setSetting('appearance', a);
+    };
+    const setMotion = (m: Motion) => {
+      setMotionState(m);
+      setSetting('motion', m);
+    };
     const dark = appearance === 'auto' ? systemDark : appearance === 'dark';
     const c = dark ? DARK : LIGHT;
 

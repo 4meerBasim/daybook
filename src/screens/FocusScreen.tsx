@@ -9,6 +9,7 @@ import Animated, {
 import { useTheme } from '../theme/ThemeProvider';
 import { metrics, radius } from '../theme/tokens';
 import { align, row } from '../lib/rtl';
+import { useStore } from '../state/store';
 import { Screen, useHeaderTop } from '../components/Screen';
 import { CheckIcon } from '../components/Icon';
 
@@ -37,15 +38,31 @@ const Strip = memo(function Strip({
 
 export function FocusScreen({ onClose }: { onClose: () => void }) {
   const { c, t, rtl, reduced, display, ui, mono } = useTheme();
-  const [left, setLeft] = useState(1499);
+  const { addFocusSession } = useStore();
+  const [left, setLeft] = useState(1500);
   const [running, setRunning] = useState(true);
   const top = useHeaderTop();
 
+  const finish = () => {
+    const seconds = 1500 - left;
+    if (seconds > 0) {
+      addFocusSession({ taskId: null, startedAt: Date.now() - seconds * 1000, seconds });
+    }
+    onClose();
+  };
+
   useEffect(() => {
     if (!running) return;
-    const iv = setInterval(() => setLeft((l) => (l > 0 ? l - 1 : 1500)), 1000);
+    const iv = setInterval(() => setLeft((l) => Math.max(0, l - 1)), 1000);
     return () => clearInterval(iv);
   }, [running]);
+
+  useEffect(() => {
+    if (left > 0) return;
+    setRunning(false);
+    addFocusSession({ taskId: null, startedAt: Date.now() - 1500 * 1000, seconds: 1500 });
+    onClose();
+  }, [left]);
 
   const toggleRun = () => setRunning((r) => !r);
 
@@ -146,7 +163,7 @@ export function FocusScreen({ onClose }: { onClose: () => void }) {
             <Text style={[ui(17, 500), { color: c.paper }]}>{runLabel}</Text>
           </Pressable>
           <Pressable
-            onPress={onClose}
+            onPress={finish}
             android_ripple={null}
             accessibilityRole="button"
             accessibilityLabel={t.done}

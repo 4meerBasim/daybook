@@ -18,6 +18,8 @@ import * as Haptics from 'expo-haptics';
 import { useTheme } from '../theme/ThemeProvider';
 import { duration, easing, metrics } from '../theme/tokens';
 import { insetStart, marginStart, pad, row } from '../lib/rtl';
+import { toArabicDigits } from '../lib/day';
+import { ColorKey } from '../data/seed';
 import { Checkbox, Dot } from './Ledger';
 
 export type TaskRowProps = {
@@ -26,6 +28,8 @@ export type TaskRowProps = {
   dotColor?: string;
   done?: boolean;
   overdue?: boolean;
+  color?: ColorKey;
+  progress?: { done: number; total: number };
   onToggle: () => void;
   accessibilityActions: AccessibilityActionInfo[];
   onAccessibilityAction: (e: AccessibilityActionEvent) => void;
@@ -37,11 +41,13 @@ export function TaskRow({
   dotColor,
   done = false,
   overdue = false,
+  color,
+  progress,
   onToggle,
   accessibilityActions,
   onAccessibilityAction,
 }: TaskRowProps) {
-  const { c, ui, mono, rtl, reduced } = useTheme();
+  const { c, ui, mono, ar, rtl, reduced } = useTheme();
   const [textWidth, setTextWidth] = useState(0);
 
   const strike = useSharedValue(done ? 1 : 0);
@@ -124,8 +130,16 @@ export function TaskRow({
         />
       </View>
 
-      {meta || dotColor ? (
+      {meta || dotColor || color || progress ? (
         <View style={{ flexDirection: row(rtl), alignItems: 'center', gap: 6 }}>
+          {progress && progress.total > 0 ? (
+            <Text
+              style={[mono(12, 500), { color: c.ink3, writingDirection: 'ltr' }]}
+            >
+              {`${toArabicDigits(progress.done, ar)}/${toArabicDigits(progress.total, ar)}`}
+            </Text>
+          ) : null}
+          {color ? <Dot color={c[color]} /> : null}
           {dotColor ? <Dot color={dotColor} /> : null}
           {meta ? (
             <Text style={[mono(12, 500), { color: overdue && !done ? c.ver : c.ink3 }]}>{meta}</Text>

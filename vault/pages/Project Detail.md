@@ -4,8 +4,8 @@ Route: `Project` (native stack), params `{ projectId: string | null; list?: 'tod
 Summary: One project's tasks for one list — back button, "PROJECT · <LIST>" label, project name, a live done/total count, and the tasks as swipeable, checkable rows, with a blank row and a pen button for adding more.
 
 ## Related
-- Connects to: [[Today]], [[Inbox]] — reached by tapping a project row on either; the back chevron calls `navigation.goBack()`, [[Profile]] — the Projects row opens Studio across all lists, [[Task Detail]] — long-press a task row, [[Calendar]] — swipe a row past the pick-date threshold, [[Quick Add Sheet]] — the pen button opens it with this project preselected, [[Main Tabs]]
-- Features: [[Project Grouped Tasks]], [[Add Task Inside Project]], [[Task Details]], [[Pen FAB Tab Bar]], [[Swipe Row Actions]], [[Ink Strike-Through Completion]], [[Ledger Paper Chrome]], [[Reduced Motion Mode]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]]
+- Connects to: [[Today]], [[Inbox]] — reached by tapping a project row on either; the back chevron calls `navigation.goBack()`, [[Profile]] — the Projects row opens Studio across all lists, [[Task Detail]] — long-press a task row, [[Calendar]] — swipe a row past the pick-date threshold, [[Quick Add Sheet]] — the pen button opens it with this project preselected, [[Main Tabs]], [[Search]] — tapping a project result opens it
+- Features: [[Project Grouped Tasks]], [[Add Task Inside Project]], [[Task Details]], [[Pen FAB Tab Bar]], [[Swipe Row Actions]], [[Ink Strike-Through Completion]], [[Ledger Paper Chrome]], [[Reduced Motion Mode]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]], [[Persist + filter tags]], [[Color labels]], [[Due-date picker]], [[Real-time shared lists (Supabase)]]
 - Bugs: [[Swipe Actions Not Wired Into Task Lists]]
 - Enhancements: [[Inbox Triage Chips]]
 
@@ -17,3 +17,6 @@ The count is live, done over total for the rows on screen, pinned to `writingDir
 Tasks can be added without leaving the page — see [[Add Task Inside Project]]. Under the last task is a blank row with a dashed checkbox outline and a text field; submitting adds a plain, title-only task to this project and the list being viewed, clears the field and keeps the keyboard up. A round pen button pinned bottom-centre, the same look as the one in [[Pen FAB Tab Bar]], opens [[Quick Add Sheet]], mounted by this screen while its own `adding` flag is true, with this project preselected and undated tasks sent to the list being viewed. With no `list` both paths fall back to Today.
 
 This replaced the static Studio mock — the fixed 7/12 count, the shared avatars, the `#design` / `#invoice` chips and the "this week" / "later" sections are gone, along with the `shared`, `thisWeek` and `later` strings. Rows no longer carry a project dot, since the whole page is one project; the dot a row can carry now is its priority. [[Task Detail]] used to be a single fixed screen that every row opened; it now shows the task that was pressed.
+
+
+Phase 7 adds a "Share list" action in the header for real projects, part of [[Real-time shared lists (Supabase)]]: when [[Cloud sync (Supabase)]] is configured it creates/shows a share code and subscribes to realtime task changes for the project, re-hydrating the store on remote edits; unconfigured it alerts that cloud sync is required and no-ops.

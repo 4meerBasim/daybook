@@ -4,10 +4,10 @@ Route: `TaskDetail` (native stack), params `{ taskId: string }`
 Summary: One task opened up — its project, a checkbox and the title, then When, Priority and Status rows and the description.
 
 ## Related
-- Connects to: [[Project Detail]], [[Recent]] — reached by long-pressing a task row on either, which passes that row's id; the back chevron calls `navigation.goBack()`, [[Focus Mode]] — the ellipsis button in the header, [[Main Tabs]]
-- Features: [[Task Details]], [[Add Task Inside Project]], [[Swipe Row Actions]], [[Ledger Paper Chrome]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]], [[Ink Strike-Through Completion]]
+- Connects to: [[Project Detail]], [[Recent]] — reached by long-pressing a task row on either, which passes that row's id; the back chevron calls `navigation.goBack()`, [[Focus Mode]] — the ellipsis button in the header, [[Main Tabs]], [[Eisenhower Matrix]] — tapping a matrix card opens it, [[Smart Lists]], [[Tag Browser]], [[Search]] — tapping a task result opens it
+- Features: [[Task Details]], [[Add Task Inside Project]], [[Swipe Row Actions]], [[Ledger Paper Chrome]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]], [[Ink Strike-Through Completion]], [[Due-date picker]], [[Local reminders]], [[Recurring tasks]], [[Subtasks and checklists]], [[Color labels]], [[Attachments]], [[Photo attachments]], [[Voice notes]]
 - Bugs: [[Focus Mode Unreachable]]
-- Enhancements: none
+- Enhancements: [[AI writing assist]], [[Markdown editor]]
 
 ## Notes
 `src/screens/TaskDetailScreen.tsx`. The screen takes `taskId` from the route, finds the task in `useTasks()` and its project in `projects()`. The header holds the back chevron, the project name ("No project" when the task has none) and the ellipsis button, which still opens [[Focus Mode]]. If no task matches the id — one that was snoozed or deleted, say — only the header is drawn.
@@ -21,6 +21,8 @@ Then three label rows drawn by a local `Field` component, each `metrics.row` hig
 - Status — an outlined chip with the stored status ("To do" when unset), replaced by "Done" while the task is checked.
 - Description — the task's `desc`, or "None" in `ink3`.
 
-See [[Task Details]] for the fields themselves. The page is read-only apart from the checkbox.
+See [[Task Details]] for the fields themselves. (The automatic time/location/weather metadata shipped in Phase 2 is a journaling feature on the [[Entry Composer]], not on task detail — see [[Auto context metadata (time, location, weather)]].)
+
+An Attachments block sits below the subtasks (`AttachmentsSection taskId={task.id}` from `src/components/Attachments.tsx`): a capture bar (Photo / Camera / Voice) plus the task's photo thumbnails and audio rows with play/pause and duration, each removable. See [[Photo attachments]], [[Voice notes]] and the [[Attachments]] layer.
 
 This replaced a single fixed mock. The route used to take no params, so every row opened the same Studio task; the repeat hint, the reminder row, the `#invoice` tag chip, the three checkable subtasks with their `1 / 3` count, the note and the attachment tile are gone, along with the `weekly`, `reminder`, `snoozeHint`, `subtasks`, `sub1`, `sub3`, `notes` and `attachHint` strings. The old note text survives as the description of seed task `t1`. The red margin line that ran beside the subtasks went with them.

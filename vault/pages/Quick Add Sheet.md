@@ -5,9 +5,9 @@ Summary: The add sheet: a Task / Habit / Project switch on top, then either the 
 
 ## Related
 - Connects to: [[Main Tabs]] — opened by the pen FAB from any tab and closed by the add button, keyboard submit, pan-down or backdrop tap, [[Project Detail]] — opened by that page's own pen button with the project preselected, [[Today]] — also opened in project mode by its "New project" row and in habit mode by its "New habit" row, [[Inbox]] — also opened in project mode by its "New project" row, [[Recent]], [[Profile]]
-- Features: [[Add Habits and Projects]], [[Natural Language Quick Add]], [[Task Details]], [[Project Grouped Tasks]], [[Add Task Inside Project]], [[Pen FAB Tab Bar]], [[Reduced Motion Mode]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]]
-- Bugs: [[Quick Add Does Not Create Tasks]], [[Quick Add Sheet Shown On Launch]]
-- Enhancements: none
+- Features: [[Add Habits and Projects]], [[Natural Language Quick Add]], [[Task Details]], [[Project Grouped Tasks]], [[Add Task Inside Project]], [[Pen FAB Tab Bar]], [[Reduced Motion Mode]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]], [[Persist + filter tags]], [[Due-date picker]], [[Recurring tasks]], [[Nested tags]], [[Grocery-style auto-categorize]], [[Attachments]], [[Photo attachments]], [[Voice notes]]
+- Bugs: [[Quick Add Does Not Create Tasks]], [[Quick Add Sheet Shown On Launch]], [[Repeat chip label is cosmetic and uses a glyph]]
+- Enhancements: [[AI writing assist]], [[Markdown editor]]
 
 ## Notes
 `src/screens/QuickAddSheet.tsx`. The component takes `onClose` and three optional props, `initialKind` (default `'task'`), `initialProjectId` (default `null`) and `undatedList` (default `'inbox'`). `MainTabs` passes only `initialKind`; [[Project Detail]] passes its own project and the list being viewed and leaves the kind at Task — see [[Add Task Inside Project]].
@@ -26,6 +26,10 @@ Below the parsed chips are two labelled `DetailInput` fields. WHEN is a single l
 
 All of it is local state, so it resets each time the sheet opens; the project is seeded from `initialProjectId` — "No project" from the tab bar, the page's project from [[Project Detail]]. The sheet body is a `BottomSheetScrollView` with `keyboardShouldPersistTaps="handled"`, so the taller content scrolls inside the sheet and the chips take a tap while the keyboard is up.
 
+Below the parsed chips a capture bar (shared `CaptureBar`) offers Photo (library), Camera and a Voice record toggle that shows the elapsed time while recording. Captured items are held in local pending state and shown as photo thumbnails or an audio chip, each with a remove (×). On submit, after `addTask` returns the new task, one `Attachment` per pending item is bound to that task id. See [[Photo attachments]], [[Voice notes]] and the [[Attachments]] layer.
+
 The "Add task" button and the title field's submit key both call `submit`: the plain words become the title, the date, time and repeat chips of the title and the When field together become its `meta` (a date chip that reads exactly "Today" is dropped), followed by the unrecognised When text if there is any, a task is flagged `later` when either text names a day other than today (`hasLaterDay`) or the When text was kept verbatim, and `addTask` files it under the chosen list and project with the trimmed description, the priority and the status — see [[Project Grouped Tasks]]. The text is then cleared and the sheet closes. An empty title keeps the sheet open.
 
 The button is the last thing in the sheet in every mode: full width, 48pt, filled ink, labelled "Add task", "Add habit" or "Add project" for the selected kind. The four decorative tool icons that used to sit beside it (calendar, flag, hash, paperclip) have been removed.
+
+This sheet captures tasks, habits and projects only. The Phase 2 journaling capture — daily writing prompts, entry templates and automatic context metadata — lives on the [[Entry Composer]], not here.

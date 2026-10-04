@@ -8,11 +8,29 @@ import BottomSheet, {
 import type { BottomSheetBackdropProps } from '@gorhom/bottom-sheet';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../theme/ThemeProvider';
-import { radius } from '../theme/tokens';
+import { LABEL_COLORS, radius } from '../theme/tokens';
 import { align, borderStart, row } from '../lib/rtl';
 import { useProjects, useStore } from '../state/store';
 import { ListKey, Priority, Status } from '../data/seed';
 import { chipColors, parse, tokenColor } from '../lib/parse';
+import { toArabicDigits } from '../lib/day';
+import {
+  capturePhotoFromCamera,
+  deleteAttachmentFile,
+  formatDuration,
+  persistAttachmentFile,
+  pickPhotoFromLibrary,
+} from '../lib/attachments';
+import { CaptureBar, PhotoThumb, useVoiceCapture } from '../components/Attachments';
+import { MicIcon, CloseIcon } from '../components/Icon';
+
+type PendingAttachment = {
+  kind: 'photo' | 'audio';
+  uri: string;
+  durationMs: number | null;
+  width: number | null;
+  height: number | null;
+};
 
 const priorities: Priority[] = ['none', 'low', 'medium', 'high'];
 const statuses: Status[] = ['todo', 'doing', 'waiting'];
@@ -22,7 +40,6 @@ type SheetInput = React.ComponentRef<typeof BottomSheetTextInput>;
 export type AddKind = 'task' | 'habit' | 'project';
 
 const kinds: AddKind[] = ['task', 'habit', 'project'];
-const projectColors = ['blue', 'och', 'moss', 'ver'] as const;
 
 export function QuickAddSheet({
   initialKind = 'task',
@@ -36,11 +53,13 @@ export function QuickAddSheet({
   onClose: () => void;
 }) {
   const { c, t, ar, ui, mono, display, rtl, reduced } = useTheme();
-  const { qa, setQa, addTask, addHabit, addProject } = useStore();
+  const { qa, setQa, addTask, addHabit, addProject, addAttachment } = useStore();
   const allProjects = useProjects();
+  const voice = useVoiceCapture();
+  const [pending, setPending] = useState<PendingAttachment[]>([]);
   const [kind, setKind] = useState(initialKind);
   const [name, setName] = useState('');
-  const [color, setColor] = useState<(typeof projectColors)[number]>('blue');
+  const [color, setColor] = useState<(typeof LABEL_COLORS)[number]>('blue');
   const [minutes, setMinutes] = useState('');
   const [when, setWhen] = useState('');
   const [desc, setDesc] = useState('');
@@ -49,6 +68,10 @@ export function QuickAddSheet({
   const [projectId, setProjectId] = useState(initialProjectId);
   const sheetRef = useRef<BottomSheet>(null);
   const minutesRef = useRef<SheetInput>(null);
+  const committedRef = useRef(false);
+  const busyRef = useRef(false);
+  const pendingRef = useRef<PendingAttachment[]>([]);
+  pendingRef.current = pending;
   const topInset = useSafeAreaInsets().top;
 
   const parsed = parse(qa, ar);
@@ -69,8 +92,13 @@ export function QuickAddSheet({
     today: ar ? 'يُحفظ في اليوم' : 'Saved to Today',
     inbox: ar ? 'يُحفظ في الوارد' : 'Saved to Inbox',
   }[list];
-  const priority =
-    pickedPriority ?? (chips.some((ch) => ch.kind === 'pri') ? 'high' : 'none');
+  const parsedPriority: Priority = (() => {
+    const vals = chips.filter((ch) => ch.kind === 'pri').map((ch) => ch.value ?? 3);
+    if (!vals.length) return 'none';
+    const max = Math.max(...vals);
+    return max >= 3 ? 'high' : max >= 2 ? 'medium' : 'low';
+  })();
+  const priority = pickedPriority ?? parsedPriority;
 
   const kindLabels = {
     task: t.kindTask,
@@ -105,7 +133,8 @@ export function QuickAddSheet({
       .filter((ch) => ch.kind !== 'tag' && ch.kind !== 'pri' && ch.label !== t.today)
       .map((ch) => ch.label);
     if (freeWhen) meta.push(freeWhen);
-    addTask({
+    const tags = [...new Set(chips.filter((ch) => ch.kind === 'tag').map((ch) => ch.label.slice(1)))];
+    const created = addTask({
       title,
       meta: meta.join(' · '),
       list,
@@ -114,8 +143,66 @@ export function QuickAddSheet({
       desc: desc.trim(),
       priority,
       status,
+      tags,
+      dueAt: whenParsed.dueAt ?? parsed.dueAt ?? null,
+      recurrence: whenParsed.recurrence ?? parsed.recurrence ?? null,
     });
+    for (const p of pending) {
+      addAttachment({
+        taskId: created.id,
+        entryId: null,
+        kind: p.kind,
+        uri: p.uri,
+        durationMs: p.durationMs,
+        width: p.width,
+        height: p.height,
+      });
+    }
+    committedRef.current = true;
     sheetRef.current?.forceClose();
+  };
+
+  const addPendingPhoto = async (fromCamera: boolean) => {
+    if (busyRef.current) return;
+    busyRef.current = true;
+    try {
+      const asset = fromCamera ? await capturePhotoFromCamera() : await pickPhotoFromLibrary();
+      if (!asset) return;
+      const uri = await persistAttachmentFile(asset.uri, 'photo');
+      setPending((p) => [
+        ...p,
+        { kind: 'photo', uri, durationMs: null, width: asset.width ?? null, height: asset.height ?? null },
+      ]);
+    } finally {
+      busyRef.current = false;
+    }
+  };
+
+  const toggleVoice = async () => {
+    if (busyRef.current) return;
+    busyRef.current = true;
+    try {
+      if (voice.isRecording) {
+        const result = await voice.stop();
+        if (result)
+          setPending((p) => [
+            ...p,
+            { kind: 'audio', uri: result.uri, durationMs: result.durationMs, width: null, height: null },
+          ]);
+        return;
+      }
+      await voice.start();
+    } finally {
+      busyRef.current = false;
+    }
+  };
+
+  const removePending = (index: number) => {
+    setPending((p) => {
+      const target = p[index];
+      if (target) deleteAttachmentFile(target.uri);
+      return p.filter((_, i) => i !== index);
+    });
   };
 
   const renderBackdrop = useCallback(
@@ -144,6 +231,9 @@ export function QuickAddSheet({
       android_keyboardInputMode="adjustResize"
       enablePanDownToClose
       onClose={() => {
+        if (!committedRef.current) {
+          for (const p of pendingRef.current) deleteAttachmentFile(p.uri);
+        }
         setQa('');
         onClose();
       }}
@@ -276,7 +366,7 @@ export function QuickAddSheet({
               accessibilityLabel={t.color}
               style={{ flexDirection: row(rtl) }}
             >
-              {projectColors.map((col) => {
+              {LABEL_COLORS.map((col) => {
                 const on = col === color;
                 return (
                   <Pressable
@@ -405,6 +495,51 @@ export function QuickAddSheet({
               >
                 <Text style={[ui(12, 500), { lineHeight: undefined, color: c.ink3 }]}>{dest}</Text>
               </View>
+            </View>
+
+            <View style={{ marginTop: 14, gap: 12 }}>
+              <CaptureBar
+                onPickPhoto={() => addPendingPhoto(false)}
+                onCamera={() => addPendingPhoto(true)}
+                voice={{ isRecording: voice.isRecording, durationMs: voice.durationMs, onToggle: toggleVoice }}
+              />
+              {pending.length ? (
+                <View style={{ flexDirection: row(rtl), flexWrap: 'wrap', gap: 12 }}>
+                  {pending.map((p, i) =>
+                    p.kind === 'photo' ? (
+                      <PhotoThumb key={i} uri={p.uri} onRemove={() => removePending(i)} />
+                    ) : (
+                      <View
+                        key={i}
+                        style={{
+                          flexDirection: row(rtl),
+                          alignItems: 'center',
+                          gap: 8,
+                          height: 36,
+                          paddingHorizontal: 10,
+                          borderRadius: radius.chip,
+                          borderWidth: 1,
+                          borderColor: c.rule,
+                        }}
+                      >
+                        <MicIcon size={16} color={c.ink2} />
+                        <Text style={[ui(13, 500), { lineHeight: undefined, color: c.ink2 }]}>
+                          {toArabicDigits(formatDuration(p.durationMs), ar)}
+                        </Text>
+                        <Pressable
+                          onPress={() => removePending(i)}
+                          hitSlop={8}
+                          accessibilityRole="button"
+                          accessibilityLabel={t.removeAttachment}
+                          android_ripple={null}
+                        >
+                          <CloseIcon size={16} color={c.ink3} />
+                        </Pressable>
+                      </View>
+                    )
+                  )}
+                </View>
+              ) : null}
             </View>
 
             <DetailInput

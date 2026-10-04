@@ -20,6 +20,13 @@ import { SettingsScreen } from '../screens/SettingsScreen';
 import { PageClosedScreen } from '../screens/PageClosedScreen';
 import { SwipeStatesScreen } from '../screens/SwipeStatesScreen';
 import { AddKind, QuickAddSheet } from '../screens/QuickAddSheet';
+import { EntryComposerScreen } from '../screens/EntryComposerScreen';
+import { TimelineMapScreen } from '../screens/TimelineMapScreen';
+import { JournalsScreen } from '../screens/JournalsScreen';
+import { SmartListsScreen } from '../screens/SmartListsScreen';
+import { TagBrowserScreen } from '../screens/TagBrowserScreen';
+import { EisenhowerScreen } from '../screens/EisenhowerScreen';
+import { SearchScreen } from '../screens/SearchScreen';
 
 export type RootParams = {
   Onboarding: undefined;
@@ -33,6 +40,13 @@ export type RootParams = {
   PageClosed: undefined;
   SwipeStates: undefined;
   InboxEmpty: undefined;
+  EntryComposer: { entryId?: string | null; initialTemplateId?: string | null } | undefined;
+  TimelineMap: undefined;
+  Journals: undefined;
+  SmartLists: undefined;
+  TagBrowser: undefined;
+  Eisenhower: undefined;
+  Search: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootParams>();
@@ -53,12 +67,15 @@ function MainTabs({ navigation }: NativeStackScreenProps<RootParams, 'Main'>) {
           onOpenHabit={(habitId) => navigation.navigate('Habit', { habitId })}
           onAddProject={() => setAdding('project')}
           onAddHabit={() => setAdding('habit')}
+          onOpenEntry={(entryId) => navigation.navigate('EntryComposer', { entryId })}
+          onOpenTimeline={() => navigation.navigate('TimelineMap')}
         />
       ) : null}
       {tab === 'recent' ? (
         <RecentScreen
           onOpenTask={(taskId) => navigation.navigate('TaskDetail', { taskId })}
           onPickDate={() => navigation.navigate('Calendar')}
+          onOpenTimeline={() => navigation.navigate('TimelineMap')}
         />
       ) : null}
       {tab === 'inbox' ? <InboxScreen onOpenProject={openProject('inbox')} onAddProject={() => setAdding('project')} /> : null}
@@ -66,6 +83,11 @@ function MainTabs({ navigation }: NativeStackScreenProps<RootParams, 'Main'>) {
         <ProfileScreen
           onOpenProject={() => navigation.navigate('Project', { projectId: 'studio' })}
           onOpenSettings={() => navigation.navigate('Settings')}
+          onOpenJournals={() => navigation.navigate('Journals')}
+          onOpenSmartLists={() => navigation.navigate('SmartLists')}
+          onOpenTagBrowser={() => navigation.navigate('TagBrowser')}
+          onOpenEisenhower={() => navigation.navigate('Eisenhower')}
+          onOpenSearch={() => navigation.navigate('Search')}
         />
       ) : null}
 
@@ -126,6 +148,30 @@ export function Root() {
         </Stack.Screen>
         <Stack.Screen name="SwipeStates" component={SwipeStatesScreen} />
         <Stack.Screen name="InboxEmpty" component={InboxEmptyScreen} />
+        <Stack.Screen name="EntryComposer" options={{ presentation: 'fullScreenModal' }}>
+          {({ navigation, route }) => (
+            <EntryComposerScreen
+              entryId={route.params?.entryId}
+              initialTemplateId={route.params?.initialTemplateId}
+              onClose={() => navigation.goBack()}
+            />
+          )}
+        </Stack.Screen>
+        <Stack.Screen name="TimelineMap">
+          {({ navigation }) => (
+            <TimelineMapScreen
+              onOpenEntry={(entryId) => navigation.navigate('EntryComposer', { entryId })}
+              onBack={() => navigation.goBack()}
+            />
+          )}
+        </Stack.Screen>
+        <Stack.Screen name="Journals">
+          {({ navigation }) => <JournalsScreen onBack={() => navigation.goBack()} />}
+        </Stack.Screen>
+        <Stack.Screen name="SmartLists" component={SmartListsScreen} />
+        <Stack.Screen name="TagBrowser" component={TagBrowserScreen} />
+        <Stack.Screen name="Eisenhower" component={EisenhowerScreen} />
+        <Stack.Screen name="Search" component={SearchScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

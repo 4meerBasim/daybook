@@ -4,9 +4,9 @@ Route: `Main` → tab key `inbox`
 Summary: Undated captures waiting to be triaged, grouped into one row per project plus a "No project" row for the unassigned ones, ending with a "New project" row that opens the add sheet.
 
 ## Related
-- Connects to: [[Main Tabs]], [[Project Detail]] — tap a project row, [[Inbox Empty]] — long-press the Inbox tab, [[Quick Add Sheet]] — pen FAB, or the "New project" row, which opens it in project mode
-- Features: [[Project Grouped Tasks]], [[Add Habits and Projects]], [[Inline Page Search]], [[Ledger Paper Chrome]], [[Collapsing Page Header]], [[Pen FAB Tab Bar]], [[Natural Language Quick Add]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]]
-- Bugs: [[Swipe Actions Not Wired Into Task Lists]], [[Quick Add Does Not Create Tasks]]
+- Connects to: [[Main Tabs]], [[Project Detail]] — tap a project row, [[Inbox Empty]] — long-press the Inbox tab, [[Quick Add Sheet]] — pen FAB, or the "New project" row, which opens it in project mode, [[Smart Lists]]
+- Features: [[Project Grouped Tasks]], [[Add Habits and Projects]], [[Inline Page Search]], [[Ledger Paper Chrome]], [[Collapsing Page Header]], [[Pen FAB Tab Bar]], [[Natural Language Quick Add]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]], [[Persistence layer]], [[Persist + filter tags]], [[Grocery-style auto-categorize]], [[Smart lists]], [[Nested tags]], [[Global search]]
+- Bugs: [[Swipe Actions Not Wired Into Task Lists]], [[Quick Add Does Not Create Tasks]], [[Inbox grouped pick-date opens generic calendar]]
 - Enhancements: [[Inbox Triage Chips]]
 
 ## Notes

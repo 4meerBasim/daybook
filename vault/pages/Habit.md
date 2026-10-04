@@ -5,7 +5,7 @@ Summary: One habit's own sheet on darker paper — its name and, for the seeded 
 
 ## Related
 - Connects to: [[Today]] — tapping a habit row opens this screen for that habit, [[Main Tabs]] — the check button calls `navigation.goBack()`
-- Features: [[Habit Session Timer]], [[Add Habits and Projects]], [[Ledger Paper Chrome]], [[Light and Dark Paper Palettes]], [[In-App RTL and Arabic Typography]]
+- Features: [[Habit Session Timer]], [[Add Habits and Projects]], [[Ledger Paper Chrome]], [[Light and Dark Paper Palettes]], [[In-App RTL and Arabic Typography]], [[Persistence layer]], [[Karma and gamification]]
 - Bugs: none found
 - Enhancements: none
 

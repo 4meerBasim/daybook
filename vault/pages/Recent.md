@@ -4,8 +4,8 @@ Route: `Main` → tab key `recent`
 Summary: A flat list of every task, most recently added first, each row showing its project — the one tab that lists tasks directly rather than project rows.
 
 ## Related
-- Connects to: [[Main Tabs]], [[Task Detail]] — long-press a task row, [[Calendar]] — swipe a row past the pick-date threshold, [[Quick Add Sheet]] — pen FAB
-- Features: [[Swipe Row Actions]], [[Task Details]], [[Ink Strike-Through Completion]], [[Inline Page Search]], [[Project Grouped Tasks]], [[Natural Language Quick Add]], [[Ledger Paper Chrome]], [[Collapsing Page Header]], [[Pen FAB Tab Bar]], [[Reduced Motion Mode]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]]
+- Connects to: [[Main Tabs]], [[Timeline and Map]] — top ledger row opens Timeline & map, [[Task Detail]] — long-press a task row, [[Calendar]] — swipe a row past the pick-date threshold, [[Quick Add Sheet]] — pen FAB, [[Eisenhower Matrix]] — quadrant sort view
+- Features: [[Timeline and map view]], [[Swipe Row Actions]], [[Task Details]], [[Ink Strike-Through Completion]], [[Inline Page Search]], [[Project Grouped Tasks]], [[Natural Language Quick Add]], [[Ledger Paper Chrome]], [[Collapsing Page Header]], [[Pen FAB Tab Bar]], [[Reduced Motion Mode]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]], [[Persist + filter tags]], [[Due-date picker]], [[Smart lists]], [[Nested tags]], [[Eisenhower matrix]], [[Global search]]
 - Bugs: [[Swipe Actions Not Wired Into Task Lists]], [[Quick Add Does Not Create Tasks]]
 - Enhancements: none
 

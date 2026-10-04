@@ -53,3 +53,5 @@ export const priorityColors = {
   medium: { fg: 'och', bg: 'ochS' },
   high: { fg: 'ver', bg: 'verS' },
 } as const;
+
+export const LABEL_COLORS = ['blue', 'och', 'moss', 'ver'] as const;

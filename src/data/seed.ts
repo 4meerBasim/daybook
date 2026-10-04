@@ -1,11 +1,15 @@
 import { Palette } from '../theme/palette';
 import { Strings } from '../i18n/strings';
+import { JournalIconKey } from '../components/Icon';
+import type { RecurrenceRule } from '../lib/recurrence';
 
 export type ListKey = 'today' | 'inbox';
 
 export type Priority = 'none' | 'low' | 'medium' | 'high';
 
 export type Status = 'todo' | 'doing' | 'waiting';
+
+export type ColorKey = 'blue' | 'och' | 'moss' | 'ver';
 
 export type Project = { id: string; name: string; color: keyof Palette };
 
@@ -20,7 +24,79 @@ export type Task = {
   desc?: string;
   priority?: Priority;
   status?: Status;
+  tags?: string[];
+  dueAt?: number | null;
+  reminderAt?: number | null;
+  recurrence?: RecurrenceRule | null;
+  color?: ColorKey | null;
+  urgent?: boolean;
+  important?: boolean;
+  someday?: boolean;
 };
+
+export type Subtask = { id: string; taskId: string; title: string; done: boolean; position: number };
+
+export type Attachment = {
+  id: string;
+  taskId: string | null;
+  entryId: string | null;
+  kind: 'photo' | 'audio';
+  uri: string;
+  durationMs: number | null;
+  width: number | null;
+  height: number | null;
+  createdAt: number;
+};
+
+export type SmartListRule = {
+  tags?: string[];
+  due?: 'today' | 'overdue' | 'week' | 'none';
+  priority?: ('low' | 'medium' | 'high')[];
+  projectId?: string | null;
+  color?: ColorKey[];
+  someday?: boolean;
+};
+
+export type SmartList = {
+  id: string;
+  name: string;
+  rules: SmartListRule;
+  position: number;
+  builtin?: boolean;
+};
+
+export type Journal = { id: string; name: string; color: keyof Palette; icon: JournalIconKey };
+
+export type Entry = {
+  id: string;
+  journalId: string;
+  day: string;
+  title: string;
+  body: string;
+  templateId: string | null;
+  createdAt: number;
+  placeName: string | null;
+  lat: number | null;
+  lng: number | null;
+  tempC: number | null;
+  weatherCode: number | null;
+};
+
+export type EntryTemplate = { id: string; name: string; body: string; builtIn: boolean };
+
+export const DEFAULT_JOURNAL_ID = 'default';
+
+export function defaultJournal(t: Strings): Journal {
+  return { id: DEFAULT_JOURNAL_ID, name: t.defaultJournal, color: 'blue', icon: 'book' };
+}
+
+export function builtinTemplates(t: Strings): EntryTemplate[] {
+  return [
+    { id: 'tpl-gratitude', name: t.tplGratitude, body: t.tplGratitudeBody, builtIn: true },
+    { id: 'tpl-review', name: t.tplDailyReview, body: t.tplDailyReviewBody, builtIn: true },
+    { id: 'tpl-weekly', name: t.tplWeekly, body: t.tplWeeklyBody, builtIn: true },
+  ];
+}
 
 export function projects(t: Strings): Project[] {
   return [
