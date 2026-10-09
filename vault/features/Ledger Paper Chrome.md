@@ -28,14 +28,14 @@ That measurement is why every ruled row is built the same way: an outer box with
 
 Row internals are `padding: 0 20 0 16`, a 22pt checkbox, a 12pt gap and a 16pt title inset, which puts the content column at `metrics.content` — 66. The design names 66 for its sub-heading rows, and the gap is 12 rather than 14 so the two agree.
 
-Metrics come from `src/theme/tokens.ts` and are shared with every screen, which is why the rules line up across [[Today]], [[Upcoming]], [[Inbox]], [[Project Detail]], [[Search]], [[Task Detail]], [[Page Closed]] and [[Swipe States]] even where those screens lay out rows themselves. [[Inbox Empty]], [[Calendar]] and [[Search]] redraw the margin rule inline using the same `insetStart(rtl, metrics.marginLine)` so it mirrors correctly in Arabic.
+Metrics come from `src/theme/tokens.ts` and are shared with every screen, which is why the rules line up across [[Today]], [[Upcoming]], [[Project Detail]], [[Search Results]], [[Task Detail]], [[Page Closed]] and [[Swipe States]] even where those screens lay out rows themselves. [[Calendar]] and [[Search Results]] redraw the margin rule inline using the same `insetStart(rtl, metrics.marginLine)` so it mirrors correctly in Arabic.
 
 ### What still holds one line
 
-Growth is for text the user wrote. Task titles, inbox captures, project names, subtasks and note excerpts wrap; tab labels, times, counts, fractions and section sub-headings keep `numberOfLines={1}`, because they are table chrome and a wrapped count reads as a mistake. Chips keep the design's 26 / 28 / 30 heights as a `minHeight` with an explicit `lineHeight`, so a long label truncates inside the pill instead of stretching the row.
+Growth is for text the user wrote. Task titles, project names, subtasks and note excerpts wrap; tab labels, times, counts, fractions and section sub-headings keep `numberOfLines={1}`, because they are table chrome and a wrapped count reads as a mistake. Chips keep the design's 26 / 28 / 30 heights as a `minHeight` with an explicit `lineHeight`, so a long label truncates inside the pill instead of stretching the row.
 
 ## Related
-- Page: [[Today]], [[Upcoming]], [[Inbox]], [[Inbox Empty]], [[Search]], [[Project Detail]], [[Task Detail]], [[Calendar]], [[Page Closed]], [[Swipe States]], [[Settings]], [[Onboarding]], [[Quick Add Sheet]]
-- Features: [[Light and Dark Paper Palettes]], [[In-App RTL and Arabic Typography]], [[Ink Strike-Through Completion]], [[Collapsing Page Header]]
+- Page: [[Today]], [[Upcoming]], [[Profile]], [[Search Results]], [[Project Detail]], [[Task Detail]], [[Calendar]], [[Page Closed]], [[Swipe States]], [[Settings]], [[Onboarding]], [[Quick Add Sheet]]
+- Features: [[Light and Dark Paper Palettes]], [[In-App RTL and Arabic Typography]], [[Ink Strike-Through Completion]], [[Collapsing Page Header]], [[Glass Tab Bar]]
 - Bugs: [[Ink Stroke Spans The Whole Title Column]], [[Quick Add Highlight Drifts From The Caret]] — the same growing-text rule applied to the capture field
 - Enhancements: [[Closing the Page Ritual]], [[Day Capacity Budget]], [[Ink Decay and Task Retirement]], [[Notes With Live Task Lines]], [[Deal Me One Task Picker]], [[Weekly Spread Review]], [[Focus Live Activity and Widgets]]

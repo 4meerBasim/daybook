@@ -5,7 +5,9 @@ import { splitTags } from '../lib/parse';
 
 export const DB_NAME = 'daybook.db';
 
-const SCHEMA_VERSION = 2;
+const SCHEMA_VERSION = 3;
+
+export const DISPLAY_NAME = 'displayName';
 
 export const PRIORITY_HIGH = 3;
 
@@ -115,6 +117,13 @@ UPDATE tasks SET tags = 'design' WHERE seedKey IN ('projectBrief', 'moodboards',
 UPDATE tasks SET tags = 'invoice' WHERE seedKey = 'task1';
 `;
 
+const V3 = `
+CREATE TABLE prefs (
+  key TEXT PRIMARY KEY NOT NULL,
+  value TEXT NOT NULL
+);
+`;
+
 async function liftTagsFromTitles(db: SQLiteDatabase): Promise<void> {
   const written = await db.getAllAsync<{ id: string; title: string }>(
     "SELECT id, title FROM tasks WHERE seedKey IS NULL AND title LIKE '%#%'"
@@ -137,6 +146,7 @@ const STEPS: ((db: SQLiteDatabase) => Promise<void>)[] = [
     await db.execAsync(V2);
     await liftTagsFromTitles(db);
   },
+  (db) => db.execAsync(V3),
 ];
 
 export async function migrate(db: SQLiteDatabase): Promise<void> {

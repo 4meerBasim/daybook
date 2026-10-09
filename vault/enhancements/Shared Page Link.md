@@ -16,5 +16,5 @@ Open decisions:
 - Privacy line: sharing is opt-in per page and must never carry the rest of the vault along.
 
 ## Related
-- Page: [[Settings]], [[Project Detail]]
+- Page: [[Settings]], [[Profile]], [[Project Detail]]
 - Enhancements: [[Offline First Local Store]]

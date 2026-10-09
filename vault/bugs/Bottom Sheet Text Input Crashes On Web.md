@@ -28,6 +28,6 @@ Options, none taken yet:
 Native behaviour is unverified — this project does not boot emulators, so the claim that native is unaffected rests on `react-native`'s own API surface rather than a run.
 
 ## Related
-- Feature: [[Natural Language Quick Add]], [[Pen FAB Tab Bar]]
+- Feature: [[Natural Language Quick Add]], [[Glass Tab Bar]]
 - Page: [[Quick Add Sheet]]
 - Bugs: [[Quick Add Does Not Create Tasks]], [[Quick Add Highlight Drifts From The Caret]]

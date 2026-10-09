@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { useColorScheme } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -23,17 +24,26 @@ export default function App() {
   if (!fontsLoaded) return null;
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaProvider>
-        <ThemeProvider systemDark={systemDark}>
+    <SafeAreaProvider>
+      <ThemeProvider systemDark={systemDark}>
+        <Shell>
           <SQLiteProvider databaseName={DB_NAME} onInit={initDatabase}>
             <StoreProvider>
               <ThemedStatusBar />
               <Root />
             </StoreProvider>
           </SQLiteProvider>
-        </ThemeProvider>
-      </SafeAreaProvider>
+        </Shell>
+      </ThemeProvider>
+    </SafeAreaProvider>
+  );
+}
+
+function Shell({ children }: { children: ReactNode }) {
+  const { c } = useTheme();
+  return (
+    <GestureHandlerRootView style={{ flex: 1, backgroundColor: c.paper }}>
+      {children}
     </GestureHandlerRootView>
   );
 }

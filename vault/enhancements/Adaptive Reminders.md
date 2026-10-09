@@ -16,5 +16,5 @@ Open decisions:
 - Insistent mode risks being hostile. It should be opt-in per task, from [[Task Detail]].
 
 ## Related
-- Page: [[Settings]], [[Task Detail]]
+- Page: [[Settings]], [[Profile]], [[Task Detail]]
 - Enhancements: [[Closing the Page Ritual]], [[Waiting On Follow-Ups]], [[Offline First Local Store]]

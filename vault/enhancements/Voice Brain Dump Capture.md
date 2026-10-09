@@ -11,12 +11,12 @@ Capture is the moment apps lose people — typing seven tasks one at a time is w
 Open decisions:
 
 - Transcription route: on-device speech recognition or server-side. On-device is free and private but weaker on Arabic, which matters given [[In-App RTL and Arabic Typography]] is a first-class concern in this app.
-- Output needs review before commit — a confirmation sheet listing the parsed tasks, since a bad parse dumping twelve wrong rows into the [[Inbox]] is worse than typing.
+- Output needs review before commit — a confirmation sheet listing the parsed tasks, since a bad parse dumping twelve wrong rows into the list is worse than typing. Worse still right now: anything parsed without a day is inserted where no screen will show it, so the user could neither see nor undo it — [[Undated Unassigned Tasks Have No Screen]].
 - Multi-item output has nowhere to land while [[Quick Add Does Not Create Tasks]] is open.
 - Audio attachments imply file storage. [[Task Detail]] draws an attachment row already, but nothing backs it.
 
 ## Related
-- Page: [[Quick Add Sheet]], [[Inbox]], [[Task Detail]]
+- Page: [[Quick Add Sheet]], [[Today]], [[Task Detail]]
 - Features: [[Natural Language Quick Add]], [[In-App RTL and Arabic Typography]]
-- Bugs: [[Quick Add Does Not Create Tasks]]
+- Bugs: [[Quick Add Does Not Create Tasks]], [[Undated Unassigned Tasks Have No Screen]]
 - Enhancements: [[Inbox Triage Chips]], [[System Capture Entry Points]]

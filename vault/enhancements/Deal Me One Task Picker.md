@@ -12,11 +12,11 @@ Open decisions:
 
 - Tags exist as chips in the design but carry no semantics. Energy and context could reuse tags or be a separate dimension; reusing tags is cheaper and probably right.
 - The time-based filters need the duration field from [[Day Capacity Budget]] to mean anything.
-- Where the button lives. The pen FAB is capture; this is retrieval, so it wants its own affordance — possibly a long-press on the Today tab, which [[Main Tabs]] already uses for shortcuts.
+- Where the button lives. The bar's Add item is capture; this is retrieval, so it wants its own affordance. A long-press is the obvious candidate, and the redesign freed one up: Profile's long-press is unassigned now that the Inbox tab is gone, where before the only free slot would have meant displacing [[Settings]] or [[Calendar]]. See [[Main Tabs]] and [[Glass Tab Bar]]. The raised pen it used to be contrasted against is gone too — [[Pen FAB]].
 - "Deal me another" needs session memory of what was refused, so the same task is not dealt twice in a row.
 
 ## Related
-- Page: [[Today]], [[Focus Mode]], [[Main Tabs]]
-- Features: [[Focus Timer]], [[Pen FAB Tab Bar]], [[Ledger Paper Chrome]]
+- Page: [[Today]], [[Focus Mode]], [[Main Tabs]], [[Profile]]
+- Features: [[Focus Timer]], [[Glass Tab Bar]], [[Pen FAB]], [[Ledger Paper Chrome]]
 - Bugs: [[Focus Mode Unreachable]]
 - Enhancements: [[Day Capacity Budget]]

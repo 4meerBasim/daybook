@@ -7,6 +7,7 @@ export const radius = {
   chip: 6,
   card: 12,
   sheet: 20,
+  bar: 32,
   pen: 9999,
 } as const;
 
@@ -21,9 +22,14 @@ export const metrics = {
   rowPad: 12,
   content: 66,
   tabBar: 84,
+  tabBarHeight: 64,
+  tabBarInset: 12,
+  tabBarMinBottom: 12,
+  tabBarLift: 16,
   pen: 56,
   tab: 56,
   minTap: 44,
+  avatar: 48,
   labelColumn: 88,
   hitSlop: { top: 8, bottom: 8, left: 8, right: 8 },
 } as const;
@@ -47,14 +53,14 @@ export const easing = {
   ink: Easing.bezier(0.4, 0, 0.2, 1),
 };
 
-export function penShadow(c: Palette, dark: boolean): ViewStyle {
-  return dark
-    ? { borderWidth: 1, borderColor: `${c.ink}1F` }
-    : {
-        shadowColor: c.ink,
-        shadowOpacity: 0.18,
-        shadowRadius: 16,
-        shadowOffset: { width: 0, height: 6 },
-        elevation: 8,
-      };
+export function glass(c: Palette, dark: boolean): {
+  blur: number;
+  tint: string;
+  shell: ViewStyle;
+} {
+  return {
+    blur: dark ? 48 : 56,
+    tint: dark ? `${c.paper2}B0` : `${c.paper2}A8`,
+    shell: { borderWidth: 1, borderColor: dark ? `${c.ink}26` : `${c.rule}CC` },
+  };
 }

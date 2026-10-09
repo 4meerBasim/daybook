@@ -22,5 +22,5 @@ Fixed by declaring `react-native-worklets` at 0.10.1 and bumping `expo` to the m
 `src/theme/tokens.ts:33` calls `Easing.bezier(...)` at module scope, which is what made the failure land on the very first module evaluation rather than at first animation. That is the messenger, not the cause, and it is left as is.
 
 ## Related
-- Feature: [[Swipe Row Actions]], [[Ink Strike-Through Completion]], [[Collapsing Page Header]], [[Reduced Motion Mode]]
+- Feature: [[Swipe Row Actions]], [[Ink Strike-Through Completion]], [[Collapsing Page Header]], [[Reduced Motion Mode]], [[Animated Page Transitions]], [[Glass Tab Bar]], [[Expanding Search Field]] — the three worklet-driven animations added since
 - Page: [[Main Tabs]], [[Today]]

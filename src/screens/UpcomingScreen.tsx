@@ -3,6 +3,7 @@ import { Text, View } from 'react-native';
 import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
 import { useTheme } from '../theme/ThemeProvider';
 import { maxFontSizeMultiplier, metrics } from '../theme/tokens';
+import { useTabBarFootprint } from '../components/TabBar';
 import { align, marginStart, pad, row } from '../lib/rtl';
 import { addDays, dayOfMonth, startOfDay, timeLabel } from '../lib/date';
 import { useStore } from '../state/store';
@@ -19,6 +20,7 @@ function dateLabel(items: DatedTask[]): string {
 
 export function UpcomingScreen() {
   const { c, t, ui, mono, display, rtl, unit } = useTheme();
+  const tabBarFootprint = useTabBarFootprint();
   const { upcoming } = useStore();
   const scrollY = useSharedValue(0);
   const onScroll = useAnimatedScrollHandler((e) => {
@@ -43,7 +45,7 @@ export function UpcomingScreen() {
       <Animated.ScrollView
         onScroll={onScroll}
         scrollEventThrottle={16}
-        contentContainerStyle={{ paddingBottom: metrics.tabBar }}
+        contentContainerStyle={{ paddingBottom: tabBarFootprint }}
       >
         <PageHeader title={t.upcoming} scrollY={scrollY} />
 

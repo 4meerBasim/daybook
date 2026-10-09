@@ -2,7 +2,14 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 import { useSQLiteContext } from 'expo-sqlite';
 import { dayOfMonth } from '../lib/date';
 import type { SnoozeOffset } from '../db/reminders';
-import { PROJECT_COLORS, type DatedTask, type ProjectRow, type SubtaskRow, type TaskRow } from '../db/schema';
+import {
+  DISPLAY_NAME,
+  PROJECT_COLORS,
+  type DatedTask,
+  type ProjectRow,
+  type SubtaskRow,
+  type TaskRow,
+} from '../db/schema';
 import { SEED_INVOICE_TASK_ID } from '../db/seed';
 import {
   archiveProject,
@@ -11,12 +18,13 @@ import {
   insertTask,
   restoreTask,
   selectAssigned,
-  selectInbox,
   selectMonth,
+  selectPref,
   selectProjects,
   selectSubtasks,
   selectToday,
   selectUpcoming,
+  setPref,
   setSubtaskCompleted,
   setTaskCompleted,
   snoozeTask,
@@ -29,11 +37,11 @@ import {
 type Snapshot = {
   today: DatedTask[];
   upcoming: DatedTask[];
-  inbox: TaskRow[];
   assigned: TaskRow[];
   projects: ProjectRow[];
   month: DatedTask[];
   subtasks: SubtaskRow[];
+  displayName: string;
 };
 
 type Store = Snapshot & {
@@ -48,6 +56,7 @@ type Store = Snapshot & {
   createProject: (name: string) => void;
   renameProject: (id: string, name: string) => void;
   removeProject: (id: string) => void;
+  setDisplayName: (name: string) => void;
   qa: string;
   setQa: (v: string) => void;
   sel: number;
@@ -57,11 +66,11 @@ type Store = Snapshot & {
 const EMPTY: Snapshot = {
   today: [],
   upcoming: [],
-  inbox: [],
   assigned: [],
   projects: [],
   month: [],
   subtasks: [],
+  displayName: '',
 };
 
 const StoreContext = createContext<Store | null>(null);
@@ -75,16 +84,25 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const reload = useCallback(async () => {
     const now = Date.now();
-    const [today, upcoming, inbox, assigned, projects, month, subtasks] = await Promise.all([
-      selectToday(db, now),
-      selectUpcoming(db, now),
-      selectInbox(db),
-      selectAssigned(db),
-      selectProjects(db),
-      selectMonth(db, now),
-      selectSubtasks(db, SEED_INVOICE_TASK_ID),
-    ]);
-    setSnapshot({ today, upcoming, inbox, assigned, projects, month, subtasks });
+    const [today, upcoming, assigned, projects, month, subtasks, displayName] =
+      await Promise.all([
+        selectToday(db, now),
+        selectUpcoming(db, now),
+        selectAssigned(db),
+        selectProjects(db),
+        selectMonth(db, now),
+        selectSubtasks(db, SEED_INVOICE_TASK_ID),
+        selectPref(db, DISPLAY_NAME),
+      ]);
+    setSnapshot({
+      today,
+      upcoming,
+      assigned,
+      projects,
+      month,
+      subtasks,
+      displayName: displayName ?? '',
+    });
     setLoaded(true);
   }, [db]);
 
@@ -114,6 +132,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       },
       renameProject: (id, name) => after(updateProjectName(db, id, name)),
       removeProject: (id) => after(archiveProject(db, id, Date.now())),
+      setDisplayName: (name) => after(setPref(db, DISPLAY_NAME, name)),
       qa,
       setQa,
       sel,

@@ -16,7 +16,7 @@ Summary: Typing a task underlines its dates, times, tags, priority and repeat wo
 
 Each match also emits a chip with a localised label — `High priority` / `أولوية عالية`, `↻ Repeats week` / `↻ يتكرر`, and so on — and `tokenColor` / `chipColors` map the kind onto palette tokens so the highlighting recolours with the theme.
 
-`hasDate` is true when a date or time chip carries no digits; [[Quick Add Sheet]] reads it to show the dashed destination chip, "Saved to Upcoming" when a day is understood and "Saved to Inbox" otherwise — which is what wires this to [[Upcoming]] and [[Inbox]].
+`hasDate` is true when a date or time chip carries no digits; [[Quick Add Sheet]] reads it to show the dashed destination chip, "Saved to Upcoming" when a day is understood and "No date" otherwise. Only the first of those is a destination now: the chip used to read "Saved to Inbox" and point at a real list, and since that screen was removed the dateless half of the parser's output has nowhere to appear — see [[Undated Unassigned Tasks Have No Screen]].
 
 The highlighting effect in the sheet is a coloured `Text` rebuilt from `parsed.tokens` on every keystroke with a transparent `BottomSheetTextInput` absolutely filled over it. The mirror is the layer in flow and the input cannot scroll, which is what keeps the caret on its glyph — see [[Quick Add Highlight Drifts From The Caret]] for the arrangement this replaced and why the previous one came apart.
 
@@ -29,10 +29,10 @@ The highlighting effect in the sheet is a coloured `Text` rebuilt from `parsed.t
 - **Due date** — resolved against the current date, so "tomorrow" means tomorrow on the day it is typed. `resolveDay` handles today / tonight / tomorrow / next week / next monday / next friday and the Arabic غداً, غدا and اليوم; `applyTime` then refines the hour from a `3pm` or `10:30am` token. A date is only produced when `hasDate` is already true, which keeps the insert consistent with the destination chip the user was shown.
 - **Priority** — `PRIORITY_HIGH` when a `pri` token is present, null otherwise.
 
-A time with no day is left in the title rather than thrown away, since that task goes to [[Inbox]] undated.
+A time with no day is left in the title rather than thrown away, since the task is inserted undated and the time is the only trace of when the user meant it.
 
 ## Related
-- Page: [[Quick Add Sheet]], [[Inbox]], [[Upcoming]], [[Today]], [[Project Detail]]
-- Features: [[Offline First Local Store]], [[Projects As A Real Entity]], [[Pen FAB Tab Bar]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]]
-- Bugs: [[Quick Add Does Not Create Tasks]], [[Bottom Sheet Text Input Crashes On Web]], [[Quick Add Highlight Drifts From The Caret]]
+- Page: [[Quick Add Sheet]], [[Upcoming]], [[Today]], [[Project Detail]]
+- Features: [[Offline First Local Store]], [[Projects As A Real Entity]], [[Glass Tab Bar]], [[Pen FAB]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]]
+- Bugs: [[Quick Add Does Not Create Tasks]], [[Bottom Sheet Text Input Crashes On Web]], [[Quick Add Highlight Drifts From The Caret]], [[Undated Unassigned Tasks Have No Screen]]
 - Enhancements: [[Day Capacity Budget]], [[Notes With Live Task Lines]], [[Voice Brain Dump Capture]], [[System Capture Entry Points]]

@@ -2,7 +2,8 @@ import React from 'react';
 import { Pressable, Text, View } from 'react-native';
 import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
 import { useTheme } from '../theme/ThemeProvider';
-import { maxFontSizeMultiplier, metrics } from '../theme/tokens';
+import { maxFontSizeMultiplier } from '../theme/tokens';
+import { useTabBarFootprint } from '../components/TabBar';
 import { marginStart, row } from '../lib/rtl';
 import { isOverdue, isYesterday, longDate, timeLabel } from '../lib/date';
 import { useStore } from '../state/store';
@@ -25,6 +26,7 @@ export function TodayScreen({
   onPickDate: () => void;
 }) {
   const { c, t, ui, mono, rtl } = useTheme();
+  const tabBarFootprint = useTabBarFootprint();
   const { today, loaded, complete, snooze, remove } = useStore();
   const scrollY = useSharedValue(0);
   const onScroll = useAnimatedScrollHandler((e) => {
@@ -47,7 +49,7 @@ export function TodayScreen({
       <Animated.ScrollView
         onScroll={onScroll}
         scrollEventThrottle={16}
-        contentContainerStyle={{ paddingBottom: metrics.tabBar }}
+        contentContainerStyle={{ paddingBottom: tabBarFootprint }}
       >
         <PageHeader
           title={t.today}

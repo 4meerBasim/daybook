@@ -1,21 +1,29 @@
 import React, { useState } from 'react';
-import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
+import Animated, { SharedValue, useAnimatedStyle } from 'react-native-reanimated';
 import { useTheme } from '../theme/ThemeProvider';
 import { maxFontSizeMultiplier, metrics, radius } from '../theme/tokens';
+import { useTabBarFootprint } from '../components/TabBar';
 import { align, insetStart, marginStart, pad, row } from '../lib/rtl';
-import { Screen, useHeaderTop } from '../components/Screen';
+import { useHeaderTop } from '../components/Screen';
 import { LedgerRow } from '../components/Ledger';
 import { Chip } from '../components/Chip';
-import { SearchIcon } from '../components/Icon';
 
 type Filter = 'all' | 'tasks' | 'notes' | 'completed';
 
-export function SearchScreen({ onOpenProject }: { onOpenProject: () => void }) {
+export function SearchResults({
+  progress,
+  visible,
+  onOpenProject,
+}: {
+  progress: SharedValue<number>;
+  visible: boolean;
+  onOpenProject: () => void;
+}) {
   const { c, t, ui, mono, rtl, unit, chipPadding } = useTheme();
+  const tabBarFootprint = useTabBarFootprint();
   const top = useHeaderTop();
-  const [typed, setTyped] = useState<string | null>(null);
   const [filter, setFilter] = useState<Filter>('all');
-  const query = typed ?? t.searchQ;
 
   const filters: { key: Filter; label: string }[] = [
     { key: 'all', label: t.all },
@@ -24,37 +32,20 @@ export function SearchScreen({ onOpenProject }: { onOpenProject: () => void }) {
     { key: 'completed', label: t.completed },
   ];
 
-  return (
-    <Screen>
-      <ScrollView contentContainerStyle={{ paddingBottom: metrics.tabBar }}>
-        <View style={{ paddingTop: top, paddingHorizontal: metrics.gutter }}>
-          <View
-            style={{
-              height: 48,
-              borderRadius: radius.card,
-              backgroundColor: c.paper2,
-              borderWidth: 1,
-              borderColor: c.rule,
-              flexDirection: row(rtl),
-              alignItems: 'center',
-              gap: 10,
-              paddingHorizontal: 14,
-            }}
-          >
-            <SearchIcon size={20} color={c.ink3} />
-            <TextInput
-              value={query}
-              onChangeText={setTyped}
-              selectionColor={c.ink}
-              placeholder={t.searchQ}
-              placeholderTextColor={c.ink3}
-              maxFontSizeMultiplier={maxFontSizeMultiplier}
-              accessibilityLabel={t.search}
-              style={[ui(17), { flex: 1, color: c.ink, padding: 0, textAlign: align(rtl) }]}
-            />
-          </View>
-        </View>
+  const sheet = useAnimatedStyle(() => ({
+    opacity: progress.value,
+    transform: [{ translateY: (1 - progress.value) * 16 }],
+  }));
 
+  return (
+    <Animated.View
+      pointerEvents={visible ? 'auto' : 'none'}
+      style={[
+        { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, backgroundColor: c.paper },
+        sheet,
+      ]}
+    >
+      <ScrollView contentContainerStyle={{ paddingTop: top, paddingBottom: tabBarFootprint }}>
         <View
           style={{
             flexDirection: row(rtl),
@@ -100,7 +91,14 @@ export function SearchScreen({ onOpenProject }: { onOpenProject: () => void }) {
           <View
             pointerEvents="none"
             style={[
-              { position: 'absolute', top: 0, bottom: 0, width: 1, backgroundColor: c.ver, opacity: 0.6 },
+              {
+                position: 'absolute',
+                top: 0,
+                bottom: 0,
+                width: 1,
+                backgroundColor: c.ver,
+                opacity: 0.6,
+              },
               insetStart(rtl, metrics.marginLine),
             ]}
           />
@@ -204,7 +202,7 @@ export function SearchScreen({ onOpenProject }: { onOpenProject: () => void }) {
           </LedgerRow>
         </View>
       </ScrollView>
-    </Screen>
+    </Animated.View>
   );
 }
 

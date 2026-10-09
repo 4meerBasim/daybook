@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 import { useTheme } from '../theme/ThemeProvider';
 import { maxFontSizeMultiplier, metrics } from '../theme/tokens';
 import { align, marginStart, row } from '../lib/rtl';
@@ -8,6 +8,7 @@ import { projectName, type ProjectRow, type TaskRow } from '../db/schema';
 import { Screen, useHeaderTop } from '../components/Screen';
 import { Dot, EmptyRules, Ledger, rowContent, useRuling } from '../components/Ledger';
 import { Sheet, SheetButton, SheetRow } from '../components/Sheet';
+import { NameSheet } from '../components/NameSheet';
 import { PlusIcon } from '../components/Icon';
 
 export function ProjectsScreen({ onOpenProject }: { onOpenProject: (projectId: string) => void }) {
@@ -64,8 +65,10 @@ export function ProjectsScreen({ onOpenProject }: { onOpenProject: (projectId: s
       {named ? (
         <NameSheet
           initial={named === 'new' ? '' : projectName(named, t)}
+          placeholder={t.projectName}
           onClose={() => setNamed(null)}
           onSubmit={(name) => {
+            if (!name) return;
             if (named === 'new') createProject(name);
             else renameProject(named.id, name);
           }}
@@ -234,51 +237,3 @@ function ManageSheet({
   );
 }
 
-function NameSheet({
-  initial,
-  onClose,
-  onSubmit,
-}: {
-  initial: string;
-  onClose: () => void;
-  onSubmit: (name: string) => void;
-}) {
-  const { c, t, display, rtl, reduced } = useTheme();
-  const [text, setText] = useState(initial);
-
-  const submit = () => {
-    const name = text.trim();
-    if (name) onSubmit(name);
-    onClose();
-  };
-
-  return (
-    <Sheet onClose={onClose}>
-      <View style={{ paddingTop: 14, paddingHorizontal: metrics.gutter, gap: 16 }}>
-        <View style={{ borderBottomWidth: 1.5, borderBottomColor: c.ink, paddingBottom: 10 }}>
-          <TextInput
-            value={text}
-            onChangeText={setText}
-            autoFocus={!reduced}
-            placeholder={t.projectName}
-            placeholderTextColor={c.ink3}
-            selectionColor={c.ink}
-            accessibilityLabel={t.projectName}
-            maxFontSizeMultiplier={maxFontSizeMultiplier}
-            returnKeyType="done"
-            onSubmitEditing={submit}
-            style={[
-              display(22, { lineHeight: 28 }),
-              { color: c.ink, padding: 0, textAlign: align(rtl) },
-            ]}
-          />
-        </View>
-
-        <View style={{ flexDirection: row(rtl), gap: 12 }}>
-          <SheetButton secondary label={t.cancel} onPress={onClose} />
-          <SheetButton label={t.save} onPress={submit} />
-        </View>
-      </View>
-    </Sheet>
-  );
-}

@@ -38,8 +38,8 @@ export function QuickAddSheet({ open, onClose }: { open: boolean; onClose: () =>
       ? 'يُحفظ في القادم'
       : 'Saved to Upcoming'
     : ar
-      ? 'يُحفظ في الوارد'
-      : 'Saved to Inbox';
+      ? 'بلا تاريخ'
+      : 'No date';
 
   const onAdd = () => {
     const { title, tags, dueDate, high } = draft(parsed, Date.now());

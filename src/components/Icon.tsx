@@ -10,28 +10,20 @@ const stroke = {
   strokeLinejoin: 'round' as const,
 };
 
-export function PenIcon({ size = 24, color }: Props) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 24 24">
-      <Path d="M4 20l4-1 11-11-3-3L5 16l-1 4z" stroke={color} {...stroke} />
-      <Path d="M13 7l3 3" stroke={color} {...stroke} />
-    </Svg>
-  );
-}
-
-export function PageIcon({ size = 24, color, paper }: Props & { paper?: string }) {
-  if (paper) {
-    return (
-      <Svg width={size} height={size} viewBox="0 0 24 24">
-        <Path d="M6 3h9l4 4v14H6z" fill={color} />
-        <Path d="M9 11h7M9 15h7" stroke={paper} strokeWidth={1.5} strokeLinecap="round" fill="none" />
-      </Svg>
-    );
-  }
+export function PageIcon({ size = 24, color }: Props) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24">
       <Path d="M6 3h9l4 4v14H6z" stroke={color} {...stroke} />
       <Path d="M9 11h7M9 15h7" stroke={color} {...stroke} />
+    </Svg>
+  );
+}
+
+export function PersonIcon({ size = 24, color }: Props) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+      <Circle cx={12} cy={8} r={3.5} stroke={color} {...stroke} />
+      <Path d="M5 20v-1c0-3.3 3.1-5 7-5s7 1.7 7 5v1" stroke={color} {...stroke} />
     </Svg>
   );
 }
@@ -45,11 +37,10 @@ export function CalendarIcon({ size = 24, color }: Props) {
   );
 }
 
-export function TrayIcon({ size = 24, color }: Props) {
+export function CloseIcon({ size = 24, color }: Props) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24">
-      <Path d="M3 13l3-8h12l3 8v6H3z" stroke={color} {...stroke} />
-      <Path d="M3 13h5l2 3h4l2-3h5" stroke={color} {...stroke} />
+      <Path d="M6 6l12 12M18 6L6 18" stroke={color} {...stroke} />
     </Svg>
   );
 }

@@ -15,11 +15,16 @@ Summary: A single settings toggle turns every animation in the app into an insta
 | `PageHeader.tsx` | the scroll-linked style returns `{}`, so the title stays at 40pt — see [[Collapsing Page Header]] |
 | `FocusScreen.tsx` | the minute strips fill without the 600ms colour interpolation — see [[Focus Timer]] |
 | `QuickAddSheet.tsx` | `animateOnMount` and `autoFocus` are both disabled, so the sheet and keyboard appear without a transition |
+| `TabBar.tsx` | the sliding indicator's `translateX` and each item's opacity and label colour are assigned, so the active tab changes with no travel — see [[Glass Tab Bar]] |
+| `Root.tsx` | the pane strip's `translateX` is assigned, so a tab switch cuts instead of sliding — see [[Animated Page Transitions]] |
+| `Root.tsx` | `searchProgress` is assigned, so the search field appears at full width with the overlay already opaque; the field also skips `autoFocus` — see [[Expanding Search Field]] |
 
-Controlled from the Reduce motion row on [[Settings]].
+The three animations added in the tab-bar redesign all follow the same rule. Each one is a `withTiming` inside a `useEffect` with `reduced` in its dependency list, and the reduced branch writes the identical target value directly to the shared value, so the resting layout is byte-identical either way and only the transit disappears.
+
+Controlled from the Reduce motion row in the shared `SettingsRows` list, which both [[Settings]] and [[Profile]] render.
 
 ## Related
-- Page: [[Settings]], [[Today]], [[Focus Mode]], [[Quick Add Sheet]], [[Swipe States]], [[Page Closed]]
-- Features: [[Ink Strike-Through Completion]], [[Swipe Row Actions]], [[Wax Page Closed Stamp]], [[Collapsing Page Header]], [[Focus Timer]]
+- Page: [[Settings]], [[Profile]], [[Main Tabs]], [[Today]], [[Focus Mode]], [[Quick Add Sheet]], [[Search Results]], [[Swipe States]], [[Page Closed]]
+- Features: [[Ink Strike-Through Completion]], [[Swipe Row Actions]], [[Wax Page Closed Stamp]], [[Collapsing Page Header]], [[Focus Timer]], [[Glass Tab Bar]], [[Animated Page Transitions]], [[Expanding Search Field]]
 - Bugs: [[Startup Crash From Mismatched Worklets]]
 - Enhancements: [[Ink Decay and Task Retirement]]

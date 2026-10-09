@@ -55,17 +55,6 @@ export function selectUpcoming(db: SQLiteDatabase, now: number): Promise<DatedTa
   );
 }
 
-export function selectInbox(db: SQLiteDatabase): Promise<TaskRow[]> {
-  return db.getAllAsync<TaskRow>(
-    `SELECT * FROM tasks
-      WHERE deletedAt IS NULL
-        AND completedAt IS NULL
-        AND dueDate IS NULL
-        AND projectId IS NULL
-      ORDER BY sortOrder`
-  );
-}
-
 export function selectAssigned(db: SQLiteDatabase): Promise<TaskRow[]> {
   return db.getAllAsync<TaskRow>(
     `SELECT * FROM tasks
@@ -95,6 +84,22 @@ export function selectSubtasks(db: SQLiteDatabase, parentTaskId: string): Promis
   return db.getAllAsync<SubtaskRow>(
     'SELECT * FROM subtasks WHERE parentTaskId = $parentTaskId ORDER BY sortOrder',
     { $parentTaskId: parentTaskId }
+  );
+}
+
+export async function selectPref(db: SQLiteDatabase, key: string): Promise<string | null> {
+  const row = await db.getFirstAsync<{ value: string }>(
+    'SELECT value FROM prefs WHERE key = $key',
+    { $key: key }
+  );
+  return row ? row.value : null;
+}
+
+export async function setPref(db: SQLiteDatabase, key: string, value: string): Promise<void> {
+  await db.runAsync(
+    `INSERT INTO prefs (key, value) VALUES ($key, $value)
+      ON CONFLICT(key) DO UPDATE SET value = $value`,
+    { $key: key, $value: value }
   );
 }
 

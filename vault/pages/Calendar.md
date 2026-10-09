@@ -5,8 +5,8 @@ Summary: A month grid where each day carries tally marks for its workload, with 
 
 ## Related
 - Connects to: [[Upcoming]] — reached by long-pressing the Upcoming tab; returns via the system back gesture, [[Today]] — reached by swiping a row past the pick-date threshold, [[Main Tabs]]
-- Features: [[Offline First Local Store]], [[Calendar Tally Marks]], [[Swipe Row Actions]], [[Ledger Paper Chrome]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]]
-- Bugs: [[Snooze And Delete Share One Cleared Map]], [[Page Header Shows A Frozen Date]]
+- Features: [[Offline First Local Store]], [[Calendar Tally Marks]], [[Swipe Row Actions]], [[Glass Tab Bar]] — not rendered here, which is the bug above, [[Ledger Paper Chrome]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]]
+- Bugs: [[Snooze And Delete Share One Cleared Map]], [[Page Header Shows A Frozen Date]], [[Stack Screens Reserve Tab Bar Space]]
 - Enhancements: [[Day Capacity Budget]], [[Weekly Spread Review]]
 
 ## Notes

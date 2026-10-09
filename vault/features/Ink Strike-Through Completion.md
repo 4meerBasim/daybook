@@ -17,12 +17,12 @@ The bar's length is wrong in a way that predates all of this — see [[Ink Strok
 
 Completion state itself is `completedAt` on the task row in [[Offline First Local Store]], not a map — so a struck row is still struck after a reload. Subtasks carry their own `completedAt` in their own table; see [[Task And Subtask Ids Share One Done Map]] for the shared map this replaced.
 
-Static end-state renderings of the same stroke appear elsewhere: `ProjectScreen.tsx` draws the bar at full width for finished rows, and [[Page Closed]], [[Search]] and the subtasks on [[Task Detail]] use plain `textDecorationLine: 'line-through'`.
+Static end-state renderings of the same stroke appear elsewhere: `ProjectScreen.tsx` draws the bar at full width for finished rows, and [[Page Closed]], [[Search Results]] — now an overlay rather than a tab, same markup — and the subtasks on [[Task Detail]] use plain `textDecorationLine: 'line-through'`.
 
 That split is the design's, not an inconsistency to tidy away. Only the [[Today]] rows animate the stroke, and only those are given the absolutely positioned bar with a transitioning width; every other screen in the design uses `text-decoration: line-through` directly, because the row arrives already struck and has nothing to animate.
 
 ## Related
-- Page: [[Today]], [[Project Detail]], [[Page Closed]], [[Search]], [[Task Detail]]
+- Page: [[Today]], [[Project Detail]], [[Page Closed]], [[Search Results]], [[Task Detail]]
 - Features: [[Offline First Local Store]], [[Reduced Motion Mode]], [[Ledger Paper Chrome]]
 - Bugs: [[Startup Crash From Mismatched Worklets]], [[Task And Subtask Ids Share One Done Map]], [[Ink Stroke Spans The Whole Title Column]]
 - Enhancements: [[Closing the Page Ritual]], [[Ink Decay and Task Retirement]]

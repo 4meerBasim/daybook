@@ -6,7 +6,7 @@ Summary: Checkbox lines written inside a note are real tasks — they appear in 
 ## Notes
 This is what collapses the note-app / task-app split that makes people carry two apps. A note is where thinking happens; the commitments inside it should not have to be re-entered somewhere else. One substance, two views.
 
-[[Task Detail]] already carries a note body and checkable subtasks as separate blocks, and [[Search]] already filters across "tasks" and "notes" as though both exist — the vocabulary is in the design even though nothing connects them.
+[[Task Detail]] already carries a note body and checkable subtasks as separate blocks, and [[Search Results]] already filters across "tasks" and "notes" as though both exist — the vocabulary is in the design even though nothing connects them.
 
 Open decisions:
 
@@ -16,6 +16,6 @@ Open decisions:
 - Rendering checkbox syntax inside body text wants the same live-highlight approach `src/lib/parse.ts` uses for the [[Quick Add Sheet]], applied to a multi-line field.
 
 ## Related
-- Page: [[Task Detail]], [[Search]], [[Today]]
-- Features: [[Offline First Local Store]], [[Natural Language Quick Add]], [[Ledger Paper Chrome]]
+- Page: [[Task Detail]], [[Search Results]], [[Today]]
+- Features: [[Offline First Local Store]], [[Natural Language Quick Add]], [[Ledger Paper Chrome]], [[Expanding Search Field]] — the surface whose tasks / notes filters already assume both exist
 - Bugs: [[Task And Subtask Ids Share One Done Map]]

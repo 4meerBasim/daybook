@@ -36,7 +36,9 @@ Seed due dates are computed relative to the first-run date — today, yesterday,
 
 ### What the lists became
 
-Every screen that used to read a seed array now filters one task table: [[Today]] takes dated tasks up to end of day (carrying overdue ones that are still open), [[Upcoming]] takes future-dated tasks grouped into tomorrow / this week / later, [[Inbox]] takes undated tasks with no project, and [[Calendar]] takes the current month. One `assigned` query returns every task that has a project at all, which [[Project Detail]] filters by id and [[Projects]] counts per row, and `projects` is its own snapshot beside it. Header counts, the project progress fraction and the subtask tally are all derived now — see [[Calendar Tally Marks]].
+Every screen that used to read a seed array now filters one task table: [[Today]] takes dated tasks up to end of day (carrying overdue ones that are still open), [[Upcoming]] takes future-dated tasks grouped into tomorrow / this week / later, and [[Calendar]] takes the current month. One `assigned` query returns every task that has a project at all, which [[Project Detail]] filters by id and [[Projects]] counts per row, and `projects` is its own snapshot beside it. Header counts, the project progress fraction and the subtask tally are all derived now — see [[Calendar Tally Marks]].
+
+The snapshot lost a slice in the tab-bar redesign. `selectInbox` — undated tasks with no project — and the `inbox` field it fed were removed with the Inbox screen, and nothing replaced the filter, so rows matching `dueDate IS NULL AND projectId IS NULL` are still written and never read back. The table is unharmed; the query is simply absent. See [[Undated Unassigned Tasks Have No Screen]].
 
 ### Notification readiness, deliberately unbuilt
 
@@ -47,7 +49,7 @@ No `expo-notifications`, no permission strings, no scheduler. The data model alo
 `duration` exists for [[Day Capacity Budget]], `createdAt` and `completedAt` for [[Ink Decay and Task Retirement]] and [[Closing the Page Ritual]], stable ids across every list for [[Inbox Triage Chips]]. Merge-friendliness for [[Shared Page Link]] is still undecided — rows are last-write-wins today, and CRDT-style merging would be a schema change. The sync row drawn in [[Settings]] is still inert by design.
 
 ## Related
-- Page: [[Settings]], [[Today]], [[Inbox]], [[Upcoming]], [[Calendar]], [[Project Detail]], [[Projects]], [[Project Picker]], [[Task Detail]], [[Quick Add Sheet]]
+- Page: [[Settings]], [[Profile]], [[Today]], [[Upcoming]], [[Calendar]], [[Project Detail]], [[Projects]], [[Project Picker]], [[Task Detail]], [[Quick Add Sheet]]
 - Features: [[Natural Language Quick Add]], [[Projects As A Real Entity]], [[Swipe Row Actions]], [[Calendar Tally Marks]], [[Ink Strike-Through Completion]]
-- Bugs: [[Quick Add Does Not Create Tasks]], [[Snooze And Delete Share One Cleared Map]], [[Task And Subtask Ids Share One Done Map]], [[Page Header Shows A Frozen Date]]
+- Bugs: [[Quick Add Does Not Create Tasks]], [[Snooze And Delete Share One Cleared Map]], [[Task And Subtask Ids Share One Done Map]], [[Page Header Shows A Frozen Date]], [[Undated Unassigned Tasks Have No Screen]]
 - Enhancements: [[Closing the Page Ritual]], [[Day Capacity Budget]], [[Ink Decay and Task Retirement]], [[Notes With Live Task Lines]], [[Weekly Spread Review]], [[Shared Page Link]], [[Adaptive Reminders]], [[Focus Live Activity and Widgets]], [[System Capture Entry Points]], [[Inbox Triage Chips]], [[Waiting On Follow-Ups]], [[Voice Brain Dump Capture]]

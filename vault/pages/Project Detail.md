@@ -4,10 +4,10 @@ Route: `Project` (native stack, `{ projectId }`)
 Summary: One project's page — its own name, a derived progress count, tag chips read off its tasks, and its rows split into "this week" and "later".
 
 ## Related
-- Connects to: [[Projects]] — tap a project row; returns via the system back gesture, [[Search]] — reached by tapping the `#invoice` tag result, [[Project Picker]] — long-press a row, [[Main Tabs]], [[Task Detail]]
-- Features: [[Projects As A Real Entity]], [[Offline First Local Store]], [[Ink Strike-Through Completion]], [[Ledger Paper Chrome]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]]
+- Connects to: [[Projects]] — tap a project row; returns via the system back gesture, [[Search Results]] — reached by tapping the `#invoice` tag result in the search overlay, [[Project Picker]] — long-press a row, its only caller now, [[Main Tabs]], [[Task Detail]]
+- Features: [[Projects As A Real Entity]], [[Offline First Local Store]], [[Expanding Search Field]] — the tag result that opens this page, [[Ink Strike-Through Completion]], [[Ledger Paper Chrome]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]]
 - Bugs: [[Ink Stroke Spans The Whole Title Column]]
-- Enhancements: [[Waiting On Follow-Ups]], [[Shared Page Link]]
+- Enhancements: [[Waiting On Follow-Ups]], [[Shared Page Link]], [[Inbox Triage Chips]] — the long-press half that now only works here
 
 ## Notes
 `src/screens/ProjectScreen.tsx`. The route carries a `projectId` now, so the screen reads a real row: the eyebrow dot takes the project's own colour, the name is `projectName(project, t)` — the stored name, or the i18n string while the seeded project still carries its `seedKey` — and the fraction counts the rows on screen. Until the store has loaded, the project is simply not found yet and the screen renders bare paper.
@@ -22,4 +22,4 @@ Row meta is derived — the time of day when a task has one, otherwise its day-o
 
 Long-pressing a row opens [[Project Picker]], which is where an assignment is cleared; the row also carries an `assign` accessibility action. Tapping a row does nothing — completion on this page is not wired, exactly as the mock draws it.
 
-One edge: [[Search]]'s tag result always opens the seeded project by id, so if the user deletes Studio that result leads to a blank page until it is given a real target.
+One edge: [[Search Results]]'s tag result always opens the seeded project by id, so if the user deletes Studio that result leads to a blank page until it is given a real target.
