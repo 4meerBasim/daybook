@@ -6,7 +6,7 @@ Summary: A gesture reference page showing each swipe threshold held open — com
 ## Related
 - Connects to: [[Settings]], [[Profile]] — reached from the Shortcuts row on either; returns via the system back gesture, [[Main Tabs]], [[Project Picker]] — what long-press actually does now
 - Features: [[Swipe Row Actions]], [[Ledger Paper Chrome]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]]
-- Bugs: [[Swipe Actions Not Wired Into Task Lists]]
+- Bugs: [[Swipe Actions Not Wired Into Task Lists]], [[Stack Screens Ignore The Bottom Safe Area]] — latent here; nothing on this screen reaches the gesture area yet, [[Stack Screens Reserve Tab Bar Space]]
 - Enhancements: [[Waiting On Follow-Ups]]
 
 ## Notes

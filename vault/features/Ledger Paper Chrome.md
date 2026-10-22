@@ -37,5 +37,5 @@ Growth is for text the user wrote. Task titles, project names, subtasks and note
 ## Related
 - Page: [[Today]], [[Upcoming]], [[Profile]], [[Search Results]], [[Project Detail]], [[Task Detail]], [[Calendar]], [[Page Closed]], [[Swipe States]], [[Settings]], [[Onboarding]], [[Quick Add Sheet]], [[Unfiled]]
 - Features: [[Light and Dark Paper Palettes]], [[In-App RTL and Arabic Typography]], [[Ink Strike-Through Completion]], [[Collapsing Page Header]], [[Glass Tab Bar]]
-- Bugs: [[Ink Stroke Spans The Whole Title Column]], [[Quick Add Highlight Drifts From The Caret]] — the same growing-text rule applied to the capture field
+- Bugs: [[Ink Stroke Spans The Whole Title Column]], [[Quick Add Highlight Drifts From The Caret]] — the same growing-text rule applied to the capture field, [[Stack Screens Ignore The Bottom Safe Area]], [[Calendar Overflow Is Unreachable]]
 - Enhancements: [[Closing the Page Ritual]], [[Day Capacity Budget]], [[Ink Decay and Task Retirement]], [[Notes With Live Task Lines]], [[Deal Me One Task Picker]], [[Weekly Spread Review]], [[Focus Live Activity and Widgets]]

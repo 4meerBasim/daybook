@@ -38,7 +38,7 @@ export function CalendarScreen() {
 
   return (
     <Screen>
-      <View style={{ flex: 1, paddingBottom: metrics.tabBar }}>
+      <View style={{ flex: 1 }}>
         <View
           style={{
             paddingTop: top,

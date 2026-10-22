@@ -22,3 +22,4 @@ The storage half is already there: [[Offline First Local Store]] carries a `dura
 - Page: [[Today]], [[Calendar]], [[Task Detail]], [[Quick Add Sheet]]
 - Features: [[Offline First Local Store]], [[Calendar Tally Marks]], [[Natural Language Quick Add]], [[Ledger Paper Chrome]]
 - Enhancements: [[Closing the Page Ritual]], [[Weekly Spread Review]], [[Deal Me One Task Picker]]
+- Bugs: [[Calendar Overflow Is Unreachable]]

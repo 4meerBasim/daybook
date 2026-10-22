@@ -66,7 +66,7 @@ export function TaskDetailScreen({ onBack, onFocus }: { onBack: () => void; onFo
 
   return (
     <Screen>
-      <ScrollView contentContainerStyle={{ paddingBottom: metrics.tabBar }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: metrics.gutter }}>
         <View
           style={{
             paddingTop: top + 40,

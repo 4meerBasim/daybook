@@ -19,5 +19,5 @@ The design's prose describes "max 5, then a struck bundle", but its own render s
 ## Related
 - Page: [[Calendar]]
 - Features: [[Offline First Local Store]], [[Ledger Paper Chrome]], [[Light and Dark Paper Palettes]], [[In-App RTL and Arabic Typography]]
-- Bugs: [[Snooze And Delete Share One Cleared Map]]
+- Bugs: [[Snooze And Delete Share One Cleared Map]], [[Calendar Overflow Is Unreachable]]
 - Enhancements: [[Day Capacity Budget]], [[Weekly Spread Review]]

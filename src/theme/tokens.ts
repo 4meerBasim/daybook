@@ -21,7 +21,6 @@ export const metrics = {
   gap: 12,
   rowPad: 12,
   content: 66,
-  tabBar: 84,
   tabBarHeight: 64,
   tabBarInset: 12,
   tabBarMinBottom: 12,
