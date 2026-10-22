@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetTextInput,
@@ -14,6 +14,14 @@ import { chipColors, draft, parse, tokenColor } from '../lib/parse';
 import { PRIORITY_HIGH } from '../db/schema';
 import { Chip } from '../components/Chip';
 import { CalendarIcon, FlagIcon, HashIcon, PaperclipIcon } from '../components/Icon';
+
+// @gorhom/bottom-sheet 5.2.14 blurs through TextInput.State.currentlyFocusedInput(), which
+// react-native-web does not implement — it exposes currentlyFocusedField() instead
+const inputState = TextInput.State as unknown as {
+  currentlyFocusedInput?: () => unknown;
+  currentlyFocusedField?: () => unknown;
+};
+inputState.currentlyFocusedInput ??= () => inputState.currentlyFocusedField?.() ?? null;
 
 const LINE = 28;
 
