@@ -167,6 +167,7 @@ export function CalendarScreen() {
                   title={rowTitle(k, t)}
                   meta={timeLabel(k.dueDate)}
                   done={done}
+                  rule
                   onToggle={() => complete(k.id, !done)}
                 />
               );

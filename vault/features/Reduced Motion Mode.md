@@ -27,4 +27,4 @@ Controlled from the Reduce motion row in the shared `SettingsRows` list, which b
 - Page: [[Settings]], [[Profile]], [[Main Tabs]], [[Today]], [[Focus Mode]], [[Quick Add Sheet]], [[Search Results]], [[Swipe States]], [[Page Closed]]
 - Features: [[Ink Strike-Through Completion]], [[Swipe Row Actions]], [[Wax Page Closed Stamp]], [[Collapsing Page Header]], [[Focus Timer]], [[Glass Tab Bar]], [[Animated Page Transitions]], [[Expanding Search Field]]
 - Bugs: [[Startup Crash From Mismatched Worklets]], [[Theme Preferences Reset On Every Launch]]
-- Enhancements: [[Ink Decay and Task Retirement]]
+- Enhancements: [[Ink Decay and Task Retirement]], [[Lift The Ink]]

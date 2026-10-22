@@ -91,7 +91,7 @@ function MainTabs({ navigation }: NativeStackScreenProps<RootParams, 'Main'>) {
           />
         </Pane>
         <Pane width={width} shown={tab === 'upcoming'}>
-          <UpcomingScreen />
+          <UpcomingScreen onOpenTask={() => navigation.navigate('TaskDetail')} />
         </Pane>
         <Pane width={width} shown={tab === 'profile'}>
           <ProfileScreen

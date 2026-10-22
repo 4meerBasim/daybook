@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
-import { LayoutChangeEvent, Pressable, ScrollView, Text, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 import { useTheme } from '../theme/ThemeProvider';
 import { maxFontSizeMultiplier, metrics } from '../theme/tokens';
-import { align, insetStart, marginStart, row } from '../lib/rtl';
+import { align, marginStart, row } from '../lib/rtl';
 import { addDays, dayOfMonth, startOfDay, timeLabel } from '../lib/date';
 import { tagColors } from '../lib/parse';
 import { useStore } from '../state/store';
-import { projectName, rowTitle, taskTags, type TaskRow } from '../db/schema';
+import { projectName, rowTitle, taskTags, type TaskRow as TaskRowData } from '../db/schema';
 import { SEED_PROJECT_ID } from '../db/seed';
 import { Screen, useHeaderTop } from '../components/Screen';
-import { Checkbox, Ledger, SectionLabel, EmptyRules, rowContent, useRuling } from '../components/Ledger';
+import { Ledger, SectionLabel, EmptyRules } from '../components/Ledger';
+import { TaskRow } from '../components/TaskRow';
+import { SwipeableRow } from '../components/SwipeableRow';
 import { Chip } from '../components/Chip';
 import { ProjectPickerSheet } from './ProjectPickerSheet';
 
@@ -36,83 +38,44 @@ function Avatar({ initials, bg, first }: { initials: string; bg: string; first: 
   );
 }
 
-function ProjectTaskRow({ task, onAssign }: { task: TaskRow; onAssign: () => void }) {
-  const { c, t, ui, mono, rtl } = useTheme();
-  const { height, grown, onContentLayout } = useRuling();
-  const [textWidth, setTextWidth] = useState(0);
-  const onLayout = (e: LayoutChangeEvent) => setTextWidth(e.nativeEvent.layout.width);
+function ProjectTaskRow({ task, onAssign }: { task: TaskRowData; onAssign: () => void }) {
+  const { t } = useTheme();
+  const { complete, remove } = useStore();
   const done = task.completedAt !== null;
 
   return (
-    <Pressable
+    <SwipeableRow
+      onComplete={() => complete(task.id, !done)}
+      onDelete={() => remove(task.id)}
       onLongPress={onAssign}
-      android_ripple={null}
-      accessibilityRole="button"
-      accessibilityLabel={rowTitle(task, t)}
-      accessibilityHint={t.moveToProject}
-      accessibilityActions={[{ name: 'assign', label: t.moveToProject }]}
-      onAccessibilityAction={(e) => {
-        if (e.nativeEvent.actionName === 'assign') onAssign();
-      }}
-      style={({ pressed }) => ({
-        height,
-        justifyContent: 'center',
-        borderBottomWidth: 1,
-        borderBottomColor: c.rule,
-        backgroundColor: pressed ? c.paper2 : 'transparent',
-      })}
     >
-      <View onLayout={onContentLayout} style={rowContent(rtl, 16)}>
-        <Checkbox checked={done} />
-
-        <View
-          style={[
-            { flex: 1, minWidth: 0, flexDirection: row(rtl) },
-            marginStart(rtl, 16),
-          ]}
-        >
-          <View style={{ minWidth: 0, flexShrink: 1, position: 'relative' }}>
-            <Text
-              maxFontSizeMultiplier={maxFontSizeMultiplier}
-              onLayout={onLayout}
-              style={[
-                ui(17, 400, 22),
-                { color: done ? c.ink3 : c.ink, textAlign: align(rtl) },
-                done && grown ? { textDecorationLine: 'line-through' } : null,
-              ]}
-            >
-              {rowTitle(task, t)}
-            </Text>
-            {done && !grown ? (
-              <View
-                pointerEvents="none"
-                style={{
-                  position: 'absolute',
-                  top: '50%',
-                  height: 1.5,
-                  width: textWidth + 4,
-                  backgroundColor: c.ink,
-                  ...insetStart(rtl, -2),
-                }}
-              />
-            ) : null}
-          </View>
-        </View>
-
-        <Text numberOfLines={1} style={[mono(12, 500), { color: c.ink3 }]}>
-          {rowMeta(task)}
-        </Text>
-      </View>
-    </Pressable>
+      <TaskRow
+        title={rowTitle(task, t)}
+        meta={rowMeta(task)}
+        done={done}
+        onToggle={() => complete(task.id, !done)}
+        accessibilityActions={[
+          { name: 'complete', label: t.done },
+          { name: 'delete', label: t.delete },
+          { name: 'assign', label: t.moveToProject },
+        ]}
+        onAccessibilityAction={(e) => {
+          const action = e.nativeEvent.actionName;
+          if (action === 'complete') complete(task.id, !done);
+          if (action === 'delete') remove(task.id);
+          if (action === 'assign') onAssign();
+        }}
+      />
+    </SwipeableRow>
   );
 }
 
-function rowMeta(task: TaskRow): string {
+function rowMeta(task: TaskRowData): string {
   if (task.dueDate === null) return '';
   return timeLabel(task.dueDate) || String(dayOfMonth(task.dueDate));
 }
 
-function unionTags(tasks: TaskRow[]): string[] {
+function unionTags(tasks: TaskRowData[]): string[] {
   const all: string[] = [];
   for (const task of tasks) {
     for (const tag of taskTags(task)) if (!all.includes(tag)) all.push(tag);
@@ -124,7 +87,7 @@ export function ProjectScreen({ projectId }: { projectId: string }) {
   const { c, t, display, ui, mono, rtl } = useTheme();
   const { projects, assigned } = useStore();
   const top = useHeaderTop();
-  const [picking, setPicking] = useState<TaskRow | null>(null);
+  const [picking, setPicking] = useState<TaskRowData | null>(null);
 
   const project = projects.find((p) => p.id === projectId);
   if (!project) return <Screen />;

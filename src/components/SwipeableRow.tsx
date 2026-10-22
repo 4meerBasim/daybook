@@ -28,13 +28,15 @@ export function SwipeableRow({
 }: {
   children: React.ReactNode;
   onComplete: () => void;
-  onSnooze: () => void;
+  onSnooze?: () => void;
   onPickDate?: () => void;
   onDelete: () => void;
   onLongPress: () => void;
 }) {
   const { c, t, ui, rtl, reduced } = useTheme();
   const [width, setWidth] = useState(0);
+
+  const deleteOnly = !onSnooze && !onPickDate;
 
   const sign = rtl ? -1 : 1;
   const tx = useSharedValue(0);
@@ -71,8 +73,10 @@ export function SwipeableRow({
           runOnJS(onPickDate)();
         }
       } else if (-p >= SNOOZE) {
-        runOnJS(tap)();
-        runOnJS(onSnooze)();
+        if (onSnooze) {
+          runOnJS(tap)();
+          runOnJS(onSnooze)();
+        }
       }
       settle(0);
     });
@@ -98,11 +102,12 @@ export function SwipeableRow({
   const leading = useAnimatedStyle(() => ({ opacity: tx.value * sign > 0 ? 1 : 0 }));
   const trailing = useAnimatedStyle(() => {
     const p = width ? (-tx.value * sign) / width : 0;
-    return { opacity: p > 0 && p < DELETE ? 1 : 0 };
+    return { opacity: !deleteOnly && p > 0 && p < DELETE ? 1 : 0 };
   });
   const destructive = useAnimatedStyle(() => {
     const p = width ? (-tx.value * sign) / width : 0;
-    return { opacity: p >= DELETE ? 1 : 0 };
+    // delete covers the whole trailing range here; the blue pane would promise an action with no handler
+    return { opacity: (deleteOnly ? p > 0 : p >= DELETE) ? 1 : 0 };
   });
 
   const onLayout = (e: LayoutChangeEvent) => setWidth(e.nativeEvent.layout.width);
@@ -149,8 +154,8 @@ export function SwipeableRow({
           trailing,
         ]}
       >
-        <Text style={[actionText, { color: c.blue }]}>{t.tomorrow}</Text>
-        <Text style={[actionText, { color: c.blue }]}>{t.pickDate}</Text>
+        {onSnooze ? <Text style={[actionText, { color: c.blue }]}>{t.tomorrow}</Text> : null}
+        {onPickDate ? <Text style={[actionText, { color: c.blue }]}>{t.pickDate}</Text> : null}
       </Animated.View>
 
       <Animated.View

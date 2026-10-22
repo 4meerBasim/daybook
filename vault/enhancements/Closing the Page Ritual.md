@@ -18,4 +18,4 @@ Open decisions:
 ## Related
 - Page: [[Page Closed]], [[Today]], [[Upcoming]]
 - Features: [[Offline First Local Store]], [[Wax Page Closed Stamp]], [[Ink Strike-Through Completion]], [[Ledger Paper Chrome]]
-- Enhancements: [[Ink Decay and Task Retirement]], [[Weekly Spread Review]], [[Day Capacity Budget]]
+- Enhancements: [[Ink Decay and Task Retirement]], [[Weekly Spread Review]], [[Day Capacity Budget]], [[Lift The Ink]]
