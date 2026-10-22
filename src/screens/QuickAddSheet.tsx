@@ -16,12 +16,14 @@ import { Chip } from '../components/Chip';
 import { CalendarIcon, FlagIcon, HashIcon, PaperclipIcon } from '../components/Icon';
 
 // @gorhom/bottom-sheet 5.2.14 blurs through TextInput.State.currentlyFocusedInput(), which
-// react-native-web does not implement — it exposes currentlyFocusedField() instead
-const inputState = TextInput.State as unknown as {
+// react-native-web does not implement — it exposes currentlyFocusedField() instead. Only
+// interchangeable on web, where both return the DOM node; ??= is what keeps native's own
+// implementation, whose two methods return different things.
+const inputState = TextInput.State as {
   currentlyFocusedInput?: () => unknown;
   currentlyFocusedField?: () => unknown;
 };
-inputState.currentlyFocusedInput ??= () => inputState.currentlyFocusedField?.() ?? null;
+inputState.currentlyFocusedInput ??= () => inputState.currentlyFocusedField?.();
 
 const LINE = 28;
 
