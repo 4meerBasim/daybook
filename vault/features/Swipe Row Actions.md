@@ -19,6 +19,8 @@ Direction is mirrored by a `sign` derived from `rtl`, so "leading" is a right-dr
 
 Mounted on every [[Today]] row. Complete calls `complete(id, done)`, which writes `completedAt`; snooze calls `snooze(id, 'tomorrow')`, which writes `snoozedUntil`; delete calls `remove(id)`, which writes `deletedAt` as a soft delete; pick-date opens [[Calendar]]. Snooze and delete used to be the same call into one `cleared` map — see [[Snooze And Delete Share One Cleared Map]] for why that was wrong and what each now means.
 
+[[Today]] wires all four. [[Upcoming]] and [[Project Detail]] wire only complete and delete: snooze writes `snoozedUntil`, which only `selectToday` reads and only for a row already due today, so it is a silent no-op on a future-dated row, and pick-date opens [[Calendar]], which takes no task and cannot record one. Neither `onSnooze` nor `onPickDate` is passed on those two screens, and `onSnooze` was made optional on the wrapper to allow that — `onPickDate` already was. [[Project Detail]] also routes its long-press to its project picker rather than to task detail, and adds an `assign` action to the row.
+
 The snooze offsets are named constants in `src/db/reminders.ts` rather than inline arithmetic, so the scheduler that [[Adaptive Reminders]] eventually adds reads the same ten-minute, one-hour and tomorrow values this swipe uses.
 
 The wrapper owns the row height, the ledger rule and the clipping; `TaskRow` is `flex: 1` inside the sliding face and declares no height or border of its own, so the rule stays printed on the paper while the face slides over it. Sizing the row in both places would overhang the wrapper's border by a pixel and let a completed row's paper background paint out its own rule.
@@ -32,7 +34,7 @@ Pan and long-press are composed with `Gesture.Race`, not `Simultaneous`: a hold 
 The thresholds are documented on-screen by the annotation rows in [[Swipe States]], whose copy lives in `src/i18n/strings.ts` as `swipe1`–`swipe4`. That screen draws its own static illustration rather than driving this component, so the reference rows cannot be knocked out of position by a stray touch.
 
 ## Related
-- Page: [[Today]], [[Swipe States]], [[Settings]], [[Calendar]], [[Unfiled]]
+- Page: [[Today]], [[Upcoming]], [[Project Detail]], [[Swipe States]], [[Settings]], [[Calendar]], [[Unfiled]]
 - Features: [[Offline First Local Store]], [[Reduced Motion Mode]], [[In-App RTL and Arabic Typography]], [[Ink Strike-Through Completion]], [[Animated Page Transitions]] — the horizontal pan a pane swipe would have to be arbitrated against
 - Bugs: [[Swipe Actions Not Wired Into Task Lists]], [[Startup Crash From Mismatched Worklets]], [[Snooze And Delete Share One Cleared Map]], [[Undated Unassigned Tasks Have No Screen]] — [[Unfiled]] carries these actions, minus pick-date, [[Native Layout Direction Is Not Pinned]]
 - Enhancements: [[Waiting On Follow-Ups]], [[Adaptive Reminders]]

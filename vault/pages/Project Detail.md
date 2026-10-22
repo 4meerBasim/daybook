@@ -5,8 +5,8 @@ Summary: One project's page — its own name, a derived progress count, tag chip
 
 ## Related
 - Connects to: [[Projects]] — tap a project row; returns via the system back gesture, [[Search Results]] — reached by tapping the `#invoice` tag result in the search overlay, [[Project Picker]] — long-press a row, its only caller now, [[Main Tabs]], [[Task Detail]], [[Unfiled]] — shares this screen's stack-screen header pattern
-- Features: [[Projects As A Real Entity]], [[Offline First Local Store]], [[Expanding Search Field]] — the tag result that opens this page, [[Ink Strike-Through Completion]], [[Ledger Paper Chrome]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]]
-- Bugs: [[Ink Stroke Spans The Whole Title Column]], [[Stack Screens Ignore The Bottom Safe Area]], [[Stack Screens Reserve Tab Bar Space]] — the gutter padding this screen already got right
+- Features: [[Projects As A Real Entity]], [[Offline First Local Store]], [[Expanding Search Field]] — the tag result that opens this page, [[Swipe Row Actions]], [[Ink Strike-Through Completion]], [[Ledger Paper Chrome]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]]
+- Bugs: [[Swipe Actions Not Wired Into Task Lists]], [[Ink Stroke Spans The Whole Title Column]], [[Stack Screens Ignore The Bottom Safe Area]], [[Stack Screens Reserve Tab Bar Space]] — the gutter padding this screen already got right
 - Enhancements: [[Waiting On Follow-Ups]], [[Shared Page Link]], [[Inbox Triage Chips]] — the long-press half that now only works here
 
 ## Notes
@@ -18,8 +18,8 @@ Three things stopped being literals. The `7 / 12` became `completed / total`. Th
 
 The `LM` / `NA` circles and the "shared with Nadia" line render for the seeded Studio project only. There is no collaborator entity and no sharing — see [[Shared Page Link]] — so for a project the user made, that whole cluster is absent and the tags sit alone on the row.
 
-Row meta is derived — the time of day when a task has one, otherwise its day-of-month, where the mock drew weekday abbreviations. Completed rows stay on the page in ink-3 and draw the ink stroke statically at the measured text width rather than animating it — same visual as [[Ink Strike-Through Completion]] at its end state, including its length bug, [[Ink Stroke Spans The Whole Title Column]]. A task whose name wraps takes a second ruling unit and falls back to a plain line-through, the same rule [[Today]] follows.
+Row meta is derived — the time of day when a task has one, otherwise its day-of-month, where the mock drew weekday abbreviations. The row is a `TaskRow` now, so a completed task animates the ink stroke exactly as [[Today]] does rather than keeping this screen's old static copy of the bar — the duplicated markup, the `textWidth` state and the `onLayout` that measured it are gone, so [[Ink Strike-Through Completion]]'s strike-width behaviour lives in one place and no longer has to be fixed twice. A task whose name wraps still falls back to a plain line-through.
 
-Long-pressing a row opens [[Project Picker]], which is where an assignment is cleared; the row also carries an `assign` accessibility action. Tapping a row does nothing — completion on this page is not wired, exactly as the mock draws it.
+Long-pressing a row still opens [[Project Picker]], now through [[Swipe Row Actions]]' `onLongPress`, which is where an assignment is cleared; the row keeps its `assign` accessibility action and its move-to-project hint. Completion is now wired: a checkbox tap or a leading swipe calls `complete(id, done)`, and a trailing swipe calls `remove(id)`. Snooze and pick-date are deliberately left off — snooze is a no-op on a task not due today, and pick-date has no write path until the calendar screen is reworked — so this screen passes neither callback and exposes only complete, delete and assign to screen readers.
 
 One edge: [[Search Results]]'s tag result always opens the seeded project by id, so if the user deletes Studio that result leads to a blank page until it is given a real target.

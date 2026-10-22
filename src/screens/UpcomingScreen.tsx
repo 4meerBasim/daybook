@@ -4,13 +4,15 @@ import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native
 import { useTheme } from '../theme/ThemeProvider';
 import { maxFontSizeMultiplier, metrics } from '../theme/tokens';
 import { useTabBarFootprint } from '../components/TabBar';
-import { align, marginStart, pad, row } from '../lib/rtl';
+import { pad, row } from '../lib/rtl';
 import { addDays, dayOfMonth, startOfDay, timeLabel } from '../lib/date';
 import { useStore } from '../state/store';
 import { rowTitle, type DatedTask } from '../db/schema';
 import { Screen } from '../components/Screen';
 import { PageHeader } from '../components/PageHeader';
-import { Checkbox, Dot, EmptyRules, Ledger, LedgerRow } from '../components/Ledger';
+import { EmptyRules, Ledger } from '../components/Ledger';
+import { TaskRow } from '../components/TaskRow';
+import { SwipeableRow } from '../components/SwipeableRow';
 
 function dateLabel(items: DatedTask[]): string {
   const first = dayOfMonth(items[0].dueDate);
@@ -18,10 +20,10 @@ function dateLabel(items: DatedTask[]): string {
   return first === last ? String(first) : `${first}–${last}`;
 }
 
-export function UpcomingScreen() {
-  const { c, t, ui, mono, display, rtl, unit } = useTheme();
+export function UpcomingScreen({ onOpenTask }: { onOpenTask: () => void }) {
+  const { c, t, mono, display, rtl, unit } = useTheme();
   const tabBarFootprint = useTabBarFootprint();
-  const { upcoming } = useStore();
+  const { upcoming, complete, remove } = useStore();
   const scrollY = useSharedValue(0);
   const onScroll = useAnimatedScrollHandler((e) => {
     scrollY.value = e.contentOffset.y;
@@ -30,6 +32,11 @@ export function UpcomingScreen() {
   const now = Date.now();
   const dayAfterTomorrow = startOfDay(addDays(now, 2));
   const weekEnd = startOfDay(addDays(now, 8));
+
+  const swipeActions = [
+    { name: 'complete', label: t.done },
+    { name: 'delete', label: t.delete },
+  ];
 
   const groups = [
     { day: t.tomorrow, items: upcoming.filter((k) => k.dueDate < dayAfterTomorrow) },
@@ -81,29 +88,28 @@ export function UpcomingScreen() {
               </View>
 
               {g.items.map((k) => {
-                const meta = timeLabel(k.dueDate);
+                const done = k.completedAt !== null;
                 return (
-                  <LedgerRow key={k.id}>
-                    <Checkbox />
-                    <Text
-                      maxFontSizeMultiplier={maxFontSizeMultiplier}
-                      style={[
-                        ui(17, 400, 22),
-                        { flex: 1, minWidth: 0, color: c.ink, textAlign: align(rtl) },
-                        marginStart(rtl, 16),
-                      ]}
-                    >
-                      {rowTitle(k, t)}
-                    </Text>
-                    <View style={{ flexDirection: row(rtl), alignItems: 'center', gap: 6 }}>
-                      <Dot color={c[k.color]} />
-                      {meta ? (
-                        <Text numberOfLines={1} style={[mono(12, 500), { color: c.ink3 }]}>
-                          {meta}
-                        </Text>
-                      ) : null}
-                    </View>
-                  </LedgerRow>
+                  <SwipeableRow
+                    key={k.id}
+                    onComplete={() => complete(k.id, !done)}
+                    onDelete={() => remove(k.id)}
+                    onLongPress={onOpenTask}
+                  >
+                    <TaskRow
+                      title={rowTitle(k, t)}
+                      meta={timeLabel(k.dueDate)}
+                      dotColor={c[k.color]}
+                      done={done}
+                      onToggle={() => complete(k.id, !done)}
+                      accessibilityActions={swipeActions}
+                      onAccessibilityAction={(e) => {
+                        const action = e.nativeEvent.actionName;
+                        if (action === 'complete') complete(k.id, !done);
+                        if (action === 'delete') remove(k.id);
+                      }}
+                    />
+                  </SwipeableRow>
                 );
               })}
             </React.Fragment>
