@@ -29,7 +29,7 @@ export function SwipeableRow({
   children: React.ReactNode;
   onComplete: () => void;
   onSnooze: () => void;
-  onPickDate: () => void;
+  onPickDate?: () => void;
   onDelete: () => void;
   onLongPress: () => void;
 }) {
@@ -66,8 +66,10 @@ export function SwipeableRow({
         runOnJS(tap)();
         runOnJS(onDelete)();
       } else if (-p >= PICK) {
-        runOnJS(tap)();
-        runOnJS(onPickDate)();
+        if (onPickDate) {
+          runOnJS(tap)();
+          runOnJS(onPickDate)();
+        }
       } else if (-p >= SNOOZE) {
         runOnJS(tap)();
         runOnJS(onSnooze)();

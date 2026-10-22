@@ -4,7 +4,7 @@ Route: `TaskDetail` (native stack)
 Summary: One task opened up — title, when/remind/priority/subtasks label rows, checkable subtasks, a note, and an attachment.
 
 ## Related
-- Connects to: [[Today]] — reached by long-pressing a task row, [[Focus Mode]] — the ellipsis button in the header, [[Main Tabs]] — the back chevron calls `navigation.goBack()`, [[Project Detail]]
+- Connects to: [[Today]] — reached by long-pressing a task row, [[Focus Mode]] — the ellipsis button in the header, [[Main Tabs]] — the back chevron calls `navigation.goBack()`, [[Project Detail]], [[Unfiled]] — long-pressing an Unfiled row opens this screen
 - Features: [[Offline First Local Store]], [[Glass Tab Bar]] — not rendered here, which is the bug above, [[Ledger Paper Chrome]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]], [[Ink Strike-Through Completion]]
 - Bugs: [[Focus Mode Unreachable]], [[Task And Subtask Ids Share One Done Map]], [[Stack Screens Reserve Tab Bar Space]]
 - Enhancements: [[Day Capacity Budget]], [[Waiting On Follow-Ups]], [[Notes With Live Task Lines]], [[Voice Brain Dump Capture]], [[Adaptive Reminders]]

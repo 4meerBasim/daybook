@@ -63,6 +63,16 @@ export function selectAssigned(db: SQLiteDatabase): Promise<TaskRow[]> {
   );
 }
 
+export function selectUnfiled(db: SQLiteDatabase): Promise<TaskRow[]> {
+  return db.getAllAsync<TaskRow>(
+    `SELECT * FROM tasks
+      WHERE deletedAt IS NULL
+        AND dueDate IS NULL
+        AND projectId IS NULL
+      ORDER BY sortOrder`
+  );
+}
+
 export function selectProjects(db: SQLiteDatabase): Promise<ProjectRow[]> {
   return db.getAllAsync<ProjectRow>(
     'SELECT * FROM projects WHERE archivedAt IS NULL ORDER BY createdAt'

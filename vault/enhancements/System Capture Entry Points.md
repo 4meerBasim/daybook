@@ -6,7 +6,7 @@ Summary: Capture from outside the app — the iOS share sheet, Android send inte
 ## Notes
 The Add item in the bar is the fastest capture inside the app, which is the wrong measure: most thoughts arrive while the user is somewhere else. A share-sheet target, an Android `ACTION_SEND` handler and an assistant shortcut mean the app is never the obstacle.
 
-Anything shared in would land as an undated capture, which is where this now runs into a wall: the Inbox screen that undated captures used to land on was deleted in the tab-bar redesign, and no screen lists them any more — [[Undated Unassigned Tasks Have No Screen]]. External capture into an invisible pile is worse than no external capture, so that has to be resolved first, and the triage half is blocked on it too — see [[Inbox Triage Chips]].
+Anything shared in would land as an undated capture, and that pile now has a home: [[Undated Unassigned Tasks Have No Screen]] is fixed, so shared-in items surface on the [[Unfiled]] screen rather than vanishing. That removes the hard blocker; the triage half rides along once [[Inbox Triage Chips]] is rebased onto the same surface.
 
 Open decisions:
 

@@ -6,7 +6,7 @@ Summary: Make the "Today" and "Someday" chips on each undated capture actually m
 ## Notes
 Needs rebasing. This was written against the Inbox screen, which no longer exists — `InboxScreen.tsx`, the `inbox` tab, the `inbox` store slice and the `someday` / `nothingWaiting` strings all went in the tab-bar redesign. The chips it describes went with them. What survives is the product idea and the data behind it; what it has lost is the surface.
 
-The rows it was about are still being created. `insertTask` writes `projectId` NULL and [[Quick Add Sheet]] writes `dueDate` NULL whenever no day is parsed, so undated unfiled captures accumulate — they just have no screen listing them, which is [[Undated Unassigned Tasks Have No Screen]]. That bug has to be resolved before this one means anything, and its resolution decides where these chips live: on an "unfiled" section somewhere, or on [[Today]] if dateless captures land there instead.
+The rows it was about are still being created. `insertTask` writes `projectId` NULL and [[Quick Add Sheet]] writes `dueDate` NULL whenever no day is parsed, so undated unfiled captures accumulate — they just had no screen listing them, which was [[Undated Unassigned Tasks Have No Screen]]. That bug is now fixed: those captures live on the [[Unfiled]] stack screen, so this is the surface these chips get rebased onto.
 
 The design calls these "two one-tap triage chips (Today / Someday); long-press for a project", but its own render wires no handler to them — they were static `div`s, unlike the Today rows, which do carry an `onClick` toggle. So they shipped as drawn-but-inert, matching the mock exactly. They were briefly `Pressable`s with accessibility labels and no `onPress`, which is worse than static: TalkBack and VoiceOver announce a button that does nothing.
 
@@ -14,7 +14,7 @@ The data blockers were already gone before the redesign and still are. [[Offline
 
 What is left:
 
-- A surface. See above — this is the new blocker and it did not exist when this note was written.
+- A surface, now unblocked: the [[Unfiled]] screen lists these captures, so the chips get rebased onto its rows.
 - "Someday" still has nothing behind it. The `Someday · 4` section label was a literal, and no column marks a task as someday — a nullable field, a far-future due date, and a separate list are three different products. The same gap [[Ink Decay and Task Retirement]] runs into for its retirement prompt.
 - Making the chips interactive means deciding what feedback a triaged row gets as it leaves the list, which the mock does not draw.
 

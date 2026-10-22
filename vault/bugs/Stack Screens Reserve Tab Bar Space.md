@@ -14,5 +14,5 @@ Pre-existing; it predates the floating-glass restyle and survived the tab-bar re
 Still verified against the current code: `metrics.tabBar: 84` is in `src/theme/tokens.ts`, and these two screens are its only readers. The three panes and [[Search Results]] all call the hook, which now returns `tabBarHeight + metrics.tabBarLift + max(safeAreaBottom, tabBarMinBottom)` — `tabBarLift` replaced `penLift` when the pen was flattened, but the hook's shape and the reason it has to be computed are unchanged. See [[Pen FAB]].
 
 ## Related
-- Page: [[Calendar]], [[Task Detail]], [[Main Tabs]], [[Search Results]]
+- Page: [[Calendar]], [[Task Detail]], [[Main Tabs]], [[Search Results]], [[Unfiled]]
 - Feature: [[Glass Tab Bar]], [[Pen FAB]]

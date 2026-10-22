@@ -22,7 +22,7 @@ Static end-state renderings of the same stroke appear elsewhere: `ProjectScreen.
 That split is the design's, not an inconsistency to tidy away. Only the [[Today]] rows animate the stroke, and only those are given the absolutely positioned bar with a transitioning width; every other screen in the design uses `text-decoration: line-through` directly, because the row arrives already struck and has nothing to animate.
 
 ## Related
-- Page: [[Today]], [[Project Detail]], [[Page Closed]], [[Search Results]], [[Task Detail]]
+- Page: [[Today]], [[Project Detail]], [[Page Closed]], [[Search Results]], [[Task Detail]], [[Unfiled]]
 - Features: [[Offline First Local Store]], [[Reduced Motion Mode]], [[Ledger Paper Chrome]]
 - Bugs: [[Startup Crash From Mismatched Worklets]], [[Task And Subtask Ids Share One Done Map]], [[Ink Stroke Spans The Whole Title Column]]
 - Enhancements: [[Closing the Page Ritual]], [[Ink Decay and Task Retirement]]

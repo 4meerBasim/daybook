@@ -17,6 +17,7 @@ import { SearchResults } from '../screens/SearchResults';
 import { OnboardingScreen } from '../screens/OnboardingScreen';
 import { ProjectScreen } from '../screens/ProjectScreen';
 import { ProjectsScreen } from '../screens/ProjectsScreen';
+import { UnfiledScreen } from '../screens/UnfiledScreen';
 import { SEED_PROJECT_ID } from '../db/seed';
 import { TaskDetailScreen } from '../screens/TaskDetailScreen';
 import { CalendarScreen } from '../screens/CalendarScreen';
@@ -33,6 +34,7 @@ export type RootParams = {
   Calendar: undefined;
   Project: { projectId: string };
   Projects: undefined;
+  Unfiled: undefined;
   TaskDetail: undefined;
   Focus: undefined;
   Settings: undefined;
@@ -94,6 +96,7 @@ function MainTabs({ navigation }: NativeStackScreenProps<RootParams, 'Main'>) {
           <ProfileScreen
             onOpenGestures={() => navigation.navigate('SwipeStates')}
             onOpenProjects={() => navigation.navigate('Projects')}
+            onOpenUnfiled={() => navigation.navigate('Unfiled')}
           />
         </Pane>
       </Animated.View>
@@ -174,6 +177,14 @@ export function Root() {
             />
           )}
         </Stack.Screen>
+        <Stack.Screen name="Unfiled">
+          {({ navigation }) => (
+            <UnfiledScreen
+              onBack={() => navigation.goBack()}
+              onOpenTask={() => navigation.navigate('TaskDetail')}
+            />
+          )}
+        </Stack.Screen>
         <Stack.Screen name="TaskDetail">
           {({ navigation }) => (
             <TaskDetailScreen
@@ -190,6 +201,7 @@ export function Root() {
             <SettingsScreen
               onOpenGestures={() => navigation.navigate('SwipeStates')}
               onOpenProjects={() => navigation.navigate('Projects')}
+              onOpenUnfiled={() => navigation.navigate('Unfiled')}
             />
           )}
         </Stack.Screen>

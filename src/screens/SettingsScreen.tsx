@@ -9,9 +9,11 @@ import { SettingsRows } from '../components/SettingsRows';
 export function SettingsScreen({
   onOpenGestures,
   onOpenProjects,
+  onOpenUnfiled,
 }: {
   onOpenGestures: () => void;
   onOpenProjects: () => void;
+  onOpenUnfiled: () => void;
 }) {
   const { c, t, display, rtl } = useTheme();
   const top = useHeaderTop();
@@ -28,7 +30,11 @@ export function SettingsScreen({
           </Text>
         </View>
 
-        <SettingsRows onOpenGestures={onOpenGestures} onOpenProjects={onOpenProjects} />
+        <SettingsRows
+          onOpenGestures={onOpenGestures}
+          onOpenProjects={onOpenProjects}
+          onOpenUnfiled={onOpenUnfiled}
+        />
       </ScrollView>
     </Screen>
   );
