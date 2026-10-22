@@ -7,7 +7,7 @@ Summary: A month grid where each day carries tally marks for its workload, with 
 - Connects to: [[Upcoming]] — reached by long-pressing the Upcoming tab; returns via the system back gesture, [[Today]] — reached by swiping a row past the pick-date threshold, [[Main Tabs]], [[Unfiled]] — will route here via its pick-date swipe once Calendar can apply a date to a task
 - Features: [[Offline First Local Store]], [[Calendar Tally Marks]], [[Swipe Row Actions]], [[Glass Tab Bar]] — not rendered here, which is the bug above, [[Ledger Paper Chrome]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]]
 - Bugs: [[Snooze And Delete Share One Cleared Map]], [[Page Header Shows A Frozen Date]], [[Stack Screens Reserve Tab Bar Space]], [[Calendar Overflow Is Unreachable]], [[Native Layout Direction Is Not Pinned]]
-- Enhancements: [[Day Capacity Budget]], [[Weekly Spread Review]]
+- Enhancements: [[Day Capacity Budget]], [[Weekly Spread Review]], [[Lift The Ink]]
 
 ## Notes
 `src/screens/CalendarScreen.tsx`, reading the `month` snapshot from [[Offline First Local Store]] — every non-deleted task due inside the current calendar month. Tallies are counted per day-of-month from those rows and the list under the grid is the rows matching `sel`, both with derived counts. Nothing here is hardcoded any more: the vermilion underline and the dimming of past days follow the real current date, and `sel` initialises to it.

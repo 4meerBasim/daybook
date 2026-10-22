@@ -20,7 +20,7 @@ The period of the ruling is one number, not a constant repeated per screen. `rul
 
 A row is always a whole multiple of the unit. `useRuling` measures the row's content through `onLayout` and sets the row to `ceil(contentHeight / unit)` units, so a title that wraps takes two rules instead of pushing everything below it off the grid. It also returns `grown`, which a row uses to know it is taller than one rule.
 
-That measurement is why every ruled row is built the same way: an outer box with the snapped height and `justifyContent: 'center'`, and an inner `rowContent` view that reports its natural height. `TaskRow`, `ProjectScreen`'s rows, the subtask rows on [[Task Detail]], the demo rows on [[Swipe States]] and the three rules on [[Onboarding]] each do this directly because they are pressables or carry their own background; everything else uses `LedgerRow`.
+That measurement is why every ruled row is built the same way: an outer box with the snapped height and `justifyContent: 'center'`, and an inner `rowContent` view that reports its natural height. `TaskRow`, the subtask rows on [[Task Detail]], the demo rows on [[Swipe States]] and the three rules on [[Onboarding]] each do this directly because they are pressables or carry their own background; everything else uses `LedgerRow`.
 
 `SwipeableRow` draws its rule as a 1pt absolutely positioned line rather than a border, because its height comes from the face it wraps: a border would sit outside that height and put its rows a pixel out of step with every other row on the page.
 
