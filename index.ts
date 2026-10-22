@@ -3,9 +3,9 @@ import { I18nManager } from 'react-native';
 
 import App from './App';
 
-// the app mirrors itself in styles from its own `lang`, so the native direction has to stay
-// LTR — otherwise an RTL device makes every `row(rtl)` container flip twice
+// style-level mirroring assumes native LTR; an RTL device flips rows and swaps left/right edges on top of it
 I18nManager.allowRTL(false);
+I18nManager.forceRTL(false);
 
 // registerRootComponent calls AppRegistry.registerComponent('main', () => App);
 // It also ensures that whether you load the app in Expo Go or in a native build,
