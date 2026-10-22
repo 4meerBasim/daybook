@@ -6,7 +6,7 @@ Summary: A ruled ledger of every live project — colour dot, name, completed / 
 ## Related
 - Connects to: [[Settings]], [[Profile]] — reached from the Projects row on either; returns via the system back gesture, [[Project Detail]] — tap a project row, [[Main Tabs]]
 - Features: [[Projects As A Real Entity]], [[Offline First Local Store]], [[Ledger Paper Chrome]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]], [[Reduced Motion Mode]]
-- Bugs: [[Undated Unassigned Tasks Have No Screen]] — archiving a project is one of its two sources
+- Bugs: [[Undated Unassigned Tasks Have No Screen]] — archiving a project is one of its two sources, [[Stack Screens Ignore The Bottom Safe Area]], [[Stack Screens Reserve Tab Bar Space]] — the gutter padding this screen already got right
 - Enhancements: [[Shared Page Link]]
 
 ## Notes

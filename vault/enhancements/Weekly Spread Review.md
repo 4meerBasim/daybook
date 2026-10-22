@@ -19,3 +19,4 @@ Open decisions:
 - Page: [[Calendar]], [[Today]], [[Upcoming]]
 - Features: [[Calendar Tally Marks]], [[Ledger Paper Chrome]]
 - Enhancements: [[Closing the Page Ritual]], [[Day Capacity Budget]]
+- Bugs: [[Calendar Overflow Is Unreachable]]

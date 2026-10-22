@@ -6,7 +6,7 @@ Summary: A single-task focus session on darker paper — a 64pt monospace countd
 ## Related
 - Connects to: [[Task Detail]] — the ellipsis button in its header opens this screen, [[Main Tabs]] — the check button calls `navigation.goBack()`
 - Features: [[Focus Timer]], [[Reduced Motion Mode]], [[Light and Dark Paper Palettes]], [[In-App RTL and Arabic Typography]]
-- Bugs: [[Focus Mode Unreachable]]
+- Bugs: [[Focus Mode Unreachable]], [[Stack Screens Ignore The Bottom Safe Area]]
 - Enhancements: [[Deal Me One Task Picker]], [[Focus Live Activity and Widgets]]
 
 ## Notes

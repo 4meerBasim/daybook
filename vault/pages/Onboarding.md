@@ -6,7 +6,7 @@ Summary: First-run title page that states the app's three rules, lets the user p
 ## Related
 - Connects to: [[Main Tabs]] — the "Start writing" button calls `navigation.replace('Main')`, so onboarding is removed from the stack and cannot be returned to
 - Features: [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]], [[Ledger Paper Chrome]]
-- Bugs: none found
+- Bugs: [[Stack Screens Ignore The Bottom Safe Area]]
 - Enhancements: none
 
 ## Notes

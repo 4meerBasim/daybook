@@ -20,7 +20,7 @@ Both sources this bug named now land somewhere. A dateless capture from [[Quick 
 The chip copy on [[Quick Add Sheet]] ("No date" / "بلا تاريخ") was not changed here; it is now true without stranding anything, because the row it describes is reachable again. [[Inbox Triage Chips]] can now be rebased onto this surface.
 
 ## Related
-- Page: [[Unfiled]], [[Quick Add Sheet]], [[Main Tabs]], [[Today]], [[Projects]], [[Project Picker]], [[Profile]], [[Settings]]
+- Page: [[Unfiled]], [[Quick Add Sheet]], [[Main Tabs]], [[Today]], [[Projects]], [[Project Picker]], [[Profile]], [[Settings]], [[Upcoming]]
 - Feature: [[Natural Language Quick Add]], [[Offline First Local Store]], [[Projects As A Real Entity]], [[Glass Tab Bar]], [[Swipe Row Actions]]
 - Bugs: [[Quick Add Does Not Create Tasks]], [[Stack Screens Reserve Tab Bar Space]]
 - Enhancements: [[Inbox Triage Chips]], [[Ink Decay and Task Retirement]], [[System Capture Entry Points]], [[Voice Brain Dump Capture]], [[Waiting On Follow-Ups]]
