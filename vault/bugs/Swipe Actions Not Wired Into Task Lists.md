@@ -13,7 +13,9 @@ Fixed by wrapping each [[Today]] row in `SwipeableRow`. `onComplete` calls the e
 
 The Inbox and [[Upcoming]] were deliberately left without swipe. The mock specifies one-tap triage chips and long-press-for-project on Inbox, and day sub-headings on Upcoming; neither note mentions swipe. The rows do now carry stable ids — [[Offline First Local Store]] gave every list the same task table — so the only thing still keeping swipe off [[Upcoming]] is the design, not the data. The Inbox half is moot: that screen was deleted in the tab-bar redesign and never got swipe.
 
+[[Calendar]]'s selected-day rows became tap-completable in `fix/calendar-real-month` — they render through `TaskRow` wired to the store's `complete` — but deliberately carry no swipe, since snooze and pick-date are inert on that screen.
+
 ## Related
 - Feature: [[Swipe Row Actions]], [[Offline First Local Store]]
-- Page: [[Swipe States]], [[Today]], [[Upcoming]]
+- Page: [[Swipe States]], [[Today]], [[Upcoming]], [[Calendar]]
 - Bugs: [[Snooze And Delete Share One Cleared Map]]

@@ -27,8 +27,8 @@ export type TaskRowProps = {
   done?: boolean;
   overdue?: boolean;
   onToggle: () => void;
-  accessibilityActions: AccessibilityActionInfo[];
-  onAccessibilityAction: (e: AccessibilityActionEvent) => void;
+  accessibilityActions?: AccessibilityActionInfo[];
+  onAccessibilityAction?: (e: AccessibilityActionEvent) => void;
 };
 
 export function TaskRow({
