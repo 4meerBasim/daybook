@@ -7,7 +7,7 @@ Summary: A gesture reference page showing each swipe threshold held open — com
 - Connects to: [[Settings]], [[Profile]] — reached from the Shortcuts row on either; returns via the system back gesture, [[Main Tabs]], [[Project Picker]] — what long-press actually does now
 - Features: [[Swipe Row Actions]], [[Ledger Paper Chrome]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]]
 - Bugs: [[Swipe Actions Not Wired Into Task Lists]], [[Stack Screens Ignore The Bottom Safe Area]] — latent here; nothing on this screen reaches the gesture area yet, [[Stack Screens Reserve Tab Bar Space]], [[Ink Stroke Spans The Whole Title Column]] — not affected; the demo rows draw no strike
-- Enhancements: [[Waiting On Follow-Ups]]
+- Enhancements: [[Waiting On Follow-Ups]], [[Lift The Ink]]
 
 ## Notes
 `src/screens/SwipeStatesScreen.tsx`. The demo rows are a static illustration, not live `SwipeableRow` instances — each one hardcodes its own action pane and a fixed face offset, sign-flipped for RTL, exactly as the mock does. Keeping them inert means the reference positions cannot be knocked out of place by a touch, and it lets the delete row show the vermilion pane even though its 200pt offset is only about half the row width, below the real 70% threshold. The live gestures are on [[Today]].

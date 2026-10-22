@@ -54,7 +54,6 @@ function ProjectTaskRow({ task, onAssign }: { task: TaskRowData; onAssign: () =>
         meta={rowMeta(task)}
         done={done}
         onToggle={() => complete(task.id, !done)}
-        accessibilityHint={t.moveToProject}
         accessibilityActions={[
           { name: 'complete', label: t.done },
           { name: 'delete', label: t.delete },

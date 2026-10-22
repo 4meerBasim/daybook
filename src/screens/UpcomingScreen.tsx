@@ -87,31 +87,27 @@ export function UpcomingScreen({ onOpenTask }: { onOpenTask: () => void }) {
                 </Text>
               </View>
 
-              {g.items.map((k) => {
-                const done = k.completedAt !== null;
-                return (
-                  <SwipeableRow
-                    key={k.id}
-                    onComplete={() => complete(k.id, !done)}
-                    onDelete={() => remove(k.id)}
-                    onLongPress={onOpenTask}
-                  >
-                    <TaskRow
-                      title={rowTitle(k, t)}
-                      meta={timeLabel(k.dueDate)}
-                      dotColor={c[k.color]}
-                      done={done}
-                      onToggle={() => complete(k.id, !done)}
-                      accessibilityActions={swipeActions}
-                      onAccessibilityAction={(e) => {
-                        const action = e.nativeEvent.actionName;
-                        if (action === 'complete') complete(k.id, !done);
-                        if (action === 'delete') remove(k.id);
-                      }}
-                    />
-                  </SwipeableRow>
-                );
-              })}
+              {g.items.map((k) => (
+                <SwipeableRow
+                  key={k.id}
+                  onComplete={() => complete(k.id, true)}
+                  onDelete={() => remove(k.id)}
+                  onLongPress={onOpenTask}
+                >
+                  <TaskRow
+                    title={rowTitle(k, t)}
+                    meta={timeLabel(k.dueDate)}
+                    dotColor={c[k.color]}
+                    onToggle={() => complete(k.id, true)}
+                    accessibilityActions={swipeActions}
+                    onAccessibilityAction={(e) => {
+                      const action = e.nativeEvent.actionName;
+                      if (action === 'complete') complete(k.id, true);
+                      if (action === 'delete') remove(k.id);
+                    }}
+                  />
+                </SwipeableRow>
+              ))}
             </React.Fragment>
           ))}
 

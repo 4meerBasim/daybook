@@ -36,8 +36,6 @@ export function SwipeableRow({
   const { c, t, ui, rtl, reduced } = useTheme();
   const [width, setWidth] = useState(0);
 
-  // without a mid-swipe action the trailing region is delete alone, so it has to read as
-  // delete the whole way rather than promising an action it will not commit
   const deleteOnly = !onSnooze && !onPickDate;
 
   const sign = rtl ? -1 : 1;
@@ -108,7 +106,8 @@ export function SwipeableRow({
   });
   const destructive = useAnimatedStyle(() => {
     const p = width ? (-tx.value * sign) / width : 0;
-    return { opacity: p >= (deleteOnly ? 0 : DELETE) && p > 0 ? 1 : 0 };
+    // delete covers the whole trailing range here; the blue pane would promise an action with no handler
+    return { opacity: (deleteOnly ? p > 0 : p >= DELETE) ? 1 : 0 };
   });
 
   const onLayout = (e: LayoutChangeEvent) => setWidth(e.nativeEvent.layout.width);
@@ -155,8 +154,8 @@ export function SwipeableRow({
           trailing,
         ]}
       >
-        <Text style={[actionText, { color: c.blue }]}>{t.tomorrow}</Text>
-        <Text style={[actionText, { color: c.blue }]}>{t.pickDate}</Text>
+        {onSnooze ? <Text style={[actionText, { color: c.blue }]}>{t.tomorrow}</Text> : null}
+        {onPickDate ? <Text style={[actionText, { color: c.blue }]}>{t.pickDate}</Text> : null}
       </Animated.View>
 
       <Animated.View

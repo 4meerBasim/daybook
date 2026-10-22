@@ -7,7 +7,7 @@ Summary: One project's page — its own name, a derived progress count, tag chip
 - Connects to: [[Projects]] — tap a project row; returns via the system back gesture, [[Search Results]] — reached by tapping the `#invoice` tag result in the search overlay, [[Project Picker]] — long-press a row, its only caller now, [[Main Tabs]], [[Task Detail]], [[Unfiled]] — shares this screen's stack-screen header pattern
 - Features: [[Projects As A Real Entity]], [[Offline First Local Store]], [[Expanding Search Field]] — the tag result that opens this page, [[Swipe Row Actions]], [[Ink Strike-Through Completion]], [[Ledger Paper Chrome]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]]
 - Bugs: [[Swipe Actions Not Wired Into Task Lists]], [[Ink Stroke Spans The Whole Title Column]], [[Stack Screens Ignore The Bottom Safe Area]], [[Stack Screens Reserve Tab Bar Space]] — the gutter padding this screen already got right
-- Enhancements: [[Waiting On Follow-Ups]], [[Shared Page Link]], [[Inbox Triage Chips]] — the long-press half that now only works here
+- Enhancements: [[Waiting On Follow-Ups]], [[Shared Page Link]], [[Inbox Triage Chips]] — the long-press half that now only works here, [[Lift The Ink]]
 
 ## Notes
 `src/screens/ProjectScreen.tsx`. The route carries a `projectId` now, so the screen reads a real row: the eyebrow dot takes the project's own colour, the name is `projectName(project, t)` — the stored name, or the i18n string while the seeded project still carries its `seedKey` — and the fraction counts the rows on screen. Until the store has loaded, the project is simply not found yet and the screen renders bare paper.

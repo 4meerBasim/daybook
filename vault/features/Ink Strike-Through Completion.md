@@ -19,10 +19,10 @@ Completion state itself is `completedAt` on the task row in [[Offline First Loca
 
 Static end-state renderings of the same stroke appear elsewhere: [[Page Closed]], [[Search Results]] — now an overlay rather than a tab, same markup — and the subtasks on [[Task Detail]] use plain `textDecorationLine: 'line-through'`.
 
-That split is the design's, not an inconsistency to tidy away. The task lists — [[Today]], [[Upcoming]] and [[Project Detail]] — share this `TaskRow`, so all three animate the stroke with the absolutely positioned bar of transitioning width; the remaining screens use `text-decoration: line-through` directly, because the row arrives already struck and has nothing to animate. [[Project Detail]] used to carry its own static copy of the bar — that duplicate is gone now that it renders a `TaskRow`.
+That split is the design's, not an inconsistency to tidy away. [[Today]], [[Project Detail]] and [[Unfiled]] share this `TaskRow`, so all three animate the stroke. [[Upcoming]] shares it too but never shows a struck row, because `selectUpcoming` filters `completedAt IS NULL` — the row leaves the list rather than striking with the absolutely positioned bar of transitioning width; the remaining screens use `text-decoration: line-through` directly, because the row arrives already struck and has nothing to animate. [[Project Detail]] used to carry its own static copy of the bar — that duplicate is gone now that it renders a `TaskRow`.
 
 ## Related
 - Page: [[Today]], [[Upcoming]], [[Project Detail]], [[Page Closed]], [[Search Results]], [[Task Detail]], [[Unfiled]]
 - Features: [[Offline First Local Store]], [[Reduced Motion Mode]], [[Ledger Paper Chrome]], [[In-App RTL and Arabic Typography]], [[Swipe Row Actions]], [[Wax Page Closed Stamp]]
 - Bugs: [[Startup Crash From Mismatched Worklets]], [[Task And Subtask Ids Share One Done Map]], [[Ink Stroke Spans The Whole Title Column]]
-- Enhancements: [[Closing the Page Ritual]], [[Ink Decay and Task Retirement]]
+- Enhancements: [[Closing the Page Ritual]], [[Ink Decay and Task Retirement]], [[Lift The Ink]]

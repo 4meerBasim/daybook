@@ -27,7 +27,6 @@ export type TaskRowProps = {
   done?: boolean;
   overdue?: boolean;
   onToggle: () => void;
-  accessibilityHint?: string;
   accessibilityActions: AccessibilityActionInfo[];
   onAccessibilityAction: (e: AccessibilityActionEvent) => void;
 };
@@ -39,7 +38,6 @@ export function TaskRow({
   done = false,
   overdue = false,
   onToggle,
-  accessibilityHint,
   accessibilityActions,
   onAccessibilityAction,
 }: TaskRowProps) {
@@ -87,7 +85,6 @@ export function TaskRow({
       accessibilityRole="checkbox"
       accessibilityState={{ checked: done }}
       accessibilityLabel={title}
-      accessibilityHint={accessibilityHint}
       accessibilityActions={accessibilityActions}
       onAccessibilityAction={onAccessibilityAction}
       style={({ pressed }) => ({

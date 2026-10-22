@@ -39,4 +39,4 @@ The thresholds are documented on-screen by the annotation rows in [[Swipe States
 - Page: [[Today]], [[Upcoming]], [[Project Detail]], [[Swipe States]], [[Settings]], [[Calendar]], [[Unfiled]]
 - Features: [[Offline First Local Store]], [[Reduced Motion Mode]], [[In-App RTL and Arabic Typography]], [[Ink Strike-Through Completion]], [[Animated Page Transitions]] — the horizontal pan a pane swipe would have to be arbitrated against
 - Bugs: [[Swipe Actions Not Wired Into Task Lists]], [[Startup Crash From Mismatched Worklets]], [[Snooze And Delete Share One Cleared Map]], [[Undated Unassigned Tasks Have No Screen]] — [[Unfiled]] carries these actions, minus pick-date, [[Native Layout Direction Is Not Pinned]]
-- Enhancements: [[Waiting On Follow-Ups]], [[Adaptive Reminders]]
+- Enhancements: [[Waiting On Follow-Ups]], [[Adaptive Reminders]], [[Lift The Ink]]
