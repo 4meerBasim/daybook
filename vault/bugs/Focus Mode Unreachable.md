@@ -17,3 +17,4 @@ Fixed by giving the ellipsis button on [[Task Detail]] an `onFocus` handler that
 - Feature: [[Focus Timer]]
 - Page: [[Focus Mode]], [[Task Detail]], [[Main Tabs]]
 - Enhancements: [[Deal Me One Task Picker]], [[Focus Live Activity and Widgets]]
+- Bugs: [[Onboarding Shows On Every Launch]]

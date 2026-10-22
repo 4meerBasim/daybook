@@ -15,6 +15,8 @@ export const APPEARANCE = 'appearance';
 
 export const MOTION = 'motion';
 
+export const ONBOARDED = 'onboarded';
+
 export const PRIORITY_HIGH = 3;
 
 export const DEFAULT_TASK_COLOR: ColorToken = 'blue';
