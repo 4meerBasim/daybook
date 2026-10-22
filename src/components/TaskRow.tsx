@@ -63,7 +63,7 @@ export function TaskRow({
   }, [done, reduced]);
 
   const strikeStyle = useAnimatedStyle(() => ({
-    width: strike.value * (textWidth + 2),
+    width: strike.value * (textWidth + 4),
   }));
 
   const textColor = useDerivedValue(() =>
@@ -96,34 +96,40 @@ export function TaskRow({
       <View onLayout={onContentLayout} style={rowContent(rtl, 16)}>
         <Checkbox checked={done} />
 
-        <View style={[{ flex: 1, minWidth: 0, position: 'relative' }, marginStart(rtl, 16)]}>
-          <Animated.Text
-            maxFontSizeMultiplier={maxFontSizeMultiplier}
-            onLayout={onLayout}
-            style={[
-              ui(17, 400, 22),
-              titleStyle,
-              { alignSelf: rtl ? 'flex-end' : 'flex-start' },
-              grown && done ? { textDecorationLine: 'line-through' } : null,
-            ]}
-          >
-            {title}
-          </Animated.Text>
-          {grown ? null : (
-            <Animated.View
-              pointerEvents="none"
+        <View
+          style={[
+            { flex: 1, minWidth: 0, flexDirection: row(rtl) },
+            marginStart(rtl, 16),
+          ]}
+        >
+          <View style={{ minWidth: 0, flexShrink: 1, position: 'relative' }}>
+            <Animated.Text
+              maxFontSizeMultiplier={maxFontSizeMultiplier}
+              onLayout={onLayout}
               style={[
-                {
-                  position: 'absolute',
-                  top: '50%',
-                  height: 1.5,
-                  backgroundColor: c.ink,
-                  ...insetStart(rtl, -2),
-                },
-                strikeStyle,
+                ui(17, 400, 22),
+                titleStyle,
+                grown && done ? { textDecorationLine: 'line-through' } : null,
               ]}
-            />
-          )}
+            >
+              {title}
+            </Animated.Text>
+            {grown ? null : (
+              <Animated.View
+                pointerEvents="none"
+                style={[
+                  {
+                    position: 'absolute',
+                    top: '50%',
+                    height: 1.5,
+                    backgroundColor: c.ink,
+                    ...insetStart(rtl, -2),
+                  },
+                  strikeStyle,
+                ]}
+              />
+            )}
+          </View>
         </View>
 
         {meta || dotColor ? (

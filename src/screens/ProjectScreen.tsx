@@ -65,35 +65,38 @@ function ProjectTaskRow({ task, onAssign }: { task: TaskRow; onAssign: () => voi
       <View onLayout={onContentLayout} style={rowContent(rtl, 16)}>
         <Checkbox checked={done} />
 
-        <View style={[{ flex: 1, minWidth: 0, position: 'relative' }, marginStart(rtl, 16)]}>
-          <Text
-            maxFontSizeMultiplier={maxFontSizeMultiplier}
-            onLayout={onLayout}
-            style={[
-              ui(17, 400, 22),
-              {
-                color: done ? c.ink3 : c.ink,
-                textAlign: align(rtl),
-                alignSelf: rtl ? 'flex-end' : 'flex-start',
-              },
-              done && grown ? { textDecorationLine: 'line-through' } : null,
-            ]}
-          >
-            {rowTitle(task, t)}
-          </Text>
-          {done && !grown ? (
-            <View
-              pointerEvents="none"
-              style={{
-                position: 'absolute',
-                top: '50%',
-                height: 1.5,
-                width: textWidth + 2,
-                backgroundColor: c.ink,
-                ...insetStart(rtl, -2),
-              }}
-            />
-          ) : null}
+        <View
+          style={[
+            { flex: 1, minWidth: 0, flexDirection: row(rtl) },
+            marginStart(rtl, 16),
+          ]}
+        >
+          <View style={{ minWidth: 0, flexShrink: 1, position: 'relative' }}>
+            <Text
+              maxFontSizeMultiplier={maxFontSizeMultiplier}
+              onLayout={onLayout}
+              style={[
+                ui(17, 400, 22),
+                { color: done ? c.ink3 : c.ink, textAlign: align(rtl) },
+                done && grown ? { textDecorationLine: 'line-through' } : null,
+              ]}
+            >
+              {rowTitle(task, t)}
+            </Text>
+            {done && !grown ? (
+              <View
+                pointerEvents="none"
+                style={{
+                  position: 'absolute',
+                  top: '50%',
+                  height: 1.5,
+                  width: textWidth + 4,
+                  backgroundColor: c.ink,
+                  ...insetStart(rtl, -2),
+                }}
+              />
+            ) : null}
+          </View>
         </View>
 
         <Text numberOfLines={1} style={[mono(12, 500), { color: c.ink3 }]}>
