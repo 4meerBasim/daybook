@@ -18,5 +18,5 @@ Fixed together in `fix/calendar-real-month`. The header, weekday row and month g
 ## Related
 - Page: [[Calendar]], [[Today]], [[Upcoming]]
 - Features: [[Calendar Tally Marks]], [[Ledger Paper Chrome]], [[Offline First Local Store]]
-- Bugs: [[Stack Screens Reserve Tab Bar Space]], [[Stack Screens Ignore The Bottom Safe Area]], [[Page Header Shows A Frozen Date]]
+- Bugs: [[Stack Screens Reserve Tab Bar Space]], [[Stack Screens Ignore The Bottom Safe Area]], [[Page Header Shows A Frozen Date]], [[Onboarding Shows On Every Launch]]
 - Enhancements: [[Weekly Spread Review]], [[Day Capacity Budget]]

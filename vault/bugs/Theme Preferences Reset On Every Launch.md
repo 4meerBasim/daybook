@@ -36,3 +36,4 @@ Not verified on a device; the fix rests on the provider order and the `prefs` ro
 ## Related
 - Page: [[Settings]], [[Profile]], [[Onboarding]], [[Main Tabs]]
 - Features: [[Offline First Local Store]], [[Light and Dark Paper Palettes]], [[In-App RTL and Arabic Typography]], [[Reduced Motion Mode]]
+- Bugs: [[Onboarding Shows On Every Launch]]

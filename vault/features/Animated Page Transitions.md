@@ -21,4 +21,4 @@ Under [[Reduced Motion Mode]] the offset is assigned instead of timed, so the pa
 ## Related
 - Page: [[Main Tabs]], [[Today]], [[Upcoming]], [[Profile]]
 - Features: [[Glass Tab Bar]], [[Expanding Search Field]], [[Reduced Motion Mode]], [[In-App RTL and Arabic Typography]]
-- Bugs: [[Startup Crash From Mismatched Worklets]]
+- Bugs: [[Startup Crash From Mismatched Worklets]], [[Onboarding Shows On Every Launch]]
