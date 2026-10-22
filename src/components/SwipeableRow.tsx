@@ -36,6 +36,10 @@ export function SwipeableRow({
   const { c, t, ui, rtl, reduced } = useTheme();
   const [width, setWidth] = useState(0);
 
+  // without a mid-swipe action the trailing region is delete alone, so it has to read as
+  // delete the whole way rather than promising an action it will not commit
+  const deleteOnly = !onSnooze && !onPickDate;
+
   const sign = rtl ? -1 : 1;
   const tx = useSharedValue(0);
   const lifted = useSharedValue(0);
@@ -100,11 +104,11 @@ export function SwipeableRow({
   const leading = useAnimatedStyle(() => ({ opacity: tx.value * sign > 0 ? 1 : 0 }));
   const trailing = useAnimatedStyle(() => {
     const p = width ? (-tx.value * sign) / width : 0;
-    return { opacity: p > 0 && p < DELETE ? 1 : 0 };
+    return { opacity: !deleteOnly && p > 0 && p < DELETE ? 1 : 0 };
   });
   const destructive = useAnimatedStyle(() => {
     const p = width ? (-tx.value * sign) / width : 0;
-    return { opacity: p >= DELETE ? 1 : 0 };
+    return { opacity: p >= (deleteOnly ? 0 : DELETE) && p > 0 ? 1 : 0 };
   });
 
   const onLayout = (e: LayoutChangeEvent) => setWidth(e.nativeEvent.layout.width);
