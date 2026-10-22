@@ -91,30 +91,34 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const reload = useCallback(async () => {
     const now = Date.now();
-    const [today, upcoming, assigned, unfiled, projects, month, subtasks, displayName, onboarded] =
-      await Promise.all([
-        selectToday(db, now),
-        selectUpcoming(db, now),
-        selectAssigned(db),
-        selectUnfiled(db),
-        selectProjects(db),
-        selectMonth(db, now),
-        selectSubtasks(db, SEED_INVOICE_TASK_ID),
-        selectPref(db, DISPLAY_NAME),
-        selectPref(db, ONBOARDED),
-      ]);
-    setSnapshot({
-      today,
-      upcoming,
-      assigned,
-      unfiled,
-      projects,
-      month,
-      subtasks,
-      displayName: displayName ?? '',
-      onboarded: onboarded === 'true',
-    });
-    setLoaded(true);
+    try {
+      const [today, upcoming, assigned, unfiled, projects, month, subtasks, displayName, onboarded] =
+        await Promise.all([
+          selectToday(db, now),
+          selectUpcoming(db, now),
+          selectAssigned(db),
+          selectUnfiled(db),
+          selectProjects(db),
+          selectMonth(db, now),
+          selectSubtasks(db, SEED_INVOICE_TASK_ID),
+          selectPref(db, DISPLAY_NAME),
+          selectPref(db, ONBOARDED),
+        ]);
+      setSnapshot({
+        today,
+        upcoming,
+        assigned,
+        unfiled,
+        projects,
+        month,
+        subtasks,
+        displayName: displayName ?? '',
+        onboarded: onboarded === 'true',
+      });
+    } finally {
+      // Root gates on this, so a failed read must still release it or the app never renders
+      setLoaded(true);
+    }
   }, [db]);
 
   useEffect(() => {

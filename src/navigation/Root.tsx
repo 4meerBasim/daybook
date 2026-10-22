@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { View, useWindowDimensions } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
@@ -156,13 +156,15 @@ export function Root() {
   const { c } = useTheme();
   const { loaded, onboarded, markOnboarded } = useStore();
 
-  const navTheme = {
-    ...DefaultTheme,
-    colors: { ...DefaultTheme.colors, background: c.paper, card: c.paper, text: c.ink, border: c.rule },
-  };
+  const navTheme = useMemo(
+    () => ({
+      ...DefaultTheme,
+      colors: { ...DefaultTheme.colors, background: c.paper, card: c.paper, text: c.ink, border: c.rule },
+    }),
+    [c]
+  );
 
-  // initialRouteName is only read on first mount, so the navigator cannot start
-  // before the onboarded pref is known
+  // initialRouteName is only read on first mount
   if (!loaded) return null;
 
   return (

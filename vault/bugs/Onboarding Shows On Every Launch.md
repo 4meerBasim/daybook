@@ -16,12 +16,23 @@ What changed:
 ### Why Root gates on `loaded`
 `initialRouteName` is read once, when the navigator first mounts. Rendering before the pref is known would mean starting on [[Onboarding]] and then correcting, which is the flash the fix exists to remove — so `Root` returns `null` until the store's first snapshot resolves. [[Main Tabs]] and everything under it mount a moment later than they used to.
 
-The blank moment is paper rather than white: `Shell` sits above `Root` and paints `c.paper`, and the native window is already `#F5F0E6` from `app.json`. It is also the same wait [[Offline First Local Store]] was already doing — `loaded` existed and was only being used to hold back the wax stamp on [[Today]].
+This is a **new** blocking wait, not an existing one. `loaded` already existed on the store, but nothing waited on it: the UI rendered immediately with `EMPTY` lists and filled in, and `loaded`'s only consumer was holding back the wax stamp on [[Today]]. The prior art is one provider up — `ThemeProvider` gates the same way for the same reason, added with [[Theme Preferences Reset On Every Launch]].
 
-`markOnboarded()` goes through the store's usual `after()` path, so it triggers a reload like every other mutation. That cannot re-trigger the navigator, since `initialRouteName` is not re-read, and `loaded` is only ever set true, so the gate never closes again mid-session.
+That precedent matters for a second reason. `reload()` set `loaded` after its `await`, so a single rejected query would have left the gate shut forever: a blank screen with no error, no retry and no way out but reinstalling. Before this change that same failure degraded to empty lists. The read is now wrapped so the gate releases either way, matching `ThemeProvider`. Three sequential gates now stand between launch and first paint — fonts in `App`, prefs in `ThemeProvider`, the snapshot in `Root` — and all three release on failure.
+
+The blank moment is paper rather than white: `Shell` sits above `Root` and paints `c.paper`, and the native window is already `#F5F0E6` from `app.json`.
+
+`markOnboarded()` goes through the store's usual `after()` path, so it triggers a reload like every other mutation. `navigation.replace('Main')` runs synchronously first, so there is no race; the late reload flips `onboarded` to `true` after the navigator already mounted, which is inert because `initialRouteName` is not re-read. `loaded` is only ever set true, so the gate never closes again mid-session.
+
+Gating `Root` did mean it re-renders on every store mutation, where before it only re-rendered on a theme change — so `navTheme` is memoised on the palette. Without that, completing a task republished React Navigation's theme context and recreated every `Stack.Screen` element.
 
 ### Not covered
-There is no way to see [[Onboarding]] again once it is done — no reset in [[Settings]]. That is a product decision rather than an oversight, and the screen is still reachable by clearing app data.
+[[Onboarding]] is now a registered route with no inbound edge, which this vault treats as a bug elsewhere — see [[Focus Mode Unreachable]], which names the principle, and [[Calendar Overflow Is Unreachable]]. The difference is deliberate here rather than forgotten: the language choice it exists to make is also a row in [[Settings]], and appearance and motion are there too, so nothing it offers is lost. Stating it as a decision rather than claiming it was always intended. A reset row in [[Settings]] would close the loop if the owner wants one; clearing app data is the only route back today.
+
+Two consequences worth knowing:
+
+- Start marks the pref whether or not a language was picked. `OnboardingScreen` only calls `setLang` from its two buttons, so a user who presses Start without touching either keeps the `'en'` default — and, per the paragraph above, does not get asked again. The language row in [[Settings]] is the recovery.
+- Existing installs have no `onboarded` row, so the first launch after this change shows the welcome screen exactly once more. Correct, but it is the one visible change a tester would report.
 
 Not verified on a device; the fix rests on the navigator's documented `initialRouteName` behaviour and the pref round trip.
 
