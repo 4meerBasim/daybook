@@ -49,7 +49,7 @@ No `expo-notifications`, no permission strings, no scheduler. The data model alo
 `duration` exists for [[Day Capacity Budget]], `createdAt` and `completedAt` for [[Ink Decay and Task Retirement]] and [[Closing the Page Ritual]], stable ids across every list for [[Inbox Triage Chips]]. Merge-friendliness for [[Shared Page Link]] is still undecided — rows are last-write-wins today, and CRDT-style merging would be a schema change. The sync row drawn in [[Settings]] is still inert by design.
 
 ## Related
-- Page: [[Settings]], [[Profile]], [[Today]], [[Upcoming]], [[Calendar]], [[Project Detail]], [[Projects]], [[Project Picker]], [[Task Detail]], [[Quick Add Sheet]]
+- Page: [[Settings]], [[Profile]], [[Today]], [[Upcoming]], [[Calendar]], [[Project Detail]], [[Projects]], [[Project Picker]], [[Task Detail]], [[Quick Add Sheet]], [[Unfiled]]
 - Features: [[Natural Language Quick Add]], [[Projects As A Real Entity]], [[Swipe Row Actions]], [[Calendar Tally Marks]], [[Ink Strike-Through Completion]]
 - Bugs: [[Quick Add Does Not Create Tasks]], [[Snooze And Delete Share One Cleared Map]], [[Task And Subtask Ids Share One Done Map]], [[Page Header Shows A Frozen Date]], [[Undated Unassigned Tasks Have No Screen]]
 - Enhancements: [[Closing the Page Ritual]], [[Day Capacity Budget]], [[Ink Decay and Task Retirement]], [[Notes With Live Task Lines]], [[Weekly Spread Review]], [[Shared Page Link]], [[Adaptive Reminders]], [[Focus Live Activity and Widgets]], [[System Capture Entry Points]], [[Inbox Triage Chips]], [[Waiting On Follow-Ups]], [[Voice Brain Dump Capture]]

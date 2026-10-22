@@ -35,7 +35,7 @@ Metrics come from `src/theme/tokens.ts` and are shared with every screen, which 
 Growth is for text the user wrote. Task titles, project names, subtasks and note excerpts wrap; tab labels, times, counts, fractions and section sub-headings keep `numberOfLines={1}`, because they are table chrome and a wrapped count reads as a mistake. Chips keep the design's 26 / 28 / 30 heights as a `minHeight` with an explicit `lineHeight`, so a long label truncates inside the pill instead of stretching the row.
 
 ## Related
-- Page: [[Today]], [[Upcoming]], [[Profile]], [[Search Results]], [[Project Detail]], [[Task Detail]], [[Calendar]], [[Page Closed]], [[Swipe States]], [[Settings]], [[Onboarding]], [[Quick Add Sheet]]
+- Page: [[Today]], [[Upcoming]], [[Profile]], [[Search Results]], [[Project Detail]], [[Task Detail]], [[Calendar]], [[Page Closed]], [[Swipe States]], [[Settings]], [[Onboarding]], [[Quick Add Sheet]], [[Unfiled]]
 - Features: [[Light and Dark Paper Palettes]], [[In-App RTL and Arabic Typography]], [[Ink Strike-Through Completion]], [[Collapsing Page Header]], [[Glass Tab Bar]]
 - Bugs: [[Ink Stroke Spans The Whole Title Column]], [[Quick Add Highlight Drifts From The Caret]] — the same growing-text rule applied to the capture field
 - Enhancements: [[Closing the Page Ritual]], [[Day Capacity Budget]], [[Ink Decay and Task Retirement]], [[Notes With Live Task Lines]], [[Deal Me One Task Picker]], [[Weekly Spread Review]], [[Focus Live Activity and Widgets]]

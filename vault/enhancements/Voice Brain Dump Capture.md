@@ -11,7 +11,7 @@ Capture is the moment apps lose people — typing seven tasks one at a time is w
 Open decisions:
 
 - Transcription route: on-device speech recognition or server-side. On-device is free and private but weaker on Arabic, which matters given [[In-App RTL and Arabic Typography]] is a first-class concern in this app.
-- Output needs review before commit — a confirmation sheet listing the parsed tasks, since a bad parse dumping twelve wrong rows into the list is worse than typing. Worse still right now: anything parsed without a day is inserted where no screen will show it, so the user could neither see nor undo it — [[Undated Unassigned Tasks Have No Screen]].
+- Output needs review before commit — a confirmation sheet listing the parsed tasks, since a bad parse dumping twelve wrong rows into the list is worse than typing. Anything parsed without a day is now at least visible: [[Undated Unassigned Tasks Have No Screen]] is fixed, so a dateless parse lands on the [[Unfiled]] screen where the user can see and undo it, rather than vanishing.
 - Multi-item output has nowhere to land while [[Quick Add Does Not Create Tasks]] is open.
 - Audio attachments imply file storage. [[Task Detail]] draws an attachment row already, but nothing backs it.
 

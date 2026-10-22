@@ -4,9 +4,9 @@ Route: `Main` → tab key `profile` (third and last pane)
 Summary: The user's own page — an ink initials avatar, their name in 40pt serif, and the full preferences list underneath.
 
 ## Related
-- Connects to: [[Main Tabs]], [[Quick Add Sheet]] — the Add item in the bar, [[Search Results]] — the overlay that covers this pane, [[Swipe States]] — the Shortcuts row calls `onOpenGestures`, [[Projects]] — the Projects row calls `onOpenProjects`, [[Today]], [[Upcoming]] — the sibling panes it slides between, [[Settings]] — the stack screen rendering the same rows
+- Connects to: [[Main Tabs]], [[Quick Add Sheet]] — the Add item in the bar, [[Search Results]] — the overlay that covers this pane, [[Swipe States]] — the Shortcuts row calls `onOpenGestures`, [[Projects]] — the Projects row calls `onOpenProjects`, [[Unfiled]] — the Unfiled row calls `onOpenUnfiled`, [[Today]], [[Upcoming]] — the sibling panes it slides between, [[Settings]] — the stack screen rendering the same rows
 - Features: [[Glass Tab Bar]], [[Animated Page Transitions]], [[Offline First Local Store]], [[Projects As A Real Entity]], [[Light and Dark Paper Palettes]], [[Reduced Motion Mode]], [[In-App RTL and Arabic Typography]], [[Ledger Paper Chrome]]
-- Bugs: [[Active Tab Icon Knockout Is Opaque On Glass]], [[Undated Unassigned Tasks Have No Screen]] — this pane is one candidate host for the missing list
+- Bugs: [[Active Tab Icon Knockout Is Opaque On Glass]], [[Undated Unassigned Tasks Have No Screen]] — resolved; the Unfiled row here now reaches the list
 - Enhancements: [[Adaptive Reminders]], [[Shared Page Link]], [[Ink Decay and Task Retirement]], [[Deal Me One Task Picker]] — the free long-press this pane now has
 
 ## Notes
@@ -18,4 +18,4 @@ The avatar's `radius.pen` is the last thing outside `FocusScreen.tsx` still read
 
 It reserves `useTabBarFootprint()` at the bottom like the other two panes, and it has no [[Collapsing Page Header]] — the name block is its own header and does not collapse.
 
-It is the third pane and the one with the most room, which is why it comes up as a candidate home for the list of unfiled tasks that lost its screen — see [[Undated Unassigned Tasks Have No Screen]]. Nothing in the code points that way yet.
+The unfiled captures that lost their screen now have one: an Unfiled row sits under Projects in the shared rows and opens the [[Unfiled]] stack screen — see [[Undated Unassigned Tasks Have No Screen]]. [[Settings]] carries the same row, so this pane is one of two entry points, not the host itself.

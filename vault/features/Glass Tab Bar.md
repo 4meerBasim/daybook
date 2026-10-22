@@ -40,7 +40,7 @@ The whole bar mirrors with `row(rtl)`: in Arabic Today sits rightmost, the item 
 The glass treatment is a deliberate exception to `foundation/design.md`, which bans glassmorphism as identity and allows the pen as the only elevated object. It was requested directly; the rest of the app keeps the flat paper chrome described in [[Ledger Paper Chrome]].
 
 ## Related
-- Page: [[Main Tabs]], [[Today]], [[Upcoming]], [[Profile]], [[Search Results]], [[Quick Add Sheet]], [[Settings]], [[Calendar]], [[Task Detail]]
+- Page: [[Main Tabs]], [[Today]], [[Upcoming]], [[Profile]], [[Search Results]], [[Quick Add Sheet]], [[Settings]], [[Calendar]], [[Task Detail]], [[Unfiled]] — a stack screen precisely because the bar stays at three tabs
 - Features: [[Expanding Search Field]], [[Animated Page Transitions]], [[Pen FAB]], [[Natural Language Quick Add]], [[Reduced Motion Mode]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]], [[Ledger Paper Chrome]]
 - Bugs: [[Stack Screens Reserve Tab Bar Space]], [[Active Tab Icon Knockout Is Opaque On Glass]], [[Startup Crash From Mismatched Worklets]], [[Undated Unassigned Tasks Have No Screen]] — the Inbox tab this bar dropped
 - Enhancements: [[Deal Me One Task Picker]], [[System Capture Entry Points]]

@@ -11,12 +11,14 @@ import { Dot } from './Ledger';
 export function SettingsRows({
   onOpenGestures,
   onOpenProjects,
+  onOpenUnfiled,
 }: {
   onOpenGestures: () => void;
   onOpenProjects: () => void;
+  onOpenUnfiled: () => void;
 }) {
   const { c, t, lang, appearance, motion, ui, rtl, setLang, setAppearance, setMotion } = useTheme();
-  const { projects } = useStore();
+  const { projects, unfiled } = useStore();
 
   return (
     <View style={{ borderTopWidth: 1, borderTopColor: c.rule }}>
@@ -84,6 +86,13 @@ export function SettingsRows({
       <Row onPress={onOpenProjects} label={t.projects}>
         <RowLabel label={t.projects} />
         <Text style={[ui(15), { color: c.ink3 }]}>{String(projects.length)}</Text>
+      </Row>
+
+      <Row onPress={onOpenUnfiled} label={t.unfiled}>
+        <RowLabel label={t.unfiled} />
+        <Text style={[ui(15), { color: c.ink3 }]}>
+          {String(unfiled.filter((k) => k.completedAt === null).length)}
+        </Text>
       </Row>
 
       <Row>

@@ -32,7 +32,7 @@ Pan and long-press are composed with `Gesture.Race`, not `Simultaneous`: a hold 
 The thresholds are documented on-screen by the annotation rows in [[Swipe States]], whose copy lives in `src/i18n/strings.ts` as `swipe1`–`swipe4`. That screen draws its own static illustration rather than driving this component, so the reference rows cannot be knocked out of position by a stray touch.
 
 ## Related
-- Page: [[Today]], [[Swipe States]], [[Settings]], [[Calendar]]
+- Page: [[Today]], [[Swipe States]], [[Settings]], [[Calendar]], [[Unfiled]]
 - Features: [[Offline First Local Store]], [[Reduced Motion Mode]], [[In-App RTL and Arabic Typography]], [[Ink Strike-Through Completion]], [[Animated Page Transitions]] — the horizontal pan a pane swipe would have to be arbitrated against
 - Bugs: [[Swipe Actions Not Wired Into Task Lists]], [[Startup Crash From Mismatched Worklets]], [[Snooze And Delete Share One Cleared Map]]
 - Enhancements: [[Waiting On Follow-Ups]], [[Adaptive Reminders]]

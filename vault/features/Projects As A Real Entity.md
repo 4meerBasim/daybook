@@ -42,7 +42,7 @@ No collaborator entity was invented. There is no backend, no accounts and no sha
 Schema version 2. The migration steps are indexed by version, so an existing database runs only what it has not seen: add `tasks.tags`, add `projects.seedKey`, name the seeded project, tag the seeded project's tasks so an upgrade looks like a fresh install, then lift hashtags out of the titles of every task the user wrote under version 1. Nothing is dropped and nothing is recreated.
 
 ## Related
-- Page: [[Projects]], [[Project Detail]], [[Project Picker]], [[Settings]], [[Profile]], [[Main Tabs]], [[Search Results]], [[Today]], [[Upcoming]]
+- Page: [[Projects]], [[Project Detail]], [[Project Picker]], [[Settings]], [[Profile]], [[Main Tabs]], [[Search Results]], [[Today]], [[Upcoming]], [[Unfiled]]
 - Features: [[Offline First Local Store]], [[Natural Language Quick Add]], [[Ledger Paper Chrome]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]]
 - Bugs: [[Quick Add Does Not Create Tasks]], [[Bottom Sheet Text Input Crashes On Web]], [[Undated Unassigned Tasks Have No Screen]]
 - Enhancements: [[Inbox Triage Chips]], [[Shared Page Link]], [[Waiting On Follow-Ups]]

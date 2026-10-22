@@ -18,9 +18,11 @@ function initials(name: string): string {
 export function ProfileScreen({
   onOpenGestures,
   onOpenProjects,
+  onOpenUnfiled,
 }: {
   onOpenGestures: () => void;
   onOpenProjects: () => void;
+  onOpenUnfiled: () => void;
 }) {
   const { c, t, display, mono, rtl } = useTheme();
   const tabBarFootprint = useTabBarFootprint();
@@ -81,7 +83,11 @@ export function ProfileScreen({
           )}
         </Pressable>
 
-        <SettingsRows onOpenGestures={onOpenGestures} onOpenProjects={onOpenProjects} />
+        <SettingsRows
+          onOpenGestures={onOpenGestures}
+          onOpenProjects={onOpenProjects}
+          onOpenUnfiled={onOpenUnfiled}
+        />
       </ScrollView>
 
       {naming ? (

@@ -23,6 +23,7 @@ import {
   selectProjects,
   selectSubtasks,
   selectToday,
+  selectUnfiled,
   selectUpcoming,
   setPref,
   setSubtaskCompleted,
@@ -38,6 +39,7 @@ type Snapshot = {
   today: DatedTask[];
   upcoming: DatedTask[];
   assigned: TaskRow[];
+  unfiled: TaskRow[];
   projects: ProjectRow[];
   month: DatedTask[];
   subtasks: SubtaskRow[];
@@ -67,6 +69,7 @@ const EMPTY: Snapshot = {
   today: [],
   upcoming: [],
   assigned: [],
+  unfiled: [],
   projects: [],
   month: [],
   subtasks: [],
@@ -84,11 +87,12 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const reload = useCallback(async () => {
     const now = Date.now();
-    const [today, upcoming, assigned, projects, month, subtasks, displayName] =
+    const [today, upcoming, assigned, unfiled, projects, month, subtasks, displayName] =
       await Promise.all([
         selectToday(db, now),
         selectUpcoming(db, now),
         selectAssigned(db),
+        selectUnfiled(db),
         selectProjects(db),
         selectMonth(db, now),
         selectSubtasks(db, SEED_INVOICE_TASK_ID),
@@ -98,6 +102,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       today,
       upcoming,
       assigned,
+      unfiled,
       projects,
       month,
       subtasks,

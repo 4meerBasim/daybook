@@ -10,7 +10,7 @@ The existing snooze swipe is the natural entry point, and it is now a real snooz
 
 Open decisions:
 
-- Where waiting-on items live: a filter, a section on an unfiled list, or their own page. The design has no screen for it, and nothing in [[Offline First Local Store]] marks a task as blocked or names who holds it. The Inbox was the obvious host and it no longer exists — the same vacancy [[Undated Unassigned Tasks Have No Screen]] records, so both want the same answer.
+- Where waiting-on items live: a filter, a section on the unfiled list, or their own page. The design has no screen for it, and nothing in [[Offline First Local Store]] marks a task as blocked or names who holds it. The [[Unfiled]] screen now exists — [[Undated Unassigned Tasks Have No Screen]] is fixed — so a "waiting on" section on it is the cheapest candidate host, though nothing yet flags a task as blocked.
 - Whether people are real entities. [[Project Detail]] already shows shared avatars, so there is a hint of a collaborator model with nothing behind it.
 - Follow-up dates imply notifications, which ties this to [[Adaptive Reminders]].
 - Closing a page has to treat waiting-on items differently from carried ones, or the carry count punishes the user for someone else's delay — see [[Closing the Page Ritual]].

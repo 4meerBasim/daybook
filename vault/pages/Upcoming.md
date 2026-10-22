@@ -4,7 +4,7 @@ Route: `Main` → tab key `upcoming` (second pane)
 Summary: Scheduled work grouped by horizon — tomorrow, this week, later — each group headed by an italic display title, its day range and a count.
 
 ## Related
-- Connects to: [[Main Tabs]], [[Today]], [[Profile]] — the sibling panes it slides between, [[Calendar]] — long-press the Upcoming tab, [[Quick Add Sheet]] — the Add item in the bar, [[Search Results]] — the overlay that covers this pane
+- Connects to: [[Main Tabs]], [[Today]], [[Profile]] — the sibling panes it slides between, [[Calendar]] — long-press the Upcoming tab, [[Quick Add Sheet]] — the Add item in the bar, [[Search Results]] — the overlay that covers this pane, [[Unfiled]] — the tomorrow swipe on an Unfiled row sets a due date, so the capture lands here
 - Features: [[Offline First Local Store]], [[Ledger Paper Chrome]], [[Collapsing Page Header]], [[Glass Tab Bar]], [[Animated Page Transitions]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]]
 - Bugs: [[Swipe Actions Not Wired Into Task Lists]], [[Quick Add Does Not Create Tasks]], [[Undated Unassigned Tasks Have No Screen]]
 - Enhancements: [[Closing the Page Ritual]], [[Ink Decay and Task Retirement]], [[Weekly Spread Review]]

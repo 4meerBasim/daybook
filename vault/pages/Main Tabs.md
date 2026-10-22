@@ -4,7 +4,7 @@ Route: `Main` (native stack screen wrapping the `MainTabs` component in `src/nav
 Summary: The tab shell that hosts the three primary panes, the quick-add sheet and the search overlay, and that owns the long-press shortcuts to the secondary screens.
 
 ## Related
-- Connects to: [[Today]], [[Upcoming]], [[Profile]], [[Search Results]], [[Quick Add Sheet]], [[Settings]], [[Calendar]], [[Task Detail]], [[Project Detail]], [[Projects]], [[Project Picker]], [[Page Closed]], [[Swipe States]], [[Onboarding]], [[Focus Mode]]
+- Connects to: [[Today]], [[Upcoming]], [[Profile]], [[Search Results]], [[Quick Add Sheet]], [[Settings]], [[Calendar]], [[Task Detail]], [[Project Detail]], [[Projects]], [[Project Picker]], [[Page Closed]], [[Swipe States]], [[Onboarding]], [[Focus Mode]], [[Unfiled]]
 - Features: [[Glass Tab Bar]], [[Animated Page Transitions]], [[Expanding Search Field]], [[Pen FAB]], [[Projects As A Real Entity]], [[Light and Dark Paper Palettes]], [[In-App RTL and Arabic Typography]], [[Reduced Motion Mode]]
 - Bugs: [[Focus Mode Unreachable]], [[Startup Crash From Mismatched Worklets]], [[Stack Screens Reserve Tab Bar Space]], [[Active Tab Icon Knockout Is Opaque On Glass]], [[Undated Unassigned Tasks Have No Screen]]
 - Enhancements: [[Deal Me One Task Picker]], [[Inbox Triage Chips]], [[System Capture Entry Points]]
