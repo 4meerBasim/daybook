@@ -1,9 +1,12 @@
-import React, { createContext, useContext, useMemo, useState } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { TextStyle, useWindowDimensions } from 'react-native';
+import { useSQLiteContext } from 'expo-sqlite';
 import { DARK, LIGHT, Palette } from './palette';
 import { displayFamily, monoFamily, uiFamily, Weight } from './fonts';
 import { rulingUnit } from './tokens';
 import { AR, EN, Strings } from '../i18n/strings';
+import { APPEARANCE, LANG, MOTION } from '../db/schema';
+import { selectPref, setPref } from '../db/queries';
 
 export type Lang = 'en' | 'ar';
 export type Appearance = 'light' | 'dark' | 'auto';
@@ -40,10 +43,27 @@ export function ThemeProvider({
   children: React.ReactNode;
   systemDark?: boolean;
 }) {
-  const [lang, setLang] = useState<Lang>('en');
-  const [appearance, setAppearance] = useState<Appearance>('light');
-  const [motion, setMotion] = useState<Motion>('full');
+  const db = useSQLiteContext();
+  const [lang, setLangState] = useState<Lang>('en');
+  const [appearance, setAppearanceState] = useState<Appearance>('light');
+  const [motion, setMotionState] = useState<Motion>('full');
+  const [loaded, setLoaded] = useState(false);
   const { fontScale } = useWindowDimensions();
+
+  useEffect(() => {
+    const load = async () => {
+      const [savedLang, savedAppearance, savedMotion] = await Promise.all([
+        selectPref(db, LANG),
+        selectPref(db, APPEARANCE),
+        selectPref(db, MOTION),
+      ]);
+      if (savedLang) setLangState(savedLang as Lang);
+      if (savedAppearance) setAppearanceState(savedAppearance as Appearance);
+      if (savedMotion) setMotionState(savedMotion as Motion);
+      setLoaded(true);
+    };
+    load();
+  }, [db]);
 
   const value = useMemo<Theme>(() => {
     const ar = lang === 'ar';
@@ -83,16 +103,27 @@ export function ThemeProvider({
       motion,
       reduced: motion === 'reduced',
       rtl: ar,
-      setLang,
-      setAppearance,
-      setMotion,
+      setLang: (l) => {
+        setLangState(l);
+        setPref(db, LANG, l);
+      },
+      setAppearance: (a) => {
+        setAppearanceState(a);
+        setPref(db, APPEARANCE, a);
+      },
+      setMotion: (m) => {
+        setMotionState(m);
+        setPref(db, MOTION, m);
+      },
       display,
       ui,
       mono,
       chipPadding: ar ? 12 : 10,
       unit: rulingUnit(fontScale),
     };
-  }, [lang, appearance, motion, systemDark, fontScale]);
+  }, [db, lang, appearance, motion, systemDark, fontScale]);
+
+  if (!loaded) return null;
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }

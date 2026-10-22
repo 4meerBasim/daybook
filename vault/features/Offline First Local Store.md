@@ -4,7 +4,7 @@ Status: shipped
 Summary: A real local database is the single source of truth — instant cold start, no spinners, fully usable with no account, and everything the user does survives a reload.
 
 ## Details
-`src/db/` on `expo-sqlite`. `schema.ts` holds the DDL, the row types and a `PRAGMA user_version` migration; `queries.ts` holds every read and write; `seed.ts` plants first-run content; `reminders.ts` holds the snooze offsets. `App.tsx` wraps the tree in `SQLiteProvider` with an `onInit` that migrates then seeds, and `src/state/store.tsx` keeps its provider shape but reads snapshots from the database instead of holding `useState` maps.
+`src/db/` on `expo-sqlite`. `schema.ts` holds the DDL, the row types and a `PRAGMA user_version` migration; `queries.ts` holds every read and write; `seed.ts` plants first-run content; `reminders.ts` holds the snooze offsets. `App.tsx` wraps the tree in `SQLiteProvider` with an `onInit` that migrates then seeds — and nests `ThemeProvider` inside it, so the theme can reach the `prefs` table too (see [[Theme Preferences Reset On Every Launch]]) — and `src/state/store.tsx` keeps its provider shape but reads snapshots from the database instead of holding `useState` maps.
 
 The legacy `expo-sqlite` API is gone in SDK 57 — no `openDatabase`, no `db.transaction`, no `executeSql`. Everything here uses the async API (`execAsync`, `runAsync`, `getFirstAsync`, `getAllAsync`, `withTransactionAsync`), which behaves identically on native and web. The `*Sync` variants are avoided on purpose: on web they need `SharedArrayBuffer`, busy-spin the main thread and cap results at roughly 1MB. Generics are always passed explicitly, since `getAllAsync` without one yields `unknown[]`.
 
@@ -51,5 +51,5 @@ No `expo-notifications`, no permission strings, no scheduler. The data model alo
 ## Related
 - Page: [[Settings]], [[Profile]], [[Today]], [[Upcoming]], [[Calendar]], [[Project Detail]], [[Projects]], [[Project Picker]], [[Task Detail]], [[Quick Add Sheet]], [[Unfiled]]
 - Features: [[Natural Language Quick Add]], [[Projects As A Real Entity]], [[Swipe Row Actions]], [[Calendar Tally Marks]], [[Ink Strike-Through Completion]]
-- Bugs: [[Quick Add Does Not Create Tasks]], [[Snooze And Delete Share One Cleared Map]], [[Task And Subtask Ids Share One Done Map]], [[Page Header Shows A Frozen Date]], [[Undated Unassigned Tasks Have No Screen]], [[Calendar Overflow Is Unreachable]]
+- Bugs: [[Quick Add Does Not Create Tasks]], [[Snooze And Delete Share One Cleared Map]], [[Task And Subtask Ids Share One Done Map]], [[Page Header Shows A Frozen Date]], [[Undated Unassigned Tasks Have No Screen]], [[Calendar Overflow Is Unreachable]], [[Theme Preferences Reset On Every Launch]]
 - Enhancements: [[Closing the Page Ritual]], [[Day Capacity Budget]], [[Ink Decay and Task Retirement]], [[Notes With Live Task Lines]], [[Weekly Spread Review]], [[Shared Page Link]], [[Adaptive Reminders]], [[Focus Live Activity and Widgets]], [[System Capture Entry Points]], [[Inbox Triage Chips]], [[Waiting On Follow-Ups]], [[Voice Brain Dump Capture]]

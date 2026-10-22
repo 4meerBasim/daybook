@@ -4,7 +4,7 @@ Status: shipped
 Summary: The whole app renders from one fifteen-token palette with a cream-paper light set and an ink-on-dark set, selectable as light, dark, or follow-system.
 
 ## Details
-`src/theme/palette.ts` defines a `Palette` type and two instances. Both carry the same roles so nothing branches on theme at the call site:
+`src/theme/palette.ts` defines a `Palette` type and two instances. The chosen `appearance` persists to the `prefs` table; what a fresh install should default to is still open, because `ThemeProvider` says light and `app.json` says automatic — see [[Theme Preferences Reset On Every Launch]]. Both carry the same roles so nothing branches on theme at the call site:
 
 - paper surfaces — `paper`, `paper2`, `card`, `rule`
 - ink text — `ink`, `ink2`, `ink3`
@@ -19,5 +19,5 @@ Controlled from the Appearance segmented control on [[Settings]].
 ## Related
 - Page: [[Settings]], [[Profile]], [[Onboarding]], [[Main Tabs]], [[Today]], [[Upcoming]], [[Search Results]], [[Quick Add Sheet]], [[Calendar]], [[Project Detail]], [[Task Detail]], [[Focus Mode]], [[Page Closed]], [[Swipe States]], [[Unfiled]]
 - Features: [[Ledger Paper Chrome]], [[In-App RTL and Arabic Typography]], [[Natural Language Quick Add]], [[Wax Page Closed Stamp]], [[Glass Tab Bar]], [[Expanding Search Field]]
-- Bugs: none
+- Bugs: [[Theme Preferences Reset On Every Launch]]
 - Enhancements: [[Ink Decay and Task Retirement]]
