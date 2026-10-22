@@ -6,7 +6,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
 import { SQLiteProvider, type SQLiteDatabase } from 'expo-sqlite';
 import { fontAssets } from './src/theme/fonts';
-import { DARK, LIGHT } from './src/theme/palette';
+import { LIGHT } from './src/theme/palette';
 import { ThemeProvider, useTheme } from './src/theme/ThemeProvider';
 import { DB_NAME, migrate } from './src/db/schema';
 import { seedFirstRun } from './src/db/seed';
@@ -27,7 +27,7 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <GestureHandlerRootView
-        style={{ flex: 1, backgroundColor: systemDark ? DARK.paper : LIGHT.paper }}
+        style={{ flex: 1, backgroundColor: LIGHT.paper }}
       >
         <SQLiteProvider databaseName={DB_NAME} onInit={initDatabase}>
           <ThemeProvider systemDark={systemDark}>

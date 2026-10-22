@@ -52,15 +52,19 @@ export function ThemeProvider({
 
   useEffect(() => {
     const load = async () => {
-      const [savedLang, savedAppearance, savedMotion] = await Promise.all([
-        selectPref(db, LANG),
-        selectPref(db, APPEARANCE),
-        selectPref(db, MOTION),
-      ]);
-      if (savedLang) setLangState(savedLang as Lang);
-      if (savedAppearance) setAppearanceState(savedAppearance as Appearance);
-      if (savedMotion) setMotionState(savedMotion as Motion);
-      setLoaded(true);
+      try {
+        const [savedLang, savedAppearance, savedMotion] = await Promise.all([
+          selectPref(db, LANG),
+          selectPref(db, APPEARANCE),
+          selectPref(db, MOTION),
+        ]);
+        if (savedLang) setLangState(savedLang as Lang);
+        if (savedAppearance) setAppearanceState(savedAppearance as Appearance);
+        if (savedMotion) setMotionState(savedMotion as Motion);
+      } finally {
+        // a failed read must still release the gate, or the provider renders null forever
+        setLoaded(true);
+      }
     };
     load();
   }, [db]);
