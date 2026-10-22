@@ -103,6 +103,7 @@ export function TaskRow({
             style={[
               ui(17, 400, 22),
               titleStyle,
+              { alignSelf: rtl ? 'flex-end' : 'flex-start' },
               grown && done ? { textDecorationLine: 'line-through' } : null,
             ]}
           >

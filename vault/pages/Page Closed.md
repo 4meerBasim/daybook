@@ -6,7 +6,7 @@ Summary: The end-of-day sheet — every task struck through, a wax stamp with a 
 ## Related
 - Connects to: [[Today]] — reached by tapping the wax stamp once nothing is left, [[Main Tabs]] — "Plan tomorrow" calls `navigation.goBack()`
 - Features: [[Wax Page Closed Stamp]], [[Ledger Paper Chrome]], [[Ink Strike-Through Completion]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]]
-- Bugs: [[Page Header Shows A Frozen Date]], [[Stack Screens Ignore The Bottom Safe Area]] — latent here; nothing on this screen reaches the gesture area yet, [[Stack Screens Reserve Tab Bar Space]]
+- Bugs: [[Page Header Shows A Frozen Date]], [[Stack Screens Ignore The Bottom Safe Area]] — latent here; nothing on this screen reaches the gesture area yet, [[Stack Screens Reserve Tab Bar Space]], [[Ink Stroke Spans The Whole Title Column]]
 - Enhancements: [[Closing the Page Ritual]] — the decision pass that should run before the stamp lands
 
 ## Notes

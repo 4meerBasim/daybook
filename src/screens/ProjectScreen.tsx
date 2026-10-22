@@ -71,7 +71,11 @@ function ProjectTaskRow({ task, onAssign }: { task: TaskRow; onAssign: () => voi
             onLayout={onLayout}
             style={[
               ui(17, 400, 22),
-              { color: done ? c.ink3 : c.ink, textAlign: align(rtl) },
+              {
+                color: done ? c.ink3 : c.ink,
+                textAlign: align(rtl),
+                alignSelf: rtl ? 'flex-end' : 'flex-start',
+              },
               done && grown ? { textDecorationLine: 'line-through' } : null,
             ]}
           >

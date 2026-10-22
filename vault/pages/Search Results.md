@@ -6,7 +6,7 @@ Summary: All / tasks / notes / Completed filter chips over grouped results — m
 ## Related
 - Connects to: [[Main Tabs]] — opened by the search button in the tab bar and closed by its X, [[Project Detail]] — tap the `#invoice` tag result, [[Today]], [[Upcoming]], [[Profile]] — the panes it covers
 - Features: [[Expanding Search Field]], [[Glass Tab Bar]], [[Animated Page Transitions]], [[Ledger Paper Chrome]], [[Projects As A Real Entity]], [[Ink Strike-Through Completion]], [[Reduced Motion Mode]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]]
-- Bugs: [[Stack Screens Reserve Tab Bar Space]] — the same footprint hook, used correctly here, [[Stack Screens Ignore The Bottom Safe Area]] — not affected; this screen reserves the bar's computed footprint
+- Bugs: [[Stack Screens Reserve Tab Bar Space]] — the same footprint hook, used correctly here, [[Stack Screens Ignore The Bottom Safe Area]] — not affected; this screen reserves the bar's computed footprint, [[Ink Stroke Spans The Whole Title Column]]
 - Enhancements: [[Notes With Live Task Lines]]
 
 ## Notes

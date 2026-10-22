@@ -31,5 +31,5 @@ Language is set from two places: the English / العربية pair on [[Onboardi
 ## Related
 - Page: [[Onboarding]], [[Settings]], [[Profile]], [[Main Tabs]], [[Today]], [[Upcoming]], [[Search Results]], [[Quick Add Sheet]], [[Calendar]], [[Project Detail]], [[Task Detail]], [[Focus Mode]], [[Page Closed]], [[Swipe States]], [[Unfiled]]
 - Features: [[Light and Dark Paper Palettes]], [[Ledger Paper Chrome]], [[Swipe Row Actions]], [[Natural Language Quick Add]], [[Collapsing Page Header]], [[Glass Tab Bar]], [[Animated Page Transitions]], [[Expanding Search Field]]
-- Bugs: [[Page Header Shows A Frozen Date]]
+- Bugs: [[Page Header Shows A Frozen Date]], [[Ink Stroke Spans The Whole Title Column]]
 - Enhancements: [[Voice Brain Dump Capture]]
