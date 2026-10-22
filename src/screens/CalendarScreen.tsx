@@ -1,40 +1,47 @@
 import React from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 import { useTheme } from '../theme/ThemeProvider';
-import { maxFontSizeMultiplier, metrics } from '../theme/tokens';
-import { align, insetStart, marginStart, pad, row } from '../lib/rtl';
-import { dayOfMonth, timeLabel } from '../lib/date';
+import { metrics } from '../theme/tokens';
+import { align, insetStart, pad, row } from '../lib/rtl';
+import { addDays, dayOfMonth, startOfMonth, startOfNextMonth, timeLabel } from '../lib/date';
 import { useStore } from '../state/store';
 import { rowTitle } from '../db/schema';
 import { Screen, useHeaderTop } from '../components/Screen';
-import { Checkbox, EmptyRules, LedgerRow } from '../components/Ledger';
+import { EmptyRules } from '../components/Ledger';
+import { TaskRow } from '../components/TaskRow';
 import { TallyMarks } from '../components/TallyMarks';
 
 type Cell = { n: number; count: number; today: boolean };
 
 export function CalendarScreen() {
-  const { c, t, ar, rtl, display, ui, mono, unit } = useTheme();
-  const { month, sel, setSel } = useStore();
+  const { c, t, rtl, display, mono, unit } = useTheme();
+  const { month, sel, setSel, complete } = useStore();
   const top = useHeaderTop();
 
-  const todayN = dayOfMonth(Date.now());
+  const now = Date.now();
+  const d = new Date(now);
+  const monthName = t.months[d.getMonth()];
+  const year = d.getFullYear();
+  const todayN = d.getDate();
+  const offset = (new Date(startOfMonth(now)).getDay() - t.firstWeekday + 7) % 7;
+  const daysInMonth = dayOfMonth(addDays(startOfNextMonth(now), -1));
+
   const load = new Map<number, number>();
   for (const k of month) {
-    const d = dayOfMonth(k.dueDate);
-    load.set(d, (load.get(d) ?? 0) + 1);
+    const day = dayOfMonth(k.dueDate);
+    load.set(day, (load.get(day) ?? 0) + 1);
   }
 
-  const offset = ar ? 3 : 1;
   const cells: (Cell | null)[] = [];
   for (let i = 0; i < offset; i++) cells.push(null);
-  for (let d = 1; d <= 30; d++) cells.push({ n: d, count: load.get(d) ?? 0, today: d === todayN });
+  for (let n = 1; n <= daysInMonth; n++) cells.push({ n, count: load.get(n) ?? 0, today: n === todayN });
   while (cells.length % 7 !== 0) cells.push(null);
 
   const weeks: (Cell | null)[][] = [];
   for (let i = 0; i < cells.length; i += 7) weeks.push(cells.slice(i, i + 7));
 
   const selItems = month.filter((k) => dayOfMonth(k.dueDate) === sel);
-  const selDayLabel = `${t.month} ${sel}`;
+  const selDayLabel = `${monthName} ${sel}`;
 
   return (
     <Screen>
@@ -50,9 +57,9 @@ export function CalendarScreen() {
           }}
         >
           <Text style={[display(40, { lineHeight: 44 }), { color: c.ink, textAlign: align(rtl) }]}>
-            {t.month}
+            {monthName}
           </Text>
-          <Text style={[mono(13, 500), { color: c.ink3, paddingBottom: 6 }]}>2026</Text>
+          <Text style={[mono(13, 500), { color: c.ink3, paddingBottom: 6 }]}>{year}</Text>
         </View>
 
         <View
@@ -90,7 +97,7 @@ export function CalendarScreen() {
                     onPress={() => setSel(cell.n)}
                     android_ripple={null}
                     accessibilityRole="button"
-                    accessibilityLabel={`${t.month} ${cell.n}`}
+                    accessibilityLabel={`${monthName} ${cell.n}`}
                     accessibilityState={{ selected }}
                     style={{
                       flex: 1,
@@ -124,56 +131,51 @@ export function CalendarScreen() {
           ))}
         </View>
 
-        <View style={{ borderTopWidth: 1, borderTopColor: c.rule, marginTop: 8 }}>
-          <View
-            style={[
-              { position: 'absolute', top: 0, bottom: 0, width: 1, backgroundColor: c.ver, opacity: 0.6 },
-              insetStart(rtl, metrics.marginLine),
-            ]}
-          />
-          <View
-            style={[
-              {
-                minHeight: unit,
-                flexDirection: row(rtl),
-                alignItems: 'baseline',
-                gap: 10,
-                borderBottomWidth: 1,
-                borderBottomColor: c.rule,
-              },
-              pad(rtl, metrics.content, metrics.gutter),
-            ]}
-          >
-            <Text style={[display(20, { weight: 400, italic: true }), { color: c.ink }]}>
-              {selDayLabel}
-            </Text>
-            <View style={{ flex: 1 }} />
-            <Text style={[mono(12, 500), { color: c.ink3 }]}>{selItems.length}</Text>
-          </View>
-
-          {selItems.map((k) => (
-            <LedgerRow key={k.id}>
-              <Checkbox />
-              <Text
-                maxFontSizeMultiplier={maxFontSizeMultiplier}
-                style={[
-                  ui(17, 400, 22),
-                  { flex: 1, minWidth: 0, color: c.ink, textAlign: align(rtl) },
-                  marginStart(rtl, 16),
-                ]}
-              >
-                {rowTitle(k, t)}
+        <ScrollView style={{ flex: 1 }}>
+          <View style={{ borderTopWidth: 1, borderTopColor: c.rule, marginTop: 8 }}>
+            <View
+              style={[
+                { position: 'absolute', top: 0, bottom: 0, width: 1, backgroundColor: c.ver, opacity: 0.6 },
+                insetStart(rtl, metrics.marginLine),
+              ]}
+            />
+            <View
+              style={[
+                {
+                  minHeight: unit,
+                  flexDirection: row(rtl),
+                  alignItems: 'baseline',
+                  gap: 10,
+                  borderBottomWidth: 1,
+                  borderBottomColor: c.rule,
+                },
+                pad(rtl, metrics.content, metrics.gutter),
+              ]}
+            >
+              <Text style={[display(20, { weight: 400, italic: true }), { color: c.ink }]}>
+                {selDayLabel}
               </Text>
-              {timeLabel(k.dueDate) ? (
-                <Text numberOfLines={1} style={[mono(12, 500), { color: c.ink3 }]}>
-                  {timeLabel(k.dueDate)}
-                </Text>
-              ) : null}
-            </LedgerRow>
-          ))}
+              <View style={{ flex: 1 }} />
+              <Text style={[mono(12, 500), { color: c.ink3 }]}>{selItems.length}</Text>
+            </View>
 
-          <EmptyRules count={2} />
-        </View>
+            {selItems.map((k) => {
+              const done = k.completedAt !== null;
+              return (
+                <TaskRow
+                  key={k.id}
+                  title={rowTitle(k, t)}
+                  meta={timeLabel(k.dueDate)}
+                  done={done}
+                  rule
+                  onToggle={() => complete(k.id, !done)}
+                />
+              );
+            })}
+
+            <EmptyRules count={2} />
+          </View>
+        </ScrollView>
       </View>
     </Screen>
   );

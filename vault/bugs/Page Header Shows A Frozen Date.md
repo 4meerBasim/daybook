@@ -15,6 +15,8 @@ The `dateLine` key is gone rather than left orphaned.
 
 What is still literal, deliberately: [[Calendar]]'s month title and year, and its thirty-cell grid. Making the title real while the grid is fixed at thirty days would trade one contradiction for a worse one, so both wait for the calendar to be built out. `months` now exists for that work.
 
+One related gap is still open, and the real month name made it visible. `sel` on the store is a bare day-of-month number, initialised once at provider mount and only ever set from a rendered cell — so it is in range for whichever month was current at launch. Theme and language now persist, but `sel` does not, and an app resumed across a month boundary can render "November 31": a header naming a day the month does not have, a count of zero, and no highlighted cell. While the month label was the literal `t.month` this was invisible. See [[Calendar Overflow Is Unreachable]] for the screen's other arithmetic, and note that fixing it properly means `sel` carrying a month rather than a day, which is also what month navigation would need.
+
 ## Related
 - Feature: [[Collapsing Page Header]], [[Offline First Local Store]], [[In-App RTL and Arabic Typography]], [[Wax Page Closed Stamp]]
 - Page: [[Today]], [[Page Closed]], [[Calendar]]

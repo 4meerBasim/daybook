@@ -17,7 +17,9 @@ Snooze and pick-date are deliberately absent from these two lists. `snoozeTask` 
 
 One consequence is worth stating plainly, because the two lists differ: on [[Project Detail]] a ticked row stays and strikes, but on [[Upcoming]] it cannot. `selectUpcoming` filters `completedAt IS NULL`, so every row that screen can render is incomplete by definition — ticking one commits the completion and the row leaves on the next reload, before the ink could draw. Completion is one-way there, and the `done` plumbing is omitted rather than left as dead wiring that reads as if it works. The recovery path is [[Lift The Ink]]; until it exists, [[Calendar]] can un-tick a task inside the current month because `selectMonth` does not filter completed rows.
 
+[[Calendar]]'s selected-day rows became tap-completable in `fix/calendar-real-month` — they render through `TaskRow` wired to the store's `complete` — but deliberately carry no swipe: snooze and pick-date are inert on that screen, and delete was never wired there.
+
 ## Related
 - Feature: [[Swipe Row Actions]], [[Offline First Local Store]]
-- Page: [[Swipe States]], [[Today]], [[Upcoming]], [[Project Detail]]
+- Page: [[Swipe States]], [[Today]], [[Upcoming]], [[Project Detail]], [[Calendar]]
 - Bugs: [[Snooze And Delete Share One Cleared Map]]

@@ -26,9 +26,10 @@ export type TaskRowProps = {
   dotColor?: string;
   done?: boolean;
   overdue?: boolean;
+  rule?: boolean;
   onToggle: () => void;
-  accessibilityActions: AccessibilityActionInfo[];
-  onAccessibilityAction: (e: AccessibilityActionEvent) => void;
+  accessibilityActions?: AccessibilityActionInfo[];
+  onAccessibilityAction?: (e: AccessibilityActionEvent) => void;
 };
 
 export function TaskRow({
@@ -37,6 +38,7 @@ export function TaskRow({
   dotColor,
   done = false,
   overdue = false,
+  rule = false,
   onToggle,
   accessibilityActions,
   onAccessibilityAction,
@@ -91,6 +93,8 @@ export function TaskRow({
         height,
         justifyContent: 'center',
         backgroundColor: pressed ? c.paper2 : done ? c.paper : 'transparent',
+        borderBottomWidth: rule ? 1 : 0,
+        borderBottomColor: c.rule,
       })}
     >
       <View onLayout={onContentLayout} style={rowContent(rtl, 16)}>

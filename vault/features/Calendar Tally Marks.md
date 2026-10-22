@@ -12,7 +12,7 @@ The marks are sparser than the mock's twelve loaded days, because they now refle
 
 Tapping a cell writes to `sel` on the shared store and the day list below filters the same month rows; because `sel` is global rather than screen state, the selected day is remembered across visits, and it starts on the real current day.
 
-The grid itself flips with `row(rtl)` and its leading blank offset changes with locale (`ar ? 3 : 1`) so the month starts on the right weekday in both scripts. The marks themselves need no mirroring — they are plain verticals. Only the habit streak on [[Today]] draws the diagonal that binds a bundle of five, and that one does flip; see [[In-App RTL and Arabic Typography]].
+The grid itself flips with `row(rtl)` and its leading blank count is derived from the real first-of-month weekday with the `(getDay() - t.firstWeekday + 7) % 7` convention, so the month starts on the right weekday in both scripts — Monday-start in English, Saturday-start in Arabic. The marks themselves need no mirroring — they are plain verticals. Only the habit streak on [[Today]] draws the diagonal that binds a bundle of five, and that one does flip; see [[In-App RTL and Arabic Typography]].
 
 The design's prose describes "max 5, then a struck bundle", but its own render simply caps the count at five and draws no bundle, which is what is built here.
 
