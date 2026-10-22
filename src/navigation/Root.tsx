@@ -7,6 +7,7 @@ import {
   type NativeStackScreenProps,
 } from '@react-navigation/native-stack';
 import { useTheme } from '../theme/ThemeProvider';
+import { useStore } from '../state/store';
 import { duration, easing } from '../theme/tokens';
 import { row } from '../lib/rtl';
 import { Screen } from '../components/Screen';
@@ -153,17 +154,32 @@ function Pane({
 
 export function Root() {
   const { c } = useTheme();
+  const { loaded, onboarded, markOnboarded } = useStore();
 
   const navTheme = {
     ...DefaultTheme,
     colors: { ...DefaultTheme.colors, background: c.paper, card: c.paper, text: c.ink, border: c.rule },
   };
 
+  // initialRouteName is only read on first mount, so the navigator cannot start
+  // before the onboarded pref is known
+  if (!loaded) return null;
+
   return (
     <NavigationContainer theme={navTheme}>
-      <Stack.Navigator screenOptions={{ headerShown: false, contentStyle: { backgroundColor: c.paper } }}>
+      <Stack.Navigator
+        initialRouteName={onboarded ? 'Main' : 'Onboarding'}
+        screenOptions={{ headerShown: false, contentStyle: { backgroundColor: c.paper } }}
+      >
         <Stack.Screen name="Onboarding">
-          {({ navigation }) => <OnboardingScreen onStart={() => navigation.replace('Main')} />}
+          {({ navigation }) => (
+            <OnboardingScreen
+              onStart={() => {
+                markOnboarded();
+                navigation.replace('Main');
+              }}
+            />
+          )}
         </Stack.Screen>
         <Stack.Screen name="Main" component={MainTabs} />
         <Stack.Screen name="Calendar" component={CalendarScreen} />

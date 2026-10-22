@@ -4,6 +4,7 @@ import { dayOfMonth } from '../lib/date';
 import type { SnoozeOffset } from '../db/reminders';
 import {
   DISPLAY_NAME,
+  ONBOARDED,
   PROJECT_COLORS,
   type DatedTask,
   type ProjectRow,
@@ -44,6 +45,7 @@ type Snapshot = {
   month: DatedTask[];
   subtasks: SubtaskRow[];
   displayName: string;
+  onboarded: boolean;
 };
 
 type Store = Snapshot & {
@@ -59,6 +61,7 @@ type Store = Snapshot & {
   renameProject: (id: string, name: string) => void;
   removeProject: (id: string) => void;
   setDisplayName: (name: string) => void;
+  markOnboarded: () => void;
   qa: string;
   setQa: (v: string) => void;
   sel: number;
@@ -74,6 +77,7 @@ const EMPTY: Snapshot = {
   month: [],
   subtasks: [],
   displayName: '',
+  onboarded: false,
 };
 
 const StoreContext = createContext<Store | null>(null);
@@ -87,7 +91,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const reload = useCallback(async () => {
     const now = Date.now();
-    const [today, upcoming, assigned, unfiled, projects, month, subtasks, displayName] =
+    const [today, upcoming, assigned, unfiled, projects, month, subtasks, displayName, onboarded] =
       await Promise.all([
         selectToday(db, now),
         selectUpcoming(db, now),
@@ -97,6 +101,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         selectMonth(db, now),
         selectSubtasks(db, SEED_INVOICE_TASK_ID),
         selectPref(db, DISPLAY_NAME),
+        selectPref(db, ONBOARDED),
       ]);
     setSnapshot({
       today,
@@ -107,6 +112,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       month,
       subtasks,
       displayName: displayName ?? '',
+      onboarded: onboarded === 'true',
     });
     setLoaded(true);
   }, [db]);
@@ -138,6 +144,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       renameProject: (id, name) => after(updateProjectName(db, id, name)),
       removeProject: (id) => after(archiveProject(db, id, Date.now())),
       setDisplayName: (name) => after(setPref(db, DISPLAY_NAME, name)),
+      markOnboarded: () => after(setPref(db, ONBOARDED, 'true')),
       qa,
       setQa,
       sel,
