@@ -9,6 +9,12 @@ const SCHEMA_VERSION = 3;
 
 export const DISPLAY_NAME = 'displayName';
 
+export const LANG = 'lang';
+
+export const APPEARANCE = 'appearance';
+
+export const MOTION = 'motion';
+
 export const PRIORITY_HIGH = 3;
 
 export const DEFAULT_TASK_COLOR: ColorToken = 'blue';
