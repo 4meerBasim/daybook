@@ -4,7 +4,7 @@ Status: shipped
 Summary: A single settings toggle turns every animation in the app into an instant state change, without removing the state change itself.
 
 ## Details
-`motion` lives on the theme context (`src/theme/ThemeProvider.tsx`) as `full` | `reduced`, with `reduced` exposed as a boolean. It is honoured everywhere motion exists, and in every case the animated value is *assigned* rather than removed, so the end state is identical:
+`motion` lives on the theme context (`src/theme/ThemeProvider.tsx`) as `full` | `reduced`, with `reduced` exposed as a boolean, and persists to the `prefs` table so the choice survives a relaunch — see [[Theme Preferences Reset On Every Launch]]. It is honoured everywhere motion exists, and in every case the animated value is *assigned* rather than removed, so the end state is identical:
 
 | Where | Reduced behaviour |
 |---|---|
@@ -26,5 +26,5 @@ Controlled from the Reduce motion row in the shared `SettingsRows` list, which b
 ## Related
 - Page: [[Settings]], [[Profile]], [[Main Tabs]], [[Today]], [[Focus Mode]], [[Quick Add Sheet]], [[Search Results]], [[Swipe States]], [[Page Closed]]
 - Features: [[Ink Strike-Through Completion]], [[Swipe Row Actions]], [[Wax Page Closed Stamp]], [[Collapsing Page Header]], [[Focus Timer]], [[Glass Tab Bar]], [[Animated Page Transitions]], [[Expanding Search Field]]
-- Bugs: [[Startup Crash From Mismatched Worklets]]
+- Bugs: [[Startup Crash From Mismatched Worklets]], [[Theme Preferences Reset On Every Launch]]
 - Enhancements: [[Ink Decay and Task Retirement]]

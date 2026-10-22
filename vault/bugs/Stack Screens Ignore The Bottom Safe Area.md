@@ -22,4 +22,4 @@ Noticed while fixing [[Stack Screens Reserve Tab Bar Space]] and deliberately le
 ## Related
 - Page: [[Settings]], [[Task Detail]], [[Projects]], [[Project Detail]], [[Unfiled]], [[Page Closed]], [[Swipe States]], [[Search Results]], [[Onboarding]], [[Focus Mode]]
 - Features: [[Ledger Paper Chrome]], [[Glass Tab Bar]]
-- Bugs: [[Stack Screens Reserve Tab Bar Space]], [[Calendar Overflow Is Unreachable]]
+- Bugs: [[Stack Screens Reserve Tab Bar Space]], [[Calendar Overflow Is Unreachable]], [[Theme Preferences Reset On Every Launch]]

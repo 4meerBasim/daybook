@@ -4,7 +4,7 @@ Status: shipped
 Summary: Switching to Arabic mirrors every layout and swaps to Arabic typefaces immediately, without restarting the app.
 
 ## Details
-Direction is a derived value, not `I18nManager.forceRTL`, so the flip happens live. `src/theme/ThemeProvider.tsx` exposes `ar` and `rtl` from `lang`, and `src/lib/rtl.ts` provides the primitives every screen uses instead of hardcoded sides:
+Direction is a derived value, not `I18nManager.forceRTL`, so the flip happens live. `lang` persists to the `prefs` table, so an Arabic reader no longer re-picks their language on every launch — see [[Theme Preferences Reset On Every Launch]]. `src/theme/ThemeProvider.tsx` exposes `ar` and `rtl` from `lang`, and `src/lib/rtl.ts` provides the primitives every screen uses instead of hardcoded sides:
 
 - `row(rtl)` → `row` / `row-reverse`
 - `align(rtl)` → `left` / `right`
@@ -31,5 +31,5 @@ Language is set from two places: the English / العربية pair on [[Onboardi
 ## Related
 - Page: [[Onboarding]], [[Settings]], [[Profile]], [[Main Tabs]], [[Today]], [[Upcoming]], [[Search Results]], [[Quick Add Sheet]], [[Calendar]], [[Project Detail]], [[Task Detail]], [[Focus Mode]], [[Page Closed]], [[Swipe States]], [[Unfiled]]
 - Features: [[Light and Dark Paper Palettes]], [[Ledger Paper Chrome]], [[Swipe Row Actions]], [[Natural Language Quick Add]], [[Collapsing Page Header]], [[Glass Tab Bar]], [[Animated Page Transitions]], [[Expanding Search Field]]
-- Bugs: [[Page Header Shows A Frozen Date]], [[Ink Stroke Spans The Whole Title Column]], [[Native Layout Direction Is Not Pinned]]
+- Bugs: [[Page Header Shows A Frozen Date]], [[Ink Stroke Spans The Whole Title Column]], [[Native Layout Direction Is Not Pinned]], [[Theme Preferences Reset On Every Launch]], [[Onboarding Shows On Every Launch]]
 - Enhancements: [[Voice Brain Dump Capture]]

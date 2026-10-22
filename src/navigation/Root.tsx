@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { View, useWindowDimensions } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
@@ -7,6 +7,7 @@ import {
   type NativeStackScreenProps,
 } from '@react-navigation/native-stack';
 import { useTheme } from '../theme/ThemeProvider';
+import { useStore } from '../state/store';
 import { duration, easing } from '../theme/tokens';
 import { row } from '../lib/rtl';
 import { Screen } from '../components/Screen';
@@ -153,17 +154,34 @@ function Pane({
 
 export function Root() {
   const { c } = useTheme();
+  const { loaded, onboarded, markOnboarded } = useStore();
 
-  const navTheme = {
-    ...DefaultTheme,
-    colors: { ...DefaultTheme.colors, background: c.paper, card: c.paper, text: c.ink, border: c.rule },
-  };
+  const navTheme = useMemo(
+    () => ({
+      ...DefaultTheme,
+      colors: { ...DefaultTheme.colors, background: c.paper, card: c.paper, text: c.ink, border: c.rule },
+    }),
+    [c]
+  );
+
+  // initialRouteName is only read on first mount
+  if (!loaded) return null;
 
   return (
     <NavigationContainer theme={navTheme}>
-      <Stack.Navigator screenOptions={{ headerShown: false, contentStyle: { backgroundColor: c.paper } }}>
+      <Stack.Navigator
+        initialRouteName={onboarded ? 'Main' : 'Onboarding'}
+        screenOptions={{ headerShown: false, contentStyle: { backgroundColor: c.paper } }}
+      >
         <Stack.Screen name="Onboarding">
-          {({ navigation }) => <OnboardingScreen onStart={() => navigation.replace('Main')} />}
+          {({ navigation }) => (
+            <OnboardingScreen
+              onStart={() => {
+                markOnboarded();
+                navigation.replace('Main');
+              }}
+            />
+          )}
         </Stack.Screen>
         <Stack.Screen name="Main" component={MainTabs} />
         <Stack.Screen name="Calendar" component={CalendarScreen} />

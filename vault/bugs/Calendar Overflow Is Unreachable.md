@@ -16,5 +16,5 @@ The fix is bound up with the two other things still mock on this screen: the gri
 ## Related
 - Page: [[Calendar]], [[Today]], [[Upcoming]]
 - Features: [[Calendar Tally Marks]], [[Ledger Paper Chrome]], [[Offline First Local Store]]
-- Bugs: [[Stack Screens Reserve Tab Bar Space]], [[Stack Screens Ignore The Bottom Safe Area]], [[Page Header Shows A Frozen Date]]
+- Bugs: [[Stack Screens Reserve Tab Bar Space]], [[Stack Screens Ignore The Bottom Safe Area]], [[Page Header Shows A Frozen Date]], [[Onboarding Shows On Every Launch]]
 - Enhancements: [[Weekly Spread Review]], [[Day Capacity Budget]]
