@@ -6,7 +6,7 @@ Summary: One project's page — its own name, a derived progress count, tag chip
 ## Related
 - Connects to: [[Projects]] — tap a project row; returns via the system back gesture, [[Search Results]] — reached by tapping the `#invoice` tag result in the search overlay, [[Project Picker]] — long-press a row, its only caller now, [[Main Tabs]], [[Task Detail]], [[Unfiled]] — shares this screen's stack-screen header pattern
 - Features: [[Projects As A Real Entity]], [[Offline First Local Store]], [[Expanding Search Field]] — the tag result that opens this page, [[Swipe Row Actions]], [[Ink Strike-Through Completion]], [[Ledger Paper Chrome]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]]
-- Bugs: [[Swipe Actions Not Wired Into Task Lists]], [[Ink Stroke Spans The Whole Title Column]], [[Stack Screens Ignore The Bottom Safe Area]], [[Stack Screens Reserve Tab Bar Space]] — the gutter padding this screen already got right
+- Bugs: [[Swipe Actions Not Wired Into Task Lists]], [[Ink Stroke Spans The Whole Title Column]], [[Stack Screens Ignore The Bottom Safe Area]], [[Stack Screens Reserve Tab Bar Space]] — the gutter padding this screen already got right, [[Native Layout Direction Is Not Pinned]]
 - Enhancements: [[Waiting On Follow-Ups]], [[Shared Page Link]], [[Inbox Triage Chips]] — the long-press half that now only works here, [[Lift The Ink]]
 
 ## Notes
