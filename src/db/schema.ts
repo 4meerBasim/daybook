@@ -5,7 +5,7 @@ import { splitTags } from '../lib/parse';
 
 export const DB_NAME = 'daybook.db';
 
-const SCHEMA_VERSION = 3;
+const SCHEMA_VERSION = 10;
 
 export const DISPLAY_NAME = 'displayName';
 
@@ -15,7 +15,29 @@ export const APPEARANCE = 'appearance';
 
 export const MOTION = 'motion';
 
+export const INK_DECAY = 'inkDecay';
+
+export const REMINDERS = 'reminders';
+
+export const FOCUS = 'focus';
+
+export const FOCUS_MINUTES = 25;
+
+export const DEFAULT_REMINDER_HOUR = 9;
+
+export const DISMISSALS_BEFORE_SHIFT = 3;
+
+export const SHIFT_MINUTES = 120;
+
+export const MAX_SHIFT_MINUTES = 480;
+
 export const ONBOARDED = 'onboarded';
+
+export const CAPACITY = 'capacity';
+
+export const DEFAULT_CAPACITY_MINUTES = 360;
+
+export const CAPACITY_OPTIONS = [240, 360, 480] as const;
 
 export const PRIORITY_HIGH = 3;
 
@@ -42,9 +64,41 @@ export type TaskRow = {
   sortOrder: number;
   reminderAt: number | null;
   tags: string | null;
+  carryCount: number;
+  somedayAt: number | null;
+  retireAskedCarry: number | null;
+  blockedBy: string | null;
+  blockedAt: number | null;
+  nudgeAt: number | null;
+  insistent: number;
+  dismissCount: number;
+  reminderShift: number;
+  escapeNote: string | null;
 };
 
 export type DatedTask = TaskRow & { dueDate: number };
+
+export type Outcome = 'settled' | 'carried' | 'struck' | 'rescheduled' | 'shelved';
+
+export type ClosedDayRow = {
+  day: number;
+  closedAt: number;
+  settled: number;
+  carried: number;
+  struck: number;
+  rescheduled: number;
+  shelved: number;
+  committedMinutes: number;
+  settledMinutes: number;
+};
+
+export type ClosedEntryRow = {
+  day: number;
+  taskId: string;
+  title: string;
+  seedKey: StringKey | null;
+  outcome: Outcome;
+};
 
 export type ProjectRow = {
   id: string;
@@ -53,6 +107,32 @@ export type ProjectRow = {
   color: ColorToken;
   createdAt: number;
   archivedAt: number | null;
+};
+
+export type NoteRow = {
+  id: string;
+  title: string;
+  createdAt: number;
+  updatedAt: number;
+  deletedAt: number | null;
+};
+
+export type NoteLineRow = {
+  id: string;
+  noteId: string;
+  sortOrder: number;
+  text: string;
+  taskId: string | null;
+};
+
+export type AttachmentRow = {
+  id: string;
+  noteId: string | null;
+  taskId: string | null;
+  uri: string;
+  bytes: number;
+  durationMs: number;
+  createdAt: number;
 };
 
 export type SubtaskRow = {
@@ -71,6 +151,8 @@ export function rowTitle(row: { title: string; seedKey: StringKey | null }, t: S
 export function projectName(project: ProjectRow, t: Strings): string {
   return project.seedKey ? t[project.seedKey] : project.name;
 }
+
+export const CHECKBOX_MARK = /^\s*[-*]?\s*\[\s*[xX ]?\s*\]\s*/;
 
 export function taskTags(task: { tags: string | null }): string[] {
   return task.tags ? task.tags.split(',') : [];
@@ -132,6 +214,30 @@ CREATE TABLE prefs (
 );
 `;
 
+const V4 = `
+ALTER TABLE tasks ADD COLUMN carryCount INTEGER NOT NULL DEFAULT 0;
+
+CREATE TABLE closed_days (
+  day INTEGER PRIMARY KEY NOT NULL,
+  closedAt INTEGER NOT NULL,
+  settled INTEGER NOT NULL,
+  carried INTEGER NOT NULL,
+  struck INTEGER NOT NULL,
+  rescheduled INTEGER NOT NULL,
+  committedMinutes INTEGER NOT NULL,
+  settledMinutes INTEGER NOT NULL
+);
+
+CREATE TABLE closed_entries (
+  day INTEGER NOT NULL REFERENCES closed_days(day),
+  taskId TEXT NOT NULL,
+  title TEXT NOT NULL,
+  seedKey TEXT,
+  outcome TEXT NOT NULL,
+  PRIMARY KEY (day, taskId)
+);
+`;
+
 async function liftTagsFromTitles(db: SQLiteDatabase): Promise<void> {
   const written = await db.getAllAsync<{ id: string; title: string }>(
     "SELECT id, title FROM tasks WHERE seedKey IS NULL AND title LIKE '%#%'"
@@ -148,6 +254,72 @@ async function liftTagsFromTitles(db: SQLiteDatabase): Promise<void> {
   }
 }
 
+const V5 = `
+ALTER TABLE tasks ADD COLUMN somedayAt INTEGER;
+
+ALTER TABLE closed_days ADD COLUMN shelved INTEGER NOT NULL DEFAULT 0;
+
+CREATE INDEX tasks_someday ON tasks (somedayAt) WHERE deletedAt IS NULL;
+`;
+
+const V6 = `
+ALTER TABLE tasks ADD COLUMN retireAskedCarry INTEGER;
+`;
+
+const V7 = `
+ALTER TABLE tasks ADD COLUMN blockedBy TEXT;
+ALTER TABLE tasks ADD COLUMN blockedAt INTEGER;
+ALTER TABLE tasks ADD COLUMN nudgeAt INTEGER;
+
+CREATE INDEX tasks_blocked ON tasks (nudgeAt) WHERE deletedAt IS NULL AND blockedBy IS NOT NULL;
+`;
+
+const V8 = `
+CREATE TABLE notes (
+  id TEXT PRIMARY KEY NOT NULL,
+  title TEXT NOT NULL,
+  createdAt INTEGER NOT NULL,
+  updatedAt INTEGER NOT NULL,
+  deletedAt INTEGER
+);
+
+CREATE TABLE note_lines (
+  id TEXT PRIMARY KEY NOT NULL,
+  noteId TEXT NOT NULL REFERENCES notes(id),
+  sortOrder INTEGER NOT NULL,
+  text TEXT NOT NULL,
+  taskId TEXT REFERENCES tasks(id)
+);
+
+CREATE INDEX note_lines_noteId ON note_lines (noteId, sortOrder);
+CREATE INDEX note_lines_taskId ON note_lines (taskId) WHERE taskId IS NOT NULL;
+`;
+
+const V9 = `
+ALTER TABLE tasks ADD COLUMN insistent INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE tasks ADD COLUMN dismissCount INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE tasks ADD COLUMN reminderShift INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE tasks ADD COLUMN escapeNote TEXT;
+
+CREATE INDEX tasks_reminderAt ON tasks (reminderAt) WHERE deletedAt IS NULL AND completedAt IS NULL;
+`;
+
+const V10 = `
+CREATE TABLE attachments (
+  id TEXT PRIMARY KEY NOT NULL,
+  noteId TEXT REFERENCES notes(id),
+  taskId TEXT REFERENCES tasks(id),
+  uri TEXT NOT NULL,
+  bytes INTEGER NOT NULL,
+  durationMs INTEGER NOT NULL,
+  createdAt INTEGER NOT NULL,
+  CHECK ((noteId IS NULL) <> (taskId IS NULL))
+);
+
+CREATE INDEX attachments_noteId ON attachments (noteId) WHERE noteId IS NOT NULL;
+CREATE INDEX attachments_taskId ON attachments (taskId) WHERE taskId IS NOT NULL;
+`;
+
 const STEPS: ((db: SQLiteDatabase) => Promise<void>)[] = [
   (db) => db.execAsync(DDL),
   async (db) => {
@@ -155,6 +327,13 @@ const STEPS: ((db: SQLiteDatabase) => Promise<void>)[] = [
     await liftTagsFromTitles(db);
   },
   (db) => db.execAsync(V3),
+  (db) => db.execAsync(V4),
+  (db) => db.execAsync(V5),
+  (db) => db.execAsync(V6),
+  (db) => db.execAsync(V7),
+  (db) => db.execAsync(V8),
+  (db) => db.execAsync(V9),
+  (db) => db.execAsync(V10),
 ];
 
 export async function migrate(db: SQLiteDatabase): Promise<void> {

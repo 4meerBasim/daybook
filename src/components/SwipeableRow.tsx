@@ -15,28 +15,28 @@ import { CheckIcon } from './Icon';
 
 const DONE = 0.4;
 const SNOOZE = 0.3;
-const PICK = 0.55;
+const WAITING = 0.55;
 const DELETE = 0.7;
 
 export function SwipeableRow({
   children,
   onComplete,
   onSnooze,
-  onPickDate,
+  onWaiting,
   onDelete,
   onLongPress,
 }: {
   children: React.ReactNode;
   onComplete: () => void;
   onSnooze?: () => void;
-  onPickDate?: () => void;
+  onWaiting?: () => void;
   onDelete: () => void;
   onLongPress: () => void;
 }) {
   const { c, t, ui, rtl, reduced } = useTheme();
   const [width, setWidth] = useState(0);
 
-  const deleteOnly = !onSnooze && !onPickDate;
+  const deleteOnly = !onSnooze && !onWaiting;
 
   const sign = rtl ? -1 : 1;
   const tx = useSharedValue(0);
@@ -67,10 +67,10 @@ export function SwipeableRow({
       } else if (-p >= DELETE) {
         runOnJS(tap)();
         runOnJS(onDelete)();
-      } else if (-p >= PICK) {
-        if (onPickDate) {
+      } else if (-p >= WAITING) {
+        if (onWaiting) {
           runOnJS(tap)();
-          runOnJS(onPickDate)();
+          runOnJS(onWaiting)();
         }
       } else if (-p >= SNOOZE) {
         if (onSnooze) {
@@ -155,7 +155,7 @@ export function SwipeableRow({
         ]}
       >
         {onSnooze ? <Text style={[actionText, { color: c.blue }]}>{t.tomorrow}</Text> : null}
-        {onPickDate ? <Text style={[actionText, { color: c.blue }]}>{t.pickDate}</Text> : null}
+        {onWaiting ? <Text style={[actionText, { color: c.blue }]}>{t.waitingOn}</Text> : null}
       </Animated.View>
 
       <Animated.View

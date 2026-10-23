@@ -84,12 +84,19 @@ export function SectionLabel({ label }: { label: string }) {
   );
 }
 
-export function EmptyRules({ count }: { count: number }) {
+export function EmptyRules({ count, overrun = 0 }: { count: number; overrun?: number }) {
   const { c, unit } = useTheme();
   return (
     <View pointerEvents="none">
       {Array.from({ length: count }).map((_, i) => (
-        <View key={i} style={{ height: unit, borderBottomWidth: 1, borderBottomColor: c.rule }} />
+        <View
+          key={i}
+          style={{
+            height: unit,
+            borderBottomWidth: i < overrun ? 1.5 : 1,
+            borderBottomColor: i < overrun ? c.ver : c.rule,
+          }}
+        />
       ))}
     </View>
   );

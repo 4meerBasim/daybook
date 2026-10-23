@@ -1,15 +1,27 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '../theme/ThemeProvider';
-import { maxFontSizeMultiplier, metrics, radius } from '../theme/tokens';
+import { maxFontSizeMultiplier, metrics } from '../theme/tokens';
 import { align, insetStart, marginStart, pad, row } from '../lib/rtl';
-import { useStore } from '../state/store';
-import { rowTitle, type SubtaskRow as SubtaskRowData } from '../db/schema';
+import { addDays, atTime, longDate, minutesLabel, startOfDay, timeLabel } from '../lib/date';
+import { tagColors } from '../lib/parse';
+import { useStore, useTaskDetail } from '../state/store';
+import {
+  PRIORITY_HIGH,
+  projectName,
+  rowTitle,
+  taskTags,
+  type SubtaskRow as SubtaskRowData,
+} from '../db/schema';
 import { Screen, useHeaderTop, useScreenBottom } from '../components/Screen';
 import { Checkbox, rowContent, useRuling } from '../components/Ledger';
 import { Chip } from '../components/Chip';
-import { ChevronBackIcon, EllipsisIcon, PaperclipIcon } from '../components/Icon';
+import { Segmented } from '../components/Segmented';
+import { Toggle } from '../components/Toggle';
+import { ProjectPickerSheet } from './ProjectPickerSheet';
+import { WaitingSheet } from '../components/WaitingSheet';
+import { ChevronBackIcon, EllipsisIcon } from '../components/Icon';
 
 function SubtaskRow({ task, onToggle }: { task: SubtaskRowData; onToggle: () => void }) {
   const { c, t, ui, rtl } = useTheme();
@@ -57,13 +69,69 @@ function SubtaskRow({ task, onToggle }: { task: SubtaskRowData; onToggle: () => 
   );
 }
 
-export function TaskDetailScreen({ onBack, onFocus }: { onBack: () => void; onFocus: () => void }) {
-  const { c, t, ui, mono, display, rtl, unit } = useTheme();
-  const { subtasks, completeSubtask } = useStore();
+const ESTIMATE_OPTIONS = [15, 30, 60, 120];
+
+const REMIND_HOURS = [7, 9, 13, 18];
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  const { c, mono, rtl, unit } = useTheme();
+  return (
+    <View
+      style={[
+        {
+          minHeight: unit,
+          flexDirection: row(rtl),
+          alignItems: 'center',
+          gap: 12,
+          borderBottomWidth: 1,
+          borderBottomColor: c.rule,
+        },
+        pad(rtl, metrics.gutter, metrics.gutter),
+      ]}
+    >
+      <Text
+        style={[
+          mono(11, 500, 0.1, true),
+          { width: metrics.labelColumn, color: c.ink3, textAlign: align(rtl) },
+        ]}
+      >
+        {label}
+      </Text>
+      {children}
+    </View>
+  );
+}
+
+export function TaskDetailScreen({
+  taskId,
+  onBack,
+  onFocus,
+  onOpenNote,
+}: {
+  taskId: string;
+  onBack: () => void;
+  onFocus: () => void;
+  onOpenNote: (noteId: string) => void;
+}) {
+  const { c, t, ui, mono, display, rtl } = useTheme();
+  const { projects, complete, completeSubtask, edit, block, unblock, setReminderAt, setInsistent } =
+    useStore();
+  const { task, subtasks, source } = useTaskDetail(taskId);
   const top = useHeaderTop();
   const bottom = useScreenBottom();
+  const [filing, setFiling] = useState(false);
+  const [blocking, setBlocking] = useState(false);
 
+  if (!task) return <Screen />;
+
+  const done = task.completedAt !== null;
+  const project = projects.find((p) => p.id === task.projectId);
+  const tags = taskTags(task);
   const doneCount = subtasks.filter((s) => s.completedAt !== null).length;
+  const clock = timeLabel(task.dueDate);
+  const estimate = task.duration === null ? 'none' : String(task.duration);
+  const remind =
+    task.reminderAt === null ? 'none' : String(new Date(task.reminderAt).getHours());
 
   return (
     <Screen>
@@ -86,7 +154,9 @@ export function TaskDetailScreen({ onBack, onFocus }: { onBack: () => void; onFo
           >
             <ChevronBackIcon color={c.ink2} flip={rtl} />
           </Pressable>
-          <Text style={[mono(12, 500, 0.1), { color: c.ink2 }]}>{t.studio}</Text>
+          <Text style={[mono(12, 500, 0.1), { color: c.ink2 }]}>
+            {project ? projectName(project, t) : ''}
+          </Text>
           <Pressable
             onPress={onFocus}
             hitSlop={metrics.hitSlop}
@@ -110,178 +180,248 @@ export function TaskDetailScreen({ onBack, onFocus }: { onBack: () => void; onFo
             pad(rtl, metrics.gutter, metrics.gutter),
           ]}
         >
-          <View
-            style={{
-              width: 26,
-              height: 26,
-              borderWidth: 1.5,
-              borderColor: c.ink,
-              borderRadius: 5,
-              marginTop: 6,
+          <Pressable
+            onPress={() => {
+              if (!done) Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              complete(task.id, !done);
             }}
-          />
+            hitSlop={metrics.hitSlop}
+            android_ripple={null}
+            accessibilityRole="checkbox"
+            accessibilityState={{ checked: done }}
+            accessibilityLabel={rowTitle(task, t)}
+            style={{ marginTop: 6 }}
+          >
+            <Checkbox checked={done} size={26} />
+          </Pressable>
           <Text
             allowFontScaling
             maxFontSizeMultiplier={maxFontSizeMultiplier}
-            style={[display(30, { lineHeight: 36 }), { flex: 1, color: c.ink, textAlign: align(rtl) }]}
+            style={[
+              display(30, { lineHeight: 36 }),
+              {
+                flex: 1,
+                color: done ? c.ink3 : c.ink,
+                textAlign: align(rtl),
+                textDecorationLine: done ? 'line-through' : 'none',
+              },
+            ]}
           >
-            {t.task1}
+            {rowTitle(task, t)}
           </Text>
         </View>
 
         <View style={{ borderTopWidth: 1, borderTopColor: c.rule }}>
-          <View
-            style={[
-              {
-                minHeight: unit,
-                flexDirection: row(rtl),
-                alignItems: 'center',
-                gap: 12,
-                borderBottomWidth: 1,
-                borderBottomColor: c.rule,
-              },
-              pad(rtl, metrics.gutter, metrics.gutter),
-            ]}
-          >
-            <Text style={[mono(11, 500, 0.1, true), { width: metrics.labelColumn, color: c.ink3, textAlign: align(rtl) }]}>
-              {t.when}
-            </Text>
-            <Text style={[ui(15), { lineHeight: undefined, color: c.ink }]}>
-              {t.today}
-              {' · '}
-              <Text style={mono(15)}>10:00</Text>
-            </Text>
-            <View style={{ flex: 1 }} />
-            <Text style={[mono(12, 500), { color: c.ink3 }]}>{'↻ '}{t.weekly}</Text>
-          </View>
+          <Field label={t.when}>
+            {task.dueDate === null ? (
+              <Text style={[ui(15), { lineHeight: undefined, color: c.ink3 }]}>{t.noDate}</Text>
+            ) : (
+              <Text style={[ui(15), { lineHeight: undefined, color: c.ink }]}>
+                {longDate(task.dueDate, t)}
+                {clock ? ' · ' : ''}
+                {clock ? <Text style={mono(15)}>{clock}</Text> : null}
+              </Text>
+            )}
+          </Field>
 
-          <View
-            style={[
-              {
-                minHeight: unit,
-                flexDirection: row(rtl),
-                alignItems: 'center',
-                gap: 12,
-                borderBottomWidth: 1,
-                borderBottomColor: c.rule,
-              },
-              pad(rtl, metrics.gutter, metrics.gutter),
-            ]}
-          >
-            <Text style={[mono(11, 500, 0.1, true), { width: metrics.labelColumn, color: c.ink3, textAlign: align(rtl) }]}>
-              {t.reminder}
-            </Text>
-            <Text style={[ui(15), { lineHeight: undefined, color: c.ink }]}>
-              09:30{' · '}{t.snoozeHint}
-            </Text>
-          </View>
-
-          <View
-            style={[
-              {
-                minHeight: unit,
-                flexDirection: row(rtl),
-                alignItems: 'center',
-                gap: 12,
-                borderBottomWidth: 1,
-                borderBottomColor: c.rule,
-              },
-              pad(rtl, metrics.gutter, metrics.gutter),
-            ]}
-          >
-            <Text style={[mono(11, 500, 0.1, true), { width: metrics.labelColumn, color: c.ink3, textAlign: align(rtl) }]}>
-              {t.priority}
-            </Text>
-            <Chip label={t.high} bg={c.verS} fg={c.ver} />
-            <Chip label="#invoice" bg={c.blueS} fg={c.blue} />
-          </View>
-
-          <View
-            style={[
-              {
-                minHeight: unit,
-                flexDirection: row(rtl),
-                alignItems: 'center',
-                gap: 12,
-                borderBottomWidth: 1,
-                borderBottomColor: c.rule,
-              },
-              pad(rtl, metrics.gutter, metrics.gutter),
-            ]}
-          >
-            <Text style={[mono(11, 500, 0.1, true), { width: metrics.labelColumn, color: c.ink3, textAlign: align(rtl) }]}>
-              {t.subtasks}
-            </Text>
-            <Text style={[mono(13, 500), { color: c.ink2 }]}>
-              {doneCount} / {subtasks.length}
-            </Text>
-          </View>
-
-          <View style={{ position: 'relative' }}>
-            <View
-              pointerEvents="none"
-              style={[
-                { position: 'absolute', top: 0, bottom: 0, width: 1, backgroundColor: c.ver, opacity: 0.6 },
-                insetStart(rtl, metrics.marginLine),
+          <Field label={t.reminder}>
+            <Segmented
+              options={[
+                { key: 'none', label: t.estimateNone },
+                ...REMIND_HOURS.map((h) => ({
+                  key: String(h),
+                  label: `${String(h).padStart(2, '0')}:00`,
+                })),
               ]}
+              value={remind}
+              onChange={(next) =>
+                setReminderAt(
+                  task.id,
+                  next === 'none'
+                    ? null
+                    : atTime(
+                        startOfDay(task.dueDate ?? addDays(Date.now(), 1)),
+                        Number(next),
+                        0
+                      )
+                )
+              }
             />
-            {subtasks.map((s) => (
-              <SubtaskRow
-                key={s.id}
-                task={s}
-                onToggle={() => completeSubtask(s.id, s.completedAt === null)}
-              />
-            ))}
-          </View>
+          </Field>
 
-          <View
-            style={{
-              paddingVertical: 14,
-              paddingHorizontal: metrics.gutter,
-              borderBottomWidth: 1,
-              borderBottomColor: c.rule,
-            }}
-          >
-            <Text style={[mono(11, 500, 0.1), { color: c.ink3, marginBottom: 6, textAlign: align(rtl) }]}>
-              {t.notes}
-            </Text>
-            <Text style={[ui(15, 400, 22), { color: c.ink2, textAlign: align(rtl) }]}>
-              {t.noteBody}
-            </Text>
-          </View>
+          {task.reminderShift ? (
+            <Field label={t.remindAt}>
+              <Text style={[ui(15), { lineHeight: undefined, color: c.ink }]}>
+                {t.movedTo.replace('{time}', timeLabel(task.reminderAt))}
+              </Text>
+            </Field>
+          ) : null}
 
-          <View
-            style={[
-              { paddingVertical: 14, flexDirection: row(rtl), gap: 10, alignItems: 'center' },
-              pad(rtl, metrics.gutter, metrics.gutter),
-            ]}
+          <Field label={t.insistentLabel}>
+            <Text style={[ui(15), { flex: 1, lineHeight: undefined, color: c.ink2 }]}>
+              {t.insistentRow}
+            </Text>
+            <Toggle
+              value={task.insistent === 1}
+              onChange={(on) => setInsistent(task.id, on)}
+              accessibilityLabel={t.insistentRow}
+            />
+          </Field>
+
+          {task.escapeNote ? (
+            <Field label={t.escapedBecause}>
+              <Text numberOfLines={2} style={[ui(15), { flex: 1, color: c.ink2 }]}>
+                {task.escapeNote}
+              </Text>
+            </Field>
+          ) : null}
+
+          <Pressable
+            onPress={() => setFiling(true)}
+            android_ripple={null}
+            accessibilityRole="button"
+            accessibilityLabel={t.moveToProject}
           >
+            <Field label={t.project}>
+              <Text
+                style={[
+                  ui(15),
+                  { lineHeight: undefined, color: project ? c.ink : c.ink3 },
+                ]}
+              >
+                {project ? projectName(project, t) : t.noProject}
+              </Text>
+            </Field>
+          </Pressable>
+
+          <Pressable
+            onPress={() => setBlocking(true)}
+            android_ripple={null}
+            accessibilityRole="button"
+            accessibilityLabel={t.waitingOn}
+          >
+            <Field label={t.waitingOn}>
+              <Text
+                style={[ui(15), { lineHeight: undefined, color: task.blockedBy ? c.ink : c.ink3 }]}
+              >
+                {task.blockedBy ?? t.notWaiting}
+              </Text>
+              <View style={{ flex: 1 }} />
+              {task.nudgeAt ? (
+                <Text style={[mono(12, 500), { color: c.ink3 }]}>{longDate(task.nudgeAt, t)}</Text>
+              ) : null}
+            </Field>
+          </Pressable>
+
+          <Field label={t.estimate}>
+            <Segmented
+              options={[
+                { key: 'none', label: t.estimateNone },
+                ...ESTIMATE_OPTIONS.map((m) => ({ key: String(m), label: minutesLabel(m, t) })),
+              ]}
+              value={estimate}
+              onChange={(next) =>
+                edit(task.id, { duration: next === 'none' ? null : Number(next) })
+              }
+            />
+          </Field>
+
+          {task.priority === PRIORITY_HIGH || tags.length ? (
+            <Field label={t.priority}>
+              {task.priority === PRIORITY_HIGH ? (
+                <Chip label={t.high} bg={c.verS} fg={c.ver} />
+              ) : null}
+              {tags.map((tag) => {
+                const tint = tagColors(tag, c);
+                return <Chip key={tag} label={`#${tag}`} bg={tint.bg} fg={tint.fg} />;
+              })}
+            </Field>
+          ) : null}
+
+          {subtasks.length ? (
+            <>
+              <Field label={t.subtasks}>
+                <Text style={[mono(13, 500), { color: c.ink2 }]}>
+                  {doneCount} / {subtasks.length}
+                </Text>
+              </Field>
+
+              <View style={{ position: 'relative' }}>
+                <View
+                  pointerEvents="none"
+                  style={[
+                    {
+                      position: 'absolute',
+                      top: 0,
+                      bottom: 0,
+                      width: 1,
+                      backgroundColor: c.ver,
+                      opacity: 0.6,
+                    },
+                    insetStart(rtl, metrics.marginLine),
+                  ]}
+                />
+                {subtasks.map((s) => (
+                  <SubtaskRow
+                    key={s.id}
+                    task={s}
+                    onToggle={() => completeSubtask(s.id, s.completedAt === null)}
+                  />
+                ))}
+              </View>
+            </>
+          ) : null}
+
+          {source ? (
+            <Pressable
+              onPress={() => onOpenNote(source.id)}
+              android_ripple={null}
+              accessibilityRole="button"
+              accessibilityLabel={source.title}
+            >
+              <Field label={t.fromNote}>
+                <Text numberOfLines={1} style={[ui(15), { lineHeight: undefined, color: c.ink }]}>
+                  {source.title}
+                </Text>
+              </Field>
+            </Pressable>
+          ) : null}
+
+          {task.notes ? (
             <View
               style={{
-                width: 56,
-                height: 56,
-                borderRadius: radius.card,
-                backgroundColor: c.paper2,
-                borderWidth: 1,
-                borderColor: c.rule,
-                borderStyle: 'dashed',
-                alignItems: 'center',
-                justifyContent: 'center',
+                paddingVertical: 14,
+                paddingHorizontal: metrics.gutter,
+                borderBottomWidth: 1,
+                borderBottomColor: c.rule,
               }}
             >
-              <PaperclipIcon size={20} color={c.ink3} />
-            </View>
-            <View>
-              <Text style={[ui(13, 400, 18), { color: c.ink3, textAlign: align(rtl) }]}>
-                invoice-0918.pdf {'·'} 240 KB
+              <Text
+                style={[
+                  mono(11, 500, 0.1),
+                  { color: c.ink3, marginBottom: 6, textAlign: align(rtl) },
+                ]}
+              >
+                {t.notes}
               </Text>
-              <Text style={[ui(13, 400, 18), { color: c.ink3, textAlign: align(rtl) }]}>
-                {t.attachHint}
+              <Text style={[ui(15, 400, 22), { color: c.ink2, textAlign: align(rtl) }]}>
+                {task.notes}
               </Text>
             </View>
-          </View>
+          ) : null}
         </View>
       </ScrollView>
+
+      {filing ? <ProjectPickerSheet task={task} onClose={() => setFiling(false)} /> : null}
+
+      {blocking ? (
+        <WaitingSheet
+          task={task}
+          onClose={() => setBlocking(false)}
+          onSubmit={(who, nudgeAt) => block(task.id, who, nudgeAt)}
+          onClear={() => unblock(task.id)}
+        />
+      ) : null}
     </Screen>
   );
 }

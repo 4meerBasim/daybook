@@ -7,6 +7,7 @@ import { useTabBarFootprint } from '../components/TabBar';
 import { pad, row } from '../lib/rtl';
 import { addDays, dayOfMonth, startOfDay, timeLabel } from '../lib/date';
 import { useStore } from '../state/store';
+import { inkDecay } from '../lib/decay';
 import { rowTitle, type DatedTask } from '../db/schema';
 import { Screen } from '../components/Screen';
 import { PageHeader } from '../components/PageHeader';
@@ -20,10 +21,10 @@ function dateLabel(items: DatedTask[]): string {
   return first === last ? String(first) : `${first}–${last}`;
 }
 
-export function UpcomingScreen({ onOpenTask }: { onOpenTask: () => void }) {
+export function UpcomingScreen({ onOpenTask }: { onOpenTask: (taskId: string) => void }) {
   const { c, t, mono, display, rtl, unit } = useTheme();
   const tabBarFootprint = useTabBarFootprint();
-  const { upcoming, complete, remove } = useStore();
+  const { upcoming, decayOn, complete, remove } = useStore();
   const scrollY = useSharedValue(0);
   const onScroll = useAnimatedScrollHandler((e) => {
     scrollY.value = e.contentOffset.y;
@@ -92,12 +93,14 @@ export function UpcomingScreen({ onOpenTask }: { onOpenTask: () => void }) {
                   key={k.id}
                   onComplete={() => complete(k.id, true)}
                   onDelete={() => remove(k.id)}
-                  onLongPress={onOpenTask}
+                  onLongPress={() => onOpenTask(k.id)}
                 >
                   <TaskRow
                     title={rowTitle(k, t)}
                     meta={timeLabel(k.dueDate)}
                     dotColor={c[k.color]}
+                    carryCount={k.carryCount}
+                    decay={inkDecay(k, now, decayOn)}
                     onToggle={() => complete(k.id, true)}
                     accessibilityActions={swipeActions}
                     onAccessibilityAction={(e) => {

@@ -4,8 +4,8 @@ Route: no stack route — a `Modal` sheet rendered by whichever list opened it
 Summary: The sheet that files a task into a project: the task's title, one row per project, and a `No project` row that clears the assignment.
 
 ## Related
-- Connects to: [[Project Detail]] — long-press a project task, its only caller, [[Main Tabs]], [[Swipe States]] — the other page that claims long-press
-- Features: [[Projects As A Real Entity]], [[Offline First Local Store]], [[Ledger Paper Chrome]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]], [[Reduced Motion Mode]]
+- Connects to: [[Project Detail]] — long-press a project task, its only caller, [[Main Tabs]], [[Swipe States]] — the other page that claims long-press, [[Task Detail]]
+- Features: [[Projects As A Real Entity]], [[Offline First Local Store]], [[Ledger Paper Chrome]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]], [[Reduced Motion Mode]], [[Inbox Triage Chips]]
 - Bugs: [[Undated Unassigned Tasks Have No Screen]]
 - Enhancements: [[Inbox Triage Chips]]
 

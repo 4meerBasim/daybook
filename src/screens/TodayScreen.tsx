@@ -1,46 +1,62 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
 import { useTheme } from '../theme/ThemeProvider';
-import { maxFontSizeMultiplier } from '../theme/tokens';
+import { maxFontSizeMultiplier, metrics } from '../theme/tokens';
 import { useTabBarFootprint } from '../components/TabBar';
-import { marginStart, row } from '../lib/rtl';
-import { isOverdue, isYesterday, longDate, timeLabel } from '../lib/date';
+import { align, marginStart, pad, row } from '../lib/rtl';
+import { isOverdue, isYesterday, longDate, startOfDay, timeLabel } from '../lib/date';
 import { useStore } from '../state/store';
-import { rowTitle } from '../db/schema';
+import { asksRetirement, inkDecay } from '../lib/decay';
+import { rowTitle, type TaskRow as TaskRowData } from '../db/schema';
 import { Screen } from '../components/Screen';
 import { PageHeader } from '../components/PageHeader';
 import { Checkbox, EmptyRules, Ledger, LedgerRow, SectionLabel } from '../components/Ledger';
+import { CapacityLine } from '../components/CapacityLine';
 import { TaskRow } from '../components/TaskRow';
+import { RetirementPrompt } from '../components/RetirementPrompt';
+import { WaitingSheet } from '../components/WaitingSheet';
 import { SwipeableRow } from '../components/SwipeableRow';
 import { Stamp } from '../components/Stamp';
 import { StreakTallyIcon } from '../components/Icon';
 
+const HOUR_UNIT_MINUTES = 60;
+
 export function TodayScreen({
-  onStamp,
+  onClose,
+  onOpenClosed,
   onOpenTask,
-  onPickDate,
 }: {
-  onStamp: () => void;
-  onOpenTask: () => void;
-  onPickDate: () => void;
+  onClose: () => void;
+  onOpenClosed: (day: number) => void;
+  onOpenTask: (taskId: string) => void;
 }) {
   const { c, t, ui, mono, rtl } = useTheme();
   const tabBarFootprint = useTabBarFootprint();
-  const { today, loaded, complete, snooze, remove } = useStore();
+  const { today, loaded, capacity, closedToday, decayOn, complete, snooze, remove, retire, block, unblock } =
+    useStore();
+  const [blocking, setBlocking] = useState<TaskRowData | null>(null);
   const scrollY = useSharedValue(0);
   const onScroll = useAnimatedScrollHandler((e) => {
     scrollY.value = e.contentOffset.y;
   });
 
   const now = Date.now();
-  const leftN = today.filter((k) => k.completedAt === null).length;
+  const open = today.filter((k) => k.completedAt === null);
+  const leftN = open.length;
+  const closed = closedToday !== null;
   const allDone = loaded && leftN === 0;
+  const committed = open.reduce((total, k) => total + (k.duration ?? 0), 0);
+  const unestimated = open.filter((k) => k.duration === null).length;
+  const overrunUnits = Math.min(
+    4,
+    Math.ceil(Math.max(committed - capacity, 0) / HOUR_UNIT_MINUTES)
+  );
 
   const swipeActions = [
     { name: 'complete', label: t.done },
     { name: 'snooze', label: t.tomorrow },
-    { name: 'pickDate', label: t.pickDate },
+    { name: 'waiting', label: t.waitingOn },
     { name: 'delete', label: t.delete },
   ];
 
@@ -58,35 +74,52 @@ export function TodayScreen({
           scrollY={scrollY}
         />
 
+        <CapacityLine committed={committed} capacity={capacity} unestimated={unestimated} />
+
         <Ledger>
           {today.map((k) => {
             const done = k.completedAt !== null;
             return (
-              <SwipeableRow
-                key={k.id}
-                onComplete={() => complete(k.id, !done)}
-                onSnooze={() => snooze(k.id, 'tomorrow')}
-                onPickDate={onPickDate}
-                onDelete={() => remove(k.id)}
-                onLongPress={onOpenTask}
-              >
-                <TaskRow
-                  title={rowTitle(k, t)}
-                  meta={isYesterday(k.dueDate, now) ? t.yesterday : timeLabel(k.dueDate)}
-                  dotColor={c[k.color]}
-                  done={done}
-                  overdue={isOverdue(k.dueDate, now)}
-                  onToggle={() => complete(k.id, !done)}
-                  accessibilityActions={swipeActions}
-                  onAccessibilityAction={(e) => {
-                    const action = e.nativeEvent.actionName;
-                    if (action === 'complete') complete(k.id, !done);
-                    if (action === 'snooze') snooze(k.id, 'tomorrow');
-                    if (action === 'pickDate') onPickDate();
-                    if (action === 'delete') remove(k.id);
-                  }}
-                />
-              </SwipeableRow>
+              <React.Fragment key={k.id}>
+                <SwipeableRow
+                  onComplete={() => complete(k.id, !done)}
+                  onSnooze={() => snooze(k.id, 'tomorrow')}
+                  onWaiting={() => setBlocking(k)}
+                  onDelete={() => remove(k.id)}
+                  onLongPress={() => onOpenTask(k.id)}
+                >
+                  <TaskRow
+                    title={rowTitle(k, t)}
+                    meta={
+                      k.blockedBy ??
+                      (isYesterday(k.dueDate, now) ? t.yesterday : timeLabel(k.dueDate))
+                    }
+                    dotColor={c[k.color]}
+                    done={done}
+                    carryCount={k.carryCount}
+                    decay={inkDecay(k, now, decayOn)}
+                    overdue={isOverdue(k.dueDate, now)}
+                    onToggle={() => complete(k.id, !done)}
+                    accessibilityActions={swipeActions}
+                    onAccessibilityAction={(e) => {
+                      const action = e.nativeEvent.actionName;
+                      if (action === 'complete') complete(k.id, !done);
+                      if (action === 'snooze') snooze(k.id, 'tomorrow');
+                      if (action === 'waiting') setBlocking(k);
+                      if (action === 'delete') remove(k.id);
+                    }}
+                  />
+                </SwipeableRow>
+
+                {asksRetirement(k) ? (
+                  <RetirementPrompt
+                    carryCount={k.carryCount}
+                    onDoIt={() => retire(k.id, 'doIt')}
+                    onSchedule={() => retire(k.id, 'schedule')}
+                    onShelve={() => retire(k.id, 'shelve')}
+                  />
+                ) : null}
+              </React.Fragment>
             );
           })}
 
@@ -108,20 +141,51 @@ export function TodayScreen({
             </View>
           </LedgerRow>
 
-          <EmptyRules count={4} />
+          {closed || !leftN ? null : (
+            <Pressable
+              onPress={onClose}
+              android_ripple={null}
+              accessibilityRole="button"
+              accessibilityLabel={t.closeThePage}
+              style={({ pressed }) => ({
+                minHeight: metrics.minTap,
+                justifyContent: 'center',
+                backgroundColor: pressed ? c.paper2 : 'transparent',
+                borderBottomWidth: 1,
+                borderBottomColor: c.rule,
+              })}
+            >
+              <View style={pad(rtl, metrics.content, metrics.gutter)}>
+                <Text style={[mono(12, 500, 0.1), { color: c.ink2, textAlign: align(rtl) }]}>
+                  {t.closeThePage}
+                </Text>
+              </View>
+            </Pressable>
+          )}
+
+          <EmptyRules count={4} overrun={overrunUnits} />
         </Ledger>
       </Animated.ScrollView>
 
       {allDone ? (
         <Pressable
-          onPress={onStamp}
+          onPress={() => (closed ? onOpenClosed(startOfDay(now)) : onClose())}
           android_ripple={null}
           accessibilityRole="button"
-          accessibilityLabel={t.pageClosed}
+          accessibilityLabel={closed ? t.pageClosed : t.closeThePage}
           style={{ position: 'absolute', top: 300, left: 0, right: 0, alignItems: 'center' }}
         >
-          <Stamp label={t.pageClosed} />
+          <Stamp label={closed ? t.pageClosed : t.closeThePage} />
         </Pressable>
+      ) : null}
+
+      {blocking ? (
+        <WaitingSheet
+          task={blocking}
+          onClose={() => setBlocking(null)}
+          onSubmit={(who, nudgeAt) => block(blocking.id, who, nudgeAt)}
+          onClear={() => unblock(blocking.id)}
+        />
       ) : null}
     </Screen>
   );

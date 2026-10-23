@@ -138,7 +138,7 @@ export function SwipeStatesScreen() {
               ]}
             >
               <Text style={[actionText, { color: c.blue }]}>{t.tomorrow}</Text>
-              <Text style={[actionText, { color: c.blue }]}>{t.pickDate}</Text>
+              <Text style={[actionText, { color: c.blue }]}>{t.waitingOn}</Text>
             </View>
           }
         />

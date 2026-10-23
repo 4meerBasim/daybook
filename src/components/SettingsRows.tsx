@@ -4,6 +4,9 @@ import { useTheme } from '../theme/ThemeProvider';
 import { maxFontSizeMultiplier, metrics, radius } from '../theme/tokens';
 import { align, row } from '../lib/rtl';
 import { useStore } from '../state/store';
+import { CAPACITY_OPTIONS } from '../db/schema';
+import { minutesLabel } from '../lib/date';
+import { askPermission } from '../lib/reminders';
 import { Segmented } from './Segmented';
 import { Toggle } from './Toggle';
 import { Dot } from './Ledger';
@@ -12,13 +15,30 @@ export function SettingsRows({
   onOpenGestures,
   onOpenProjects,
   onOpenUnfiled,
+  onOpenClosedPages,
+  onOpenWeekly,
+  onOpenNotes,
 }: {
   onOpenGestures: () => void;
   onOpenProjects: () => void;
   onOpenUnfiled: () => void;
+  onOpenClosedPages: () => void;
+  onOpenWeekly: () => void;
+  onOpenNotes: () => void;
 }) {
   const { c, t, lang, appearance, motion, ui, rtl, setLang, setAppearance, setMotion } = useTheme();
-  const { projects, unfiled } = useStore();
+  const {
+    projects,
+    unfiled,
+    notes,
+    closedDays,
+    capacity,
+    setCapacity,
+    decayOn,
+    setDecayOn,
+    remindersOn,
+    setRemindersOn,
+  } = useStore();
 
   return (
     <View style={{ borderTopWidth: 1, borderTopColor: c.rule }}>
@@ -44,13 +64,32 @@ export function SettingsRows({
       </Row>
 
       <Row>
+        <RowLabel label={t.dayCapacity} />
+        <Segmented
+          options={CAPACITY_OPTIONS.map((m) => ({ key: String(m), label: minutesLabel(m, t) }))}
+          value={String(capacity)}
+          onChange={(v) => setCapacity(Number(v))}
+        />
+      </Row>
+
+      <Row>
         <RowLabel label={t.weekStart} />
         <Text style={[ui(15), { color: c.ink3 }]}>{t.weekStartLabel}</Text>
       </Row>
 
       <Row>
         <RowLabel label={t.reminders} />
-        <Text style={[ui(15), { color: c.ink3 }]}>{`09:00 · ${t.eveningReview}`}</Text>
+        <Toggle
+          value={remindersOn}
+          onChange={async (on) => {
+            if (!on) {
+              setRemindersOn(false);
+              return;
+            }
+            setRemindersOn(await askPermission());
+          }}
+          accessibilityLabel={t.reminders}
+        />
       </Row>
 
       <Row>
@@ -65,6 +104,11 @@ export function SettingsRows({
           onChange={(v) => setMotion(v ? 'reduced' : 'full')}
           accessibilityLabel={t.reduceMotion}
         />
+      </Row>
+
+      <Row>
+        <RowLabel label={t.inkDecay} />
+        <Toggle value={decayOn} onChange={setDecayOn} accessibilityLabel={t.inkDecay} />
       </Row>
 
       <Row>
@@ -83,9 +127,24 @@ export function SettingsRows({
         </View>
       </Row>
 
+      <Row onPress={onOpenNotes} label={t.notesTitle}>
+        <RowLabel label={t.notesTitle} />
+        <Text style={[ui(15), { color: c.ink3 }]}>{String(notes.length)}</Text>
+      </Row>
+
       <Row onPress={onOpenProjects} label={t.projects}>
         <RowLabel label={t.projects} />
         <Text style={[ui(15), { color: c.ink3 }]}>{String(projects.length)}</Text>
+      </Row>
+
+      <Row onPress={onOpenWeekly} label={t.weeklyReviewRow}>
+        <RowLabel label={t.weeklyReviewRow} />
+        <Dot color={c.moss} />
+      </Row>
+
+      <Row onPress={onOpenClosedPages} label={t.closedPages}>
+        <RowLabel label={t.closedPages} />
+        <Text style={[ui(15), { color: c.ink3 }]}>{String(closedDays.length)}</Text>
       </Row>
 
       <Row onPress={onOpenUnfiled} label={t.unfiled}>
@@ -95,9 +154,11 @@ export function SettingsRows({
         </Text>
       </Row>
 
-      <Row>
+      <Row onPress={onOpenNotes} label={t.sharing}>
         <RowLabel label={t.sharing} />
-        <Text style={[ui(15), { color: c.ink3 }]}>{t.sharingVal}</Text>
+        <Text numberOfLines={1} style={[ui(15), { flexShrink: 1, color: c.ink3 }]}>
+          {t.sharingVal}
+        </Text>
       </Row>
     </View>
   );

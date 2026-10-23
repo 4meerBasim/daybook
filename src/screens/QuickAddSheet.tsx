@@ -42,7 +42,7 @@ export function QuickAddSheet({ open, onClose }: { open: boolean; onClose: () =>
     if (!reduced) inputRef.current?.focus();
   }, [open, reduced]);
 
-  const parsed = parse(qa, ar);
+  const parsed = parse(qa, ar, t);
   const dest = parsed.hasDate
     ? ar
       ? 'يُحفظ في القادم'
@@ -52,8 +52,8 @@ export function QuickAddSheet({ open, onClose }: { open: boolean; onClose: () =>
       : 'No date';
 
   const onAdd = () => {
-    const { title, tags, dueDate, high } = draft(parsed, Date.now());
-    if (title) create({ title, tags, dueDate, priority: high ? PRIORITY_HIGH : null });
+    const { title, tags, dueDate, duration, high } = draft(parsed, Date.now());
+    if (title) create({ title, tags, dueDate, duration, priority: high ? PRIORITY_HIGH : null });
     setQa('');
     onClose();
   };
