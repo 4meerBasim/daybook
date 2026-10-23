@@ -582,6 +582,28 @@ export function selectAttachments(
   );
 }
 
+export async function insertSharedPage(
+  db: SQLiteDatabase,
+  title: string,
+  lines: string[],
+  now: number
+): Promise<string> {
+  const noteId = newId();
+  await db.withTransactionAsync(async () => {
+    await db.runAsync(
+      'INSERT INTO notes (id, title, createdAt, updatedAt) VALUES ($id, $title, $now, $now)',
+      { $id: noteId, $title: title, $now: now }
+    );
+    for (let i = 0; i < lines.length; i += 1) {
+      await db.runAsync(
+        'INSERT INTO note_lines (id, noteId, sortOrder, text) VALUES ($id, $noteId, $order, $text)',
+        { $id: newId(), $noteId: noteId, $order: i + 1, $text: lines[i] }
+      );
+    }
+  });
+  return noteId;
+}
+
 export async function insertDump(
   db: SQLiteDatabase,
   title: string,

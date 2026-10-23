@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, Share, Text, TextInput, View } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '../theme/ThemeProvider';
 import { maxFontSizeMultiplier, metrics } from '../theme/tokens';
@@ -8,6 +8,7 @@ import { useNote, useStore } from '../state/store';
 import { CHECKBOX_MARK, type NoteLineRow, type TaskRow } from '../db/schema';
 import { Screen, useHeaderTop, useScreenBottom } from '../components/Screen';
 import { Checkbox, Ledger, useRuling } from '../components/Ledger';
+import { pageLink } from '../lib/share';
 import { ChevronBackIcon, PaperclipIcon, PlusIcon } from '../components/Icon';
 
 function NoteLine({
@@ -154,7 +155,14 @@ export function NoteScreen({
     <Screen>
       <ScrollView contentContainerStyle={{ paddingBottom: bottom }} keyboardShouldPersistTaps="handled">
         <View style={{ paddingTop: top, paddingHorizontal: metrics.gutter, paddingBottom: 12 }}>
-          <View style={{ flexDirection: row(rtl), marginBottom: 4 }}>
+          <View
+            style={{
+              flexDirection: row(rtl),
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: 4,
+            }}
+          >
             <Pressable
               onPress={onBack}
               accessibilityRole="button"
@@ -168,6 +176,23 @@ export function NoteScreen({
               }}
             >
               <ChevronBackIcon color={c.ink2} flip={rtl} />
+            </Pressable>
+
+            <Pressable
+              onPress={() =>
+                Share.share({
+                  message: `${note.title}\n${pageLink(
+                    note.title,
+                    lines.map((line) => line.text)
+                  )}`,
+                })
+              }
+              hitSlop={metrics.hitSlop}
+              android_ripple={null}
+              accessibilityRole="button"
+              accessibilityLabel={t.sharePage}
+            >
+              <Text style={[mono(12, 500, 0.1), { color: c.ink2 }]}>{t.sharePage}</Text>
             </Pressable>
           </View>
 

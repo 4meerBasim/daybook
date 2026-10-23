@@ -154,9 +154,11 @@ export function SettingsRows({
         </Text>
       </Row>
 
-      <Row>
+      <Row onPress={onOpenNotes} label={t.sharing}>
         <RowLabel label={t.sharing} />
-        <Text style={[ui(15), { color: c.ink3 }]}>{t.sharingVal}</Text>
+        <Text numberOfLines={1} style={[ui(15), { flexShrink: 1, color: c.ink3 }]}>
+          {t.sharingVal}
+        </Text>
       </Row>
     </View>
   );

@@ -23,6 +23,7 @@ import { InkSlip } from '../components/InkSlip';
 import { EscapeSheet } from '../components/EscapeSheet';
 import { prepareChannels, reschedule } from '../lib/reminders';
 import { clearSession, remainingSeconds, showSession } from '../lib/focus';
+import { decodePage } from '../lib/share';
 import { TabBar, TabKey, useTabBarFootprint } from '../components/TabBar';
 import { TodayScreen } from '../screens/TodayScreen';
 import { UpcomingScreen } from '../screens/UpcomingScreen';
@@ -204,13 +205,30 @@ function Pane({
   );
 }
 
-function SharedCapture({ onCaptured }: { onCaptured: () => void }) {
-  const { captureShared } = useStore();
+function IncomingLinks({
+  onCaptured,
+  onImported,
+}: {
+  onCaptured: () => void;
+  onImported: (noteId: string) => void;
+}) {
+  const { captureShared, importPage } = useStore();
 
   useEffect(() => {
-    const take = (url: string | null) => {
+    const take = async (url: string | null) => {
       if (!url) return;
-      const { queryParams } = Linking.parse(url);
+      const { hostname, path, queryParams } = Linking.parse(url);
+      const target = hostname ?? path;
+
+      if (target === 'page') {
+        const raw = queryParams?.d;
+        if (typeof raw !== 'string') return;
+        const page = decodePage(raw);
+        if (!page) return;
+        onImported(await importPage(page.title, page.lines));
+        return;
+      }
+
       const text = queryParams?.text;
       if (typeof text !== 'string' || !text.trim()) return;
       captureShared(text);
@@ -220,7 +238,7 @@ function SharedCapture({ onCaptured }: { onCaptured: () => void }) {
     Linking.getInitialURL().then(take);
     const opened = Linking.addEventListener('url', (event) => take(event.url));
     return () => opened.remove();
-  }, [captureShared, onCaptured]);
+  }, [captureShared, importPage, onCaptured, onImported]);
 
   return null;
 }
@@ -442,7 +460,10 @@ export function Root() {
       <GlobalSlip />
       <Reminders />
       <SessionNotice />
-      <SharedCapture onCaptured={() => rootRef.current?.navigate('Unfiled')} />
+      <IncomingLinks
+        onCaptured={() => rootRef.current?.navigate('Unfiled')}
+        onImported={(noteId) => rootRef.current?.navigate('Note', { noteId })}
+      />
     </NavigationContainer>
   );
 }

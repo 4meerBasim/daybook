@@ -38,6 +38,7 @@ import {
   demoteNoteLine,
   insertDump,
   insertNote,
+  insertSharedPage,
   insertNoteLine,
   insertProject,
   insertTask,
@@ -133,6 +134,7 @@ type Store = Snapshot & {
   lift: () => void;
   clearReversal: (seq: number) => void;
   createNote: (title: string) => Promise<string>;
+  importPage: (title: string, lines: string[]) => Promise<string>;
   createDump: (
     title: string,
     items: { text: string; task: NewTask }[],
@@ -381,6 +383,16 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       clearReversal: (seq) => setReversal((prev) => (prev && prev.seq === seq ? null : prev)),
       createNote: async (title) => {
         const id = await insertNote(db, title, Date.now());
+        await reload();
+        return id;
+      },
+      importPage: async (title, lines) => {
+        const id = await insertSharedPage(
+          db,
+          EN.sharedPageTitle.replace('{title}', title),
+          lines,
+          Date.now()
+        );
         await reload();
         return id;
       },

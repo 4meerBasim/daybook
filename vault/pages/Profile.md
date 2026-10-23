@@ -5,7 +5,7 @@ Summary: The user's own page — an ink initials avatar, their name in 40pt seri
 
 ## Related
 - Connects to: [[Main Tabs]], [[Quick Add Sheet]] — the Add item in the bar, [[Search Results]] — the overlay that covers this pane, [[Swipe States]] — the Shortcuts row calls `onOpenGestures`, [[Projects]] — the Projects row calls `onOpenProjects`, [[Unfiled]] — the Unfiled row calls `onOpenUnfiled`, [[Today]], [[Upcoming]] — the sibling panes it slides between, [[Settings]] — the stack screen rendering the same rows, [[Closed Pages]], [[Weekly Review]], [[Deal]], [[Notes]]
-- Features: [[Glass Tab Bar]], [[Animated Page Transitions]], [[Offline First Local Store]], [[Projects As A Real Entity]], [[Light and Dark Paper Palettes]], [[Reduced Motion Mode]], [[In-App RTL and Arabic Typography]], [[Ledger Paper Chrome]], [[Closing the Page Ritual]], [[Ink Decay and Task Retirement]], [[Weekly Spread Review]], [[Deal Me One Task Picker]], [[Notes With Live Task Lines]], [[Adaptive Reminders]]
+- Features: [[Glass Tab Bar]], [[Animated Page Transitions]], [[Offline First Local Store]], [[Projects As A Real Entity]], [[Light and Dark Paper Palettes]], [[Reduced Motion Mode]], [[In-App RTL and Arabic Typography]], [[Ledger Paper Chrome]], [[Closing the Page Ritual]], [[Ink Decay and Task Retirement]], [[Weekly Spread Review]], [[Deal Me One Task Picker]], [[Notes With Live Task Lines]], [[Adaptive Reminders]], [[Shared Page Link]]
 - Bugs: [[Theme Preferences Reset On Every Launch]], [[Active Tab Icon Knockout Is Opaque On Glass]], [[Undated Unassigned Tasks Have No Screen]] — resolved; the Unfiled row here now reaches the list
 - Enhancements: [[Shared Page Link]] — the free long-press this pane now has
 
