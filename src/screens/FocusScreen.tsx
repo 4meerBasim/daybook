@@ -10,7 +10,8 @@ import { useTheme } from '../theme/ThemeProvider';
 import { metrics, radius } from '../theme/tokens';
 import { align, row } from '../lib/rtl';
 import { useStore, useTaskDetail } from '../state/store';
-import { projectName, rowTitle } from '../db/schema';
+import { FOCUS_MINUTES, projectName, rowTitle } from '../db/schema';
+import { remainingSeconds } from '../lib/focus';
 import { Screen, useHeaderTop } from '../components/Screen';
 import { CheckIcon } from '../components/Icon';
 
@@ -37,31 +38,32 @@ const Strip = memo(function Strip({
   return <Animated.View style={[{ height: 1.5, borderRadius: 1 }, style]} />;
 });
 
-const SESSION_MINUTES = 25;
-
 export function FocusScreen({ taskId, onClose }: { taskId: string; onClose: () => void }) {
   const { c, t, rtl, reduced, display, ui, mono } = useTheme();
-  const { projects } = useStore();
+  const { projects, session, startSession, pauseSession, endSession } = useStore();
   const { task, subtasks } = useTaskDetail(taskId);
-  const [left, setLeft] = useState(SESSION_MINUTES * 60 - 1);
-  const [running, setRunning] = useState(true);
+  const [now, setNow] = useState(() => Date.now());
   const top = useHeaderTop();
+
+  const live = session && session.taskId === taskId ? session : null;
+  const running = live !== null && live.pausedAt === null;
+
+  useEffect(() => {
+    if (!session || session.taskId !== taskId) startSession(taskId);
+  }, [taskId, session?.taskId]);
 
   useEffect(() => {
     if (!running) return;
-    const iv = setInterval(
-      () => setLeft((l) => (l > 0 ? l - 1 : SESSION_MINUTES * 60)),
-      1000
-    );
+    const iv = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(iv);
   }, [running]);
 
-  const toggleRun = () => setRunning((r) => !r);
-
+  const left = live ? remainingSeconds(live, now) : FOCUS_MINUTES * 60;
   const mm = String(Math.floor(left / 60)).padStart(2, '0');
   const ss = String(left % 60).padStart(2, '0');
-  const filled = SESSION_MINUTES - Math.ceil(left / 60);
+  const filled = FOCUS_MINUTES - Math.ceil(left / 60);
   const runLabel = running ? t.pause : t.resume;
+  const toggleRun = () => pauseSession(running);
 
   const project = projects.find((p) => p.id === task?.projectId);
   const nextSubtask = subtasks.find((s) => s.completedAt === null);
@@ -124,7 +126,7 @@ export function FocusScreen({ taskId, onClose }: { taskId: string; onClose: () =
         </Text>
 
         <View style={{ marginTop: 28, marginHorizontal: 24, gap: 6 }}>
-          {Array.from({ length: SESSION_MINUTES }).map((_, i) => (
+          {Array.from({ length: FOCUS_MINUTES }).map((_, i) => (
             <Strip
               key={i}
               filled={i < filled}
@@ -162,7 +164,10 @@ export function FocusScreen({ taskId, onClose }: { taskId: string; onClose: () =
             <Text style={[ui(17, 500), { color: c.paper }]}>{runLabel}</Text>
           </Pressable>
           <Pressable
-            onPress={onClose}
+            onPress={() => {
+              endSession();
+              onClose();
+            }}
             android_ripple={null}
             accessibilityRole="button"
             accessibilityLabel={t.done}

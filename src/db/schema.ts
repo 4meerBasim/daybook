@@ -19,6 +19,10 @@ export const INK_DECAY = 'inkDecay';
 
 export const REMINDERS = 'reminders';
 
+export const FOCUS = 'focus';
+
+export const FOCUS_MINUTES = 25;
+
 export const DEFAULT_REMINDER_HOUR = 9;
 
 export const DISMISSALS_BEFORE_SHIFT = 3;

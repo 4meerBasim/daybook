@@ -29,7 +29,7 @@ export function DealScreen({
   onFocus: (taskId: string) => void;
 }) {
   const { c, t, ui, mono, display, rtl } = useTheme();
-  const { dealable, complete } = useStore();
+  const { dealable, complete, startSession } = useStore();
   const top = useHeaderTop();
   const bottom = useScreenBottom();
 
@@ -199,7 +199,10 @@ export function DealScreen({
         {dealt ? (
           <View style={{ flexDirection: row(rtl), gap: 10 }}>
             <Pressable
-              onPress={() => onFocus(dealt.id)}
+              onPress={() => {
+                startSession(dealt.id);
+                onFocus(dealt.id);
+              }}
               android_ripple={null}
               accessibilityRole="button"
               accessibilityLabel={t.focusTask}

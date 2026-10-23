@@ -2,6 +2,7 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 import { useSQLiteContext } from 'expo-sqlite';
 import { addDays, atTime, dayOfMonth, startOfDay } from '../lib/date';
 import { fromShared } from '../lib/capture';
+import type { Session } from '../lib/focus';
 import { draft as toDraft, parse } from '../lib/parse';
 import { EN } from '../i18n/strings';
 import type { SnoozeOffset } from '../db/reminders';
@@ -11,6 +12,7 @@ import {
   PRIORITY_HIGH,
   DEFAULT_REMINDER_HOUR,
   DISPLAY_NAME,
+  FOCUS,
   INK_DECAY,
   REMINDERS,
   ONBOARDED,
@@ -104,6 +106,7 @@ type Snapshot = {
   closedDays: ClosedDayRow[];
   reminders: TaskRow[];
   escaping: TaskRow | null;
+  session: Session | null;
   displayName: string;
   capacity: number;
   decayOn: boolean;
@@ -153,6 +156,9 @@ type Store = Snapshot & {
   setReminderAt: (id: string, at: number | null) => void;
   setInsistent: (id: string, on: boolean) => void;
   escape: (id: string, reason: string) => void;
+  startSession: (taskId: string) => void;
+  pauseSession: (paused: boolean) => void;
+  endSession: () => void;
   openEscape: (id: string) => void;
   closeEscape: () => void;
   retire: (id: string, outcome: 'doIt' | 'schedule' | 'shelve') => void;
@@ -180,6 +186,7 @@ const EMPTY: Snapshot = {
   closedDays: [],
   reminders: [],
   escaping: null,
+  session: null,
   displayName: '',
   capacity: DEFAULT_CAPACITY_MINUTES,
   decayOn: true,
@@ -220,6 +227,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         capacity,
         decayOn,
         remindersOn,
+        focus,
         onboarded,
       ] = await Promise.all([
         selectToday(db, now),
@@ -239,6 +247,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         selectPref(db, CAPACITY),
         selectPref(db, INK_DECAY),
         selectPref(db, REMINDERS),
+        selectPref(db, FOCUS),
         selectPref(db, ONBOARDED),
       ]);
       setSnapshot({
@@ -256,6 +265,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         closedDays,
         reminders,
         escaping: null,
+        session: focus ? (JSON.parse(focus) as Session) : null,
         displayName: displayName ?? '',
         capacity: capacity ? Number(capacity) : DEFAULT_CAPACITY_MINUTES,
         decayOn: decayOn !== 'false',
@@ -416,6 +426,27 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           })
         );
       },
+      startSession: (taskId) =>
+        after(
+          setPref(
+            db,
+            FOCUS,
+            JSON.stringify({ taskId, startedAt: Date.now(), pausedAt: null } satisfies Session)
+          )
+        ),
+      pauseSession: (paused) => {
+        const live = snapshot.session;
+        if (!live) return;
+        const next: Session = paused
+          ? { ...live, pausedAt: Date.now() }
+          : {
+              ...live,
+              startedAt: live.startedAt + (Date.now() - (live.pausedAt ?? Date.now())),
+              pausedAt: null,
+            };
+        after(setPref(db, FOCUS, JSON.stringify(next)));
+      },
+      endSession: () => after(setPref(db, FOCUS, '')),
       openEscape: (id) => setEscaping(find(id) ?? null),
       closeEscape: () => setEscaping(null),
       escaping,

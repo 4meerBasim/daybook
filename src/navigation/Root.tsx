@@ -22,6 +22,7 @@ import { Screen, useScreenBottom } from '../components/Screen';
 import { InkSlip } from '../components/InkSlip';
 import { EscapeSheet } from '../components/EscapeSheet';
 import { prepareChannels, reschedule } from '../lib/reminders';
+import { clearSession, remainingSeconds, showSession } from '../lib/focus';
 import { TabBar, TabKey, useTabBarFootprint } from '../components/TabBar';
 import { TodayScreen } from '../screens/TodayScreen';
 import { UpcomingScreen } from '../screens/UpcomingScreen';
@@ -224,6 +225,36 @@ function SharedCapture({ onCaptured }: { onCaptured: () => void }) {
   return null;
 }
 
+function SessionNotice() {
+  const { t } = useTheme();
+  const { session, remindersOn } = useStore();
+
+  useEffect(() => {
+    if (!session || !remindersOn) {
+      clearSession();
+      return;
+    }
+
+    const title = t.focus;
+    showSession(title, session, Date.now(), t);
+    if (session.pausedAt) return;
+
+    const tick = setInterval(() => {
+      const now = Date.now();
+      if (remainingSeconds(session, now) <= 0) {
+        clearSession();
+        clearInterval(tick);
+        return;
+      }
+      showSession(title, session, now, t);
+    }, 30_000);
+
+    return () => clearInterval(tick);
+  }, [session, remindersOn, t]);
+
+  return null;
+}
+
 function Reminders() {
   const { t } = useTheme();
   const { reminders, remindersOn, revision, escaping, escape, closeEscape, openEscape } =
@@ -410,6 +441,7 @@ export function Root() {
       </Stack.Navigator>
       <GlobalSlip />
       <Reminders />
+      <SessionNotice />
       <SharedCapture onCaptured={() => rootRef.current?.navigate('Unfiled')} />
     </NavigationContainer>
   );
