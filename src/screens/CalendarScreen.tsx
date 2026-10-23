@@ -13,7 +13,7 @@ import { TallyMarks } from '../components/TallyMarks';
 
 type Cell = { n: number; count: number; today: boolean };
 
-export function CalendarScreen() {
+export function CalendarScreen({ onOpenWeek }: { onOpenWeek: () => void }) {
   const { c, t, rtl, display, mono, unit } = useTheme();
   const { month, sel, setSel, complete } = useStore();
   const top = useHeaderTop();
@@ -60,7 +60,20 @@ export function CalendarScreen() {
           <Text style={[display(40, { lineHeight: 44 }), { color: c.ink, textAlign: align(rtl) }]}>
             {monthName}
           </Text>
-          <Text style={[mono(13, 500), { color: c.ink3, paddingBottom: 6 }]}>{year}</Text>
+          <View style={{ flexDirection: row(rtl), alignItems: 'baseline', gap: 14 }}>
+            <Pressable
+              onPress={onOpenWeek}
+              hitSlop={metrics.hitSlop}
+              android_ripple={null}
+              accessibilityRole="button"
+              accessibilityLabel={t.weeklyReviewRow}
+            >
+              <Text style={[mono(12, 500, 0.1), { color: c.ink2, paddingBottom: 6 }]}>
+                {t.thisWeekTitle}
+              </Text>
+            </Pressable>
+            <Text style={[mono(13, 500), { color: c.ink3, paddingBottom: 6 }]}>{year}</Text>
+          </View>
         </View>
 
         <View

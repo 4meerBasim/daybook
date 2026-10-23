@@ -30,6 +30,7 @@ import { ProfileScreen } from '../screens/ProfileScreen';
 import { ClosePageScreen } from '../screens/ClosePageScreen';
 import { PageClosedScreen } from '../screens/PageClosedScreen';
 import { ClosedPagesScreen } from '../screens/ClosedPagesScreen';
+import { WeeklyScreen } from '../screens/WeeklyScreen';
 import { SwipeStatesScreen } from '../screens/SwipeStatesScreen';
 import { QuickAddSheet } from '../screens/QuickAddSheet';
 
@@ -46,6 +47,7 @@ export type RootParams = {
   ClosePage: undefined;
   PageClosed: { day: number };
   ClosedPages: undefined;
+  Weekly: undefined;
   SwipeStates: undefined;
 };
 
@@ -107,6 +109,7 @@ function MainTabs({ navigation }: NativeStackScreenProps<RootParams, 'Main'>) {
             onOpenProjects={() => navigation.navigate('Projects')}
             onOpenUnfiled={() => navigation.navigate('Unfiled')}
             onOpenClosedPages={() => navigation.navigate('ClosedPages')}
+            onOpenWeekly={() => navigation.navigate('Weekly')}
           />
         </Pane>
       </Animated.View>
@@ -206,7 +209,14 @@ export function Root() {
           )}
         </Stack.Screen>
         <Stack.Screen name="Main" component={MainTabs} />
-        <Stack.Screen name="Calendar" component={CalendarScreen} />
+        <Stack.Screen name="Calendar">
+          {({ navigation }) => (
+            <CalendarScreen onOpenWeek={() => navigation.navigate('Weekly')} />
+          )}
+        </Stack.Screen>
+        <Stack.Screen name="Weekly">
+          {({ navigation }) => <WeeklyScreen onBack={() => navigation.goBack()} />}
+        </Stack.Screen>
         <Stack.Screen name="Project">
           {({ route }) => <ProjectScreen projectId={route.params.projectId} />}
         </Stack.Screen>
@@ -246,6 +256,7 @@ export function Root() {
               onOpenProjects={() => navigation.navigate('Projects')}
               onOpenUnfiled={() => navigation.navigate('Unfiled')}
               onOpenClosedPages={() => navigation.navigate('ClosedPages')}
+              onOpenWeekly={() => navigation.navigate('Weekly')}
             />
           )}
         </Stack.Screen>

@@ -15,11 +15,13 @@ export function SettingsRows({
   onOpenProjects,
   onOpenUnfiled,
   onOpenClosedPages,
+  onOpenWeekly,
 }: {
   onOpenGestures: () => void;
   onOpenProjects: () => void;
   onOpenUnfiled: () => void;
   onOpenClosedPages: () => void;
+  onOpenWeekly: () => void;
 }) {
   const { c, t, lang, appearance, motion, ui, rtl, setLang, setAppearance, setMotion } = useTheme();
   const { projects, unfiled, closedDays, capacity, setCapacity, decayOn, setDecayOn } =
@@ -105,6 +107,11 @@ export function SettingsRows({
       <Row onPress={onOpenProjects} label={t.projects}>
         <RowLabel label={t.projects} />
         <Text style={[ui(15), { color: c.ink3 }]}>{String(projects.length)}</Text>
+      </Row>
+
+      <Row onPress={onOpenWeekly} label={t.weeklyReviewRow}>
+        <RowLabel label={t.weeklyReviewRow} />
+        <Dot color={c.moss} />
       </Row>
 
       <Row onPress={onOpenClosedPages} label={t.closedPages}>

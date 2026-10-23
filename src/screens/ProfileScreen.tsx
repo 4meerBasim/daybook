@@ -20,11 +20,13 @@ export function ProfileScreen({
   onOpenProjects,
   onOpenUnfiled,
   onOpenClosedPages,
+  onOpenWeekly,
 }: {
   onOpenGestures: () => void;
   onOpenProjects: () => void;
   onOpenUnfiled: () => void;
   onOpenClosedPages: () => void;
+  onOpenWeekly: () => void;
 }) {
   const { c, t, display, mono, rtl } = useTheme();
   const tabBarFootprint = useTabBarFootprint();
@@ -90,6 +92,7 @@ export function ProfileScreen({
           onOpenProjects={onOpenProjects}
           onOpenUnfiled={onOpenUnfiled}
           onOpenClosedPages={onOpenClosedPages}
+          onOpenWeekly={onOpenWeekly}
         />
       </ScrollView>
 

@@ -34,6 +34,16 @@ export function startOfNextMonth(ts: number): number {
   return d.getTime();
 }
 
+export function startOfWeek(ts: number, firstWeekday: number): number {
+  const start = startOfDay(ts);
+  const back = (new Date(start).getDay() - firstWeekday + 7) % 7;
+  return startOfDay(addDays(start, -back));
+}
+
+export function weekdayIndex(ts: number, firstWeekday: number): number {
+  return (new Date(ts).getDay() - firstWeekday + 7) % 7;
+}
+
 export function dayOfMonth(ts: number): number {
   return new Date(ts).getDate();
 }
@@ -70,6 +80,11 @@ export function longDate(ts: number, t: Strings): string {
   const d = new Date(ts);
   const weekday = t.weekdays[(d.getDay() - t.firstWeekday + 7) % 7];
   return `${weekday}${t.dateComma}${d.getDate()} ${t.months[d.getMonth()]}`;
+}
+
+export function dayAndMonth(ts: number, t: Strings): string {
+  const d = new Date(ts);
+  return `${d.getDate()} ${t.months[d.getMonth()]}`;
 }
 
 export function stamped(ts: number): string {
