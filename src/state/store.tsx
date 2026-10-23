@@ -11,7 +11,6 @@ import {
   type SubtaskRow,
   type TaskRow,
 } from '../db/schema';
-import { SEED_INVOICE_TASK_ID } from '../db/seed';
 import {
   archiveProject,
   deleteTask,
@@ -23,6 +22,7 @@ import {
   selectPref,
   selectProjects,
   selectSubtasks,
+  selectTask,
   selectToday,
   selectUnfiled,
   selectUpcoming,
@@ -43,13 +43,13 @@ type Snapshot = {
   unfiled: TaskRow[];
   projects: ProjectRow[];
   month: DatedTask[];
-  subtasks: SubtaskRow[];
   displayName: string;
   onboarded: boolean;
 };
 
 type Store = Snapshot & {
   loaded: boolean;
+  revision: number;
   create: (task: NewTask) => void;
   edit: (id: string, patch: TaskPatch) => void;
   complete: (id: string, done: boolean) => void;
@@ -75,7 +75,6 @@ const EMPTY: Snapshot = {
   unfiled: [],
   projects: [],
   month: [],
-  subtasks: [],
   displayName: '',
   onboarded: false,
 };
@@ -86,13 +85,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const db = useSQLiteContext();
   const [snapshot, setSnapshot] = useState<Snapshot>(EMPTY);
   const [loaded, setLoaded] = useState(false);
+  const [revision, setRevision] = useState(0);
   const [qa, setQa] = useState('');
   const [sel, setSel] = useState(() => dayOfMonth(Date.now()));
 
   const reload = useCallback(async () => {
     const now = Date.now();
     try {
-      const [today, upcoming, assigned, unfiled, projects, month, subtasks, displayName, onboarded] =
+      const [today, upcoming, assigned, unfiled, projects, month, displayName, onboarded] =
         await Promise.all([
           selectToday(db, now),
           selectUpcoming(db, now),
@@ -100,7 +100,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           selectUnfiled(db),
           selectProjects(db),
           selectMonth(db, now),
-          selectSubtasks(db, SEED_INVOICE_TASK_ID),
           selectPref(db, DISPLAY_NAME),
           selectPref(db, ONBOARDED),
         ]);
@@ -111,10 +110,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         unfiled,
         projects,
         month,
-        subtasks,
         displayName: displayName ?? '',
         onboarded: onboarded === 'true',
       });
+      setRevision((r) => r + 1);
     } finally {
       // Root gates on this, so a failed read must still release it or the app never renders
       setLoaded(true);
@@ -133,6 +132,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     return {
       ...snapshot,
       loaded,
+      revision,
       create: (task) => after(insertTask(db, task, Date.now())),
       edit: (id, patch) => after(updateTask(db, id, patch)),
       complete: (id, done) => after(setTaskCompleted(db, id, done ? Date.now() : null)),
@@ -154,7 +154,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       sel,
       setSel,
     };
-  }, [db, reload, snapshot, loaded, qa, sel]);
+  }, [db, reload, snapshot, loaded, revision, qa, sel]);
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
 }
@@ -163,4 +163,31 @@ export function useStore() {
   const ctx = useContext(StoreContext);
   if (!ctx) throw new Error('useStore must be used inside StoreProvider');
   return ctx;
+}
+
+export type TaskDetail = { task: TaskRow | null; subtasks: SubtaskRow[] };
+
+const NO_DETAIL: TaskDetail = { task: null, subtasks: [] };
+
+export function useTaskDetail(taskId: string): TaskDetail {
+  const db = useSQLiteContext();
+  const { revision } = useStore();
+  const [detail, setDetail] = useState<TaskDetail>(NO_DETAIL);
+
+  useEffect(() => {
+    let live = true;
+    const load = async () => {
+      const [task, subtasks] = await Promise.all([
+        selectTask(db, taskId),
+        selectSubtasks(db, taskId),
+      ]);
+      if (live) setDetail({ task, subtasks });
+    };
+    load();
+    return () => {
+      live = false;
+    };
+  }, [db, taskId, revision]);
+
+  return detail;
 }

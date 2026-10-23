@@ -6,7 +6,7 @@ Summary: The ruled list that undated, unassigned captures land on — tasks with
 ## Related
 - Connects to: [[Profile]], [[Settings]] — reached from the Unfiled row on either; returns via the back chevron, [[Task Detail]] — long-press a row, [[Main Tabs]]. Not yet connected: [[Calendar]] — the pick-date swipe is deliberately left out until Calendar can apply a date to a task.
 - Features: [[Swipe Row Actions]], [[Natural Language Quick Add]], [[Offline First Local Store]], [[Projects As A Real Entity]] — archiving a project is one source of these rows, [[Ledger Paper Chrome]], [[Ink Strike-Through Completion]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]]
-- Bugs: [[Undated Unassigned Tasks Have No Screen]] — the gap this screen closes, [[Stack Screens Reserve Tab Bar Space]] — the mistake it avoids by padding to the gutter rather than the tab bar, [[Stack Screens Ignore The Bottom Safe Area]], [[Ink Stroke Spans The Whole Title Column]], [[Native Layout Direction Is Not Pinned]]
+- Bugs: [[Undated Unassigned Tasks Have No Screen]] — the gap this screen closes, [[Stack Screens Reserve Tab Bar Space]] — the mistake it avoids by padding to the gutter rather than the tab bar, [[Stack Screens Ignore The Bottom Safe Area]], [[Ink Stroke Spans The Whole Title Column]], [[Native Layout Direction Is Not Pinned]], [[Task Detail And Focus Show A Mock Task]]
 - Enhancements: [[Inbox Triage Chips]], [[System Capture Entry Points]], [[Voice Brain Dump Capture]], [[Ink Decay and Task Retirement]], [[Waiting On Follow-Ups]], [[Lift The Ink]]
 
 ## Notes

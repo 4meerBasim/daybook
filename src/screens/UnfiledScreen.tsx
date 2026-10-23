@@ -17,7 +17,7 @@ export function UnfiledScreen({
   onOpenTask,
 }: {
   onBack: () => void;
-  onOpenTask: () => void;
+  onOpenTask: (taskId: string) => void;
 }) {
   const { c, t, display, ui, rtl } = useTheme();
   const top = useHeaderTop();
@@ -88,7 +88,7 @@ export function UnfiledScreen({
                 onComplete={() => complete(k.id, !done)}
                 onSnooze={() => edit(k.id, { dueDate: startOfDay(addDays(Date.now(), 1)) })}
                 onDelete={() => remove(k.id)}
-                onLongPress={onOpenTask}
+                onLongPress={() => onOpenTask(k.id)}
               >
                 <TaskRow
                   title={rowTitle(k, t)}

@@ -6,7 +6,7 @@ Summary: Scheduled work grouped by horizon — tomorrow, this week, later — ea
 ## Related
 - Connects to: [[Main Tabs]], [[Today]], [[Profile]] — the sibling panes it slides between, [[Calendar]] — long-press the Upcoming tab, [[Quick Add Sheet]] — the Add item in the bar, [[Search Results]] — the overlay that covers this pane, [[Task Detail]] — long-press a task row, [[Unfiled]] — the tomorrow swipe on an Unfiled row sets a due date, so the capture lands here
 - Features: [[Offline First Local Store]], [[Swipe Row Actions]], [[Ink Strike-Through Completion]], [[Ledger Paper Chrome]], [[Collapsing Page Header]], [[Glass Tab Bar]], [[Animated Page Transitions]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]]
-- Bugs: [[Swipe Actions Not Wired Into Task Lists]], [[Quick Add Does Not Create Tasks]], [[Undated Unassigned Tasks Have No Screen]], [[Calendar Overflow Is Unreachable]]
+- Bugs: [[Swipe Actions Not Wired Into Task Lists]], [[Quick Add Does Not Create Tasks]], [[Undated Unassigned Tasks Have No Screen]], [[Calendar Overflow Is Unreachable]], [[Task Detail And Focus Show A Mock Task]]
 - Enhancements: [[Closing the Page Ritual]], [[Ink Decay and Task Retirement]], [[Weekly Spread Review]]
 
 ## Notes

@@ -36,8 +36,8 @@ export type RootParams = {
   Project: { projectId: string };
   Projects: undefined;
   Unfiled: undefined;
-  TaskDetail: undefined;
-  Focus: undefined;
+  TaskDetail: { taskId: string };
+  Focus: { taskId: string };
   Settings: undefined;
   PageClosed: undefined;
   SwipeStates: undefined;
@@ -86,12 +86,14 @@ function MainTabs({ navigation }: NativeStackScreenProps<RootParams, 'Main'>) {
         <Pane width={width} shown={tab === 'today'}>
           <TodayScreen
             onStamp={() => navigation.navigate('PageClosed')}
-            onOpenTask={() => navigation.navigate('TaskDetail')}
+            onOpenTask={(taskId) => navigation.navigate('TaskDetail', { taskId })}
             onPickDate={() => navigation.navigate('Calendar')}
           />
         </Pane>
         <Pane width={width} shown={tab === 'upcoming'}>
-          <UpcomingScreen onOpenTask={() => navigation.navigate('TaskDetail')} />
+          <UpcomingScreen
+            onOpenTask={(taskId) => navigation.navigate('TaskDetail', { taskId })}
+          />
         </Pane>
         <Pane width={width} shown={tab === 'profile'}>
           <ProfileScreen
@@ -199,20 +201,23 @@ export function Root() {
           {({ navigation }) => (
             <UnfiledScreen
               onBack={() => navigation.goBack()}
-              onOpenTask={() => navigation.navigate('TaskDetail')}
+              onOpenTask={(taskId) => navigation.navigate('TaskDetail', { taskId })}
             />
           )}
         </Stack.Screen>
         <Stack.Screen name="TaskDetail">
-          {({ navigation }) => (
+          {({ navigation, route }) => (
             <TaskDetailScreen
+              taskId={route.params.taskId}
               onBack={() => navigation.goBack()}
-              onFocus={() => navigation.navigate('Focus')}
+              onFocus={() => navigation.navigate('Focus', { taskId: route.params.taskId })}
             />
           )}
         </Stack.Screen>
         <Stack.Screen name="Focus" options={{ presentation: 'fullScreenModal' }}>
-          {({ navigation }) => <FocusScreen onClose={() => navigation.goBack()} />}
+          {({ navigation, route }) => (
+            <FocusScreen taskId={route.params.taskId} onClose={() => navigation.goBack()} />
+          )}
         </Stack.Screen>
         <Stack.Screen name="Settings">
           {({ navigation }) => (

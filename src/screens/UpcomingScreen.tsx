@@ -20,7 +20,7 @@ function dateLabel(items: DatedTask[]): string {
   return first === last ? String(first) : `${first}–${last}`;
 }
 
-export function UpcomingScreen({ onOpenTask }: { onOpenTask: () => void }) {
+export function UpcomingScreen({ onOpenTask }: { onOpenTask: (taskId: string) => void }) {
   const { c, t, mono, display, rtl, unit } = useTheme();
   const tabBarFootprint = useTabBarFootprint();
   const { upcoming, complete, remove } = useStore();
@@ -92,7 +92,7 @@ export function UpcomingScreen({ onOpenTask }: { onOpenTask: () => void }) {
                   key={k.id}
                   onComplete={() => complete(k.id, true)}
                   onDelete={() => remove(k.id)}
-                  onLongPress={onOpenTask}
+                  onLongPress={() => onOpenTask(k.id)}
                 >
                   <TaskRow
                     title={rowTitle(k, t)}

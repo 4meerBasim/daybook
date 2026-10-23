@@ -90,6 +90,10 @@ export function selectMonth(db: SQLiteDatabase, now: number): Promise<DatedTask[
   );
 }
 
+export function selectTask(db: SQLiteDatabase, id: string): Promise<TaskRow | null> {
+  return db.getFirstAsync<TaskRow>('SELECT * FROM tasks WHERE id = $id', { $id: id });
+}
+
 export function selectSubtasks(db: SQLiteDatabase, parentTaskId: string): Promise<SubtaskRow[]> {
   return db.getAllAsync<SubtaskRow>(
     'SELECT * FROM subtasks WHERE parentTaskId = $parentTaskId ORDER BY sortOrder',

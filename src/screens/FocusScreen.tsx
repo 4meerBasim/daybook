@@ -9,6 +9,8 @@ import Animated, {
 import { useTheme } from '../theme/ThemeProvider';
 import { metrics, radius } from '../theme/tokens';
 import { align, row } from '../lib/rtl';
+import { useStore, useTaskDetail } from '../state/store';
+import { projectName, rowTitle } from '../db/schema';
 import { Screen, useHeaderTop } from '../components/Screen';
 import { CheckIcon } from '../components/Icon';
 
@@ -35,15 +37,22 @@ const Strip = memo(function Strip({
   return <Animated.View style={[{ height: 1.5, borderRadius: 1 }, style]} />;
 });
 
-export function FocusScreen({ onClose }: { onClose: () => void }) {
+const SESSION_MINUTES = 25;
+
+export function FocusScreen({ taskId, onClose }: { taskId: string; onClose: () => void }) {
   const { c, t, rtl, reduced, display, ui, mono } = useTheme();
-  const [left, setLeft] = useState(1499);
+  const { projects } = useStore();
+  const { task, subtasks } = useTaskDetail(taskId);
+  const [left, setLeft] = useState(SESSION_MINUTES * 60 - 1);
   const [running, setRunning] = useState(true);
   const top = useHeaderTop();
 
   useEffect(() => {
     if (!running) return;
-    const iv = setInterval(() => setLeft((l) => (l > 0 ? l - 1 : 1500)), 1000);
+    const iv = setInterval(
+      () => setLeft((l) => (l > 0 ? l - 1 : SESSION_MINUTES * 60)),
+      1000
+    );
     return () => clearInterval(iv);
   }, [running]);
 
@@ -51,8 +60,14 @@ export function FocusScreen({ onClose }: { onClose: () => void }) {
 
   const mm = String(Math.floor(left / 60)).padStart(2, '0');
   const ss = String(left % 60).padStart(2, '0');
-  const filled = 25 - Math.ceil(left / 60);
+  const filled = SESSION_MINUTES - Math.ceil(left / 60);
   const runLabel = running ? t.pause : t.resume;
+
+  const project = projects.find((p) => p.id === task?.projectId);
+  const nextSubtask = subtasks.find((s) => s.completedAt === null);
+  const subtitle = [project ? projectName(project, t) : null, nextSubtask ? rowTitle(nextSubtask, t) : null]
+    .filter(Boolean)
+    .join(' · ');
 
   return (
     <Screen paper2>
@@ -67,7 +82,6 @@ export function FocusScreen({ onClose }: { onClose: () => void }) {
           }}
         >
           <Text style={[mono(12, 500, 0.1), { color: c.ink3 }]}>{t.focus}</Text>
-          <Text style={[mono(12, 500, 0.1), { color: c.ink3, writingDirection: 'ltr' }]}>1 / 4</Text>
         </View>
 
         <Text
@@ -77,17 +91,19 @@ export function FocusScreen({ onClose }: { onClose: () => void }) {
             { color: c.ink, paddingTop: 60, paddingHorizontal: 24, textAlign: align(rtl) },
           ]}
         >
-          {t.task2}
+          {task ? rowTitle(task, t) : ''}
         </Text>
 
-        <Text
-          style={[
-            ui(15, 400),
-            { color: c.ink2, paddingTop: 8, paddingHorizontal: 24, textAlign: align(rtl) },
-          ]}
-        >
-          {t.work} · {t.sub2}
-        </Text>
+        {subtitle ? (
+          <Text
+            style={[
+              ui(15, 400),
+              { color: c.ink2, paddingTop: 8, paddingHorizontal: 24, textAlign: align(rtl) },
+            ]}
+          >
+            {subtitle}
+          </Text>
+        ) : null}
 
         <Text
           allowFontScaling={false}
@@ -108,7 +124,7 @@ export function FocusScreen({ onClose }: { onClose: () => void }) {
         </Text>
 
         <View style={{ marginTop: 28, marginHorizontal: 24, gap: 6 }}>
-          {Array.from({ length: 25 }).map((_, i) => (
+          {Array.from({ length: SESSION_MINUTES }).map((_, i) => (
             <Strip
               key={i}
               filled={i < filled}

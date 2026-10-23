@@ -22,7 +22,7 @@ export function TodayScreen({
   onPickDate,
 }: {
   onStamp: () => void;
-  onOpenTask: () => void;
+  onOpenTask: (taskId: string) => void;
   onPickDate: () => void;
 }) {
   const { c, t, ui, mono, rtl } = useTheme();
@@ -68,7 +68,7 @@ export function TodayScreen({
                 onSnooze={() => snooze(k.id, 'tomorrow')}
                 onPickDate={onPickDate}
                 onDelete={() => remove(k.id)}
-                onLongPress={onOpenTask}
+                onLongPress={() => onOpenTask(k.id)}
               >
                 <TaskRow
                   title={rowTitle(k, t)}
