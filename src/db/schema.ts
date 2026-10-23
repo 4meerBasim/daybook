@@ -5,7 +5,7 @@ import { splitTags } from '../lib/parse';
 
 export const DB_NAME = 'daybook.db';
 
-const SCHEMA_VERSION = 5;
+const SCHEMA_VERSION = 6;
 
 export const DISPLAY_NAME = 'displayName';
 
@@ -14,6 +14,8 @@ export const LANG = 'lang';
 export const APPEARANCE = 'appearance';
 
 export const MOTION = 'motion';
+
+export const INK_DECAY = 'inkDecay';
 
 export const ONBOARDED = 'onboarded';
 
@@ -50,6 +52,7 @@ export type TaskRow = {
   tags: string | null;
   carryCount: number;
   somedayAt: number | null;
+  retireAskedCarry: number | null;
 };
 
 export type DatedTask = TaskRow & { dueDate: number };
@@ -210,6 +213,10 @@ ALTER TABLE closed_days ADD COLUMN shelved INTEGER NOT NULL DEFAULT 0;
 CREATE INDEX tasks_someday ON tasks (somedayAt) WHERE deletedAt IS NULL;
 `;
 
+const V6 = `
+ALTER TABLE tasks ADD COLUMN retireAskedCarry INTEGER;
+`;
+
 const STEPS: ((db: SQLiteDatabase) => Promise<void>)[] = [
   (db) => db.execAsync(DDL),
   async (db) => {
@@ -219,6 +226,7 @@ const STEPS: ((db: SQLiteDatabase) => Promise<void>)[] = [
   (db) => db.execAsync(V3),
   (db) => db.execAsync(V4),
   (db) => db.execAsync(V5),
+  (db) => db.execAsync(V6),
 ];
 
 export async function migrate(db: SQLiteDatabase): Promise<void> {

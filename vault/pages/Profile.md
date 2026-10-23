@@ -5,9 +5,9 @@ Summary: The user's own page — an ink initials avatar, their name in 40pt seri
 
 ## Related
 - Connects to: [[Main Tabs]], [[Quick Add Sheet]] — the Add item in the bar, [[Search Results]] — the overlay that covers this pane, [[Swipe States]] — the Shortcuts row calls `onOpenGestures`, [[Projects]] — the Projects row calls `onOpenProjects`, [[Unfiled]] — the Unfiled row calls `onOpenUnfiled`, [[Today]], [[Upcoming]] — the sibling panes it slides between, [[Settings]] — the stack screen rendering the same rows, [[Closed Pages]]
-- Features: [[Glass Tab Bar]], [[Animated Page Transitions]], [[Offline First Local Store]], [[Projects As A Real Entity]], [[Light and Dark Paper Palettes]], [[Reduced Motion Mode]], [[In-App RTL and Arabic Typography]], [[Ledger Paper Chrome]], [[Closing the Page Ritual]]
+- Features: [[Glass Tab Bar]], [[Animated Page Transitions]], [[Offline First Local Store]], [[Projects As A Real Entity]], [[Light and Dark Paper Palettes]], [[Reduced Motion Mode]], [[In-App RTL and Arabic Typography]], [[Ledger Paper Chrome]], [[Closing the Page Ritual]], [[Ink Decay and Task Retirement]]
 - Bugs: [[Theme Preferences Reset On Every Launch]], [[Active Tab Icon Knockout Is Opaque On Glass]], [[Undated Unassigned Tasks Have No Screen]] — resolved; the Unfiled row here now reaches the list
-- Enhancements: [[Adaptive Reminders]], [[Shared Page Link]], [[Ink Decay and Task Retirement]], [[Deal Me One Task Picker]] — the free long-press this pane now has
+- Enhancements: [[Adaptive Reminders]], [[Shared Page Link]], [[Deal Me One Task Picker]] — the free long-press this pane now has
 
 ## Notes
 `src/screens/ProfileScreen.tsx`. The header block is one `Pressable`: a `metrics.avatar` (48) circle filled `c.ink` holding the name's initials in mono over the 40pt display name, with an italic "Tap to write your name" line below it while the name is unset. Pressing anywhere in that block opens `NameSheet`, which writes through the store's `setDisplayName` into the `prefs` table — see [[Offline First Local Store]]. Unset, the name falls back to `t.you` and `initials()` runs on that instead.

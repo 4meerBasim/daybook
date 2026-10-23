@@ -29,6 +29,8 @@ export type TaskPatch = {
   duration?: number | null;
   priority?: number | null;
   reminderAt?: number | null;
+  somedayAt?: number | null;
+  retireAskedCarry?: number | null;
 };
 
 function newId(): string {

@@ -6,6 +6,7 @@ import {
   CAPACITY,
   DEFAULT_CAPACITY_MINUTES,
   DISPLAY_NAME,
+  INK_DECAY,
   ONBOARDED,
   PROJECT_COLORS,
   type ClosedDayRow,
@@ -72,6 +73,7 @@ type Snapshot = {
   closedDays: ClosedDayRow[];
   displayName: string;
   capacity: number;
+  decayOn: boolean;
   onboarded: boolean;
 };
 
@@ -96,6 +98,8 @@ type Store = Snapshot & {
   removeProject: (id: string) => void;
   setDisplayName: (name: string) => void;
   setCapacity: (minutes: number) => void;
+  setDecayOn: (on: boolean) => void;
+  retire: (id: string, outcome: 'doIt' | 'schedule' | 'shelve') => void;
   planTomorrow: () => Promise<number>;
   closePage: (decisions: Decision[]) => Promise<void>;
   markOnboarded: () => void;
@@ -117,6 +121,7 @@ const EMPTY: Snapshot = {
   closedDays: [],
   displayName: '',
   capacity: DEFAULT_CAPACITY_MINUTES,
+  decayOn: true,
   onboarded: false,
 };
 
@@ -146,6 +151,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         closedDays,
         displayName,
         capacity,
+        decayOn,
         onboarded,
       ] = await Promise.all([
         selectToday(db, now),
@@ -159,6 +165,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         selectClosedDays(db),
         selectPref(db, DISPLAY_NAME),
         selectPref(db, CAPACITY),
+        selectPref(db, INK_DECAY),
         selectPref(db, ONBOARDED),
       ]);
       setSnapshot({
@@ -173,6 +180,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         closedDays,
         displayName: displayName ?? '',
         capacity: capacity ? Number(capacity) : DEFAULT_CAPACITY_MINUTES,
+        decayOn: decayOn !== 'false',
         onboarded: onboarded === 'true',
       });
       setRevision((r) => r + 1);
@@ -256,6 +264,26 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       removeProject: (id) => after(archiveProject(db, id, Date.now())),
       setDisplayName: (name) => after(setPref(db, DISPLAY_NAME, name)),
       setCapacity: (minutes) => after(setPref(db, CAPACITY, String(minutes))),
+      setDecayOn: (on) => after(setPref(db, INK_DECAY, on ? 'true' : 'false')),
+      retire: (id, outcome) => {
+        const task = find(id);
+        if (!task) return;
+        const answered = { retireAskedCarry: task.carryCount };
+        if (outcome === 'doIt') {
+          offer({ kind: 'rescheduled', taskId: id, previous: task.dueDate });
+          after(updateTask(db, id, { ...answered, dueDate: startOfDay(Date.now()) }));
+          return;
+        }
+        if (outcome === 'schedule') {
+          offer({ kind: 'rescheduled', taskId: id, previous: task.dueDate });
+          after(updateTask(db, id, { ...answered, dueDate: startOfDay(addDays(Date.now(), 7)) }));
+          return;
+        }
+        offer({ kind: 'shelved', taskId: id, previous: task.dueDate });
+        after(
+          updateTask(db, id, { ...answered, somedayAt: Date.now(), dueDate: null })
+        );
+      },
       planTomorrow: async () => {
         const tomorrow = startOfDay(addDays(Date.now(), 1));
         const [onDay, undated] = await Promise.all([selectDay(db, tomorrow), selectUndated(db)]);

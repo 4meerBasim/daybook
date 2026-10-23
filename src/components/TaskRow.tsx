@@ -16,6 +16,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '../theme/ThemeProvider';
+import { mixInk } from '../theme/palette';
 import { duration, easing, maxFontSizeMultiplier } from '../theme/tokens';
 import { insetStart, marginStart, row } from '../lib/rtl';
 import { Checkbox, Dot, rowContent, useRuling } from './Ledger';
@@ -26,6 +27,7 @@ export type TaskRowProps = {
   dotColor?: string;
   done?: boolean;
   carryCount?: number;
+  decay?: number;
   overdue?: boolean;
   rule?: boolean;
   actions?: React.ReactNode;
@@ -40,6 +42,7 @@ export function TaskRow({
   dotColor,
   done = false,
   carryCount = 0,
+  decay = 0,
   overdue = false,
   rule = false,
   actions,
@@ -72,8 +75,10 @@ export function TaskRow({
     width: strike.value * (textWidth + 4),
   }));
 
+  // ink2 rather than ink3 as the floor: 6.9:1 on light paper, 8.6:1 on dark, both clear of AA
+  const aged = mixInk(c.ink, c.ink2, decay);
   const textColor = useDerivedValue(() =>
-    interpolateColor(dry.value, [0, 1], [c.ink, c.ink3])
+    interpolateColor(dry.value, [0, 1], [aged, c.ink3])
   );
   const titleStyle = useAnimatedStyle(() => ({ color: textColor.value }));
 
@@ -145,7 +150,7 @@ export function TaskRow({
         {meta || dotColor || carryCount ? (
           <View style={{ flexDirection: row(rtl), alignItems: 'center', gap: 6 }}>
             {carryCount && !done ? (
-              <Text style={[mono(11, 500, 0.1), { color: c.och }]}>{carryCount}×</Text>
+              <Text style={[mono(11, 500, 0.1), { color: c.ink2 }]}>{carryCount}×</Text>
             ) : null}
             {dotColor ? <Dot color={dotColor} /> : null}
             {meta ? (

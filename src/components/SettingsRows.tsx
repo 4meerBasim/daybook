@@ -22,7 +22,8 @@ export function SettingsRows({
   onOpenClosedPages: () => void;
 }) {
   const { c, t, lang, appearance, motion, ui, rtl, setLang, setAppearance, setMotion } = useTheme();
-  const { projects, unfiled, closedDays, capacity, setCapacity } = useStore();
+  const { projects, unfiled, closedDays, capacity, setCapacity, decayOn, setDecayOn } =
+    useStore();
 
   return (
     <View style={{ borderTopWidth: 1, borderTopColor: c.rule }}>
@@ -78,6 +79,11 @@ export function SettingsRows({
           onChange={(v) => setMotion(v ? 'reduced' : 'full')}
           accessibilityLabel={t.reduceMotion}
         />
+      </Row>
+
+      <Row>
+        <RowLabel label={t.inkDecay} />
+        <Toggle value={decayOn} onChange={setDecayOn} accessibilityLabel={t.inkDecay} />
       </Row>
 
       <Row>

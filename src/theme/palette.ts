@@ -51,3 +51,17 @@ export const DARK: Palette = {
   blue: '#7C9FE0',
   blueS: '#1E2738',
 };
+
+function channels(hex: string): [number, number, number] {
+  const n = parseInt(hex.slice(1), 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+
+export function mixInk(from: string, to: string, p: number): string {
+  if (p <= 0) return from;
+  if (p >= 1) return to;
+  const a = channels(from);
+  const b = channels(to);
+  const channel = (i: number) => Math.round(a[i] + (b[i] - a[i]) * p);
+  return `#${((channel(0) << 16) | (channel(1) << 8) | channel(2)).toString(16).padStart(6, '0')}`;
+}

@@ -5,6 +5,7 @@ import { maxFontSizeMultiplier, metrics } from '../theme/tokens';
 import { align, row } from '../lib/rtl';
 import { addDays, startOfDay } from '../lib/date';
 import { useStore } from '../state/store';
+import { inkDecay } from '../lib/decay';
 import { rowTitle } from '../db/schema';
 import { Screen, useHeaderTop, useScreenBottom } from '../components/Screen';
 import { EmptyRules, Ledger, SectionLabel } from '../components/Ledger';
@@ -23,7 +24,8 @@ export function UnfiledScreen({
   const { c, t, display, ui, rtl } = useTheme();
   const top = useHeaderTop();
   const bottom = useScreenBottom();
-  const { unfiled, someday, complete, reschedule, shelve, unshelve, remove } = useStore();
+  const { unfiled, someday, decayOn, complete, reschedule, shelve, unshelve, remove } =
+    useStore();
 
   const now = Date.now();
 
@@ -98,6 +100,7 @@ export function UnfiledScreen({
                 <TaskRow
                   title={rowTitle(k, t)}
                   done={done}
+                  decay={inkDecay(k, now, decayOn)}
                   onToggle={() => complete(k.id, !done)}
                   actions={
                     done ? null : (
@@ -141,6 +144,7 @@ export function UnfiledScreen({
                 >
                   <TaskRow
                     title={rowTitle(k, t)}
+                    decay={inkDecay(k, now, decayOn)}
                     onToggle={() => complete(k.id, true)}
                     actions={
                       <TriageChip

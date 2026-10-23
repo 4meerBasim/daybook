@@ -5,9 +5,9 @@ Summary: One ruled row per preference — language, appearance, week start, remi
 
 ## Related
 - Connects to: [[Today]] — reached by long-pressing the Today tab; returns via the system back gesture, [[Main Tabs]], [[Profile]] — the pane rendering the same rows, [[Swipe States]] — the Shortcuts row calls `onOpenGestures`, [[Projects]] — the Projects row calls `onOpenProjects`, [[Unfiled]] — the Unfiled row calls `onOpenUnfiled`, [[Closed Pages]]
-- Features: [[Offline First Local Store]], [[Projects As A Real Entity]], [[Glass Tab Bar]] — the long-press that reaches this screen, [[Light and Dark Paper Palettes]], [[Reduced Motion Mode]], [[In-App RTL and Arabic Typography]], [[Swipe Row Actions]], [[Ledger Paper Chrome]], [[Day Capacity Budget]], [[Closing the Page Ritual]]
+- Features: [[Offline First Local Store]], [[Projects As A Real Entity]], [[Glass Tab Bar]] — the long-press that reaches this screen, [[Light and Dark Paper Palettes]], [[Reduced Motion Mode]], [[In-App RTL and Arabic Typography]], [[Swipe Row Actions]], [[Ledger Paper Chrome]], [[Day Capacity Budget]], [[Closing the Page Ritual]], [[Ink Decay and Task Retirement]]
 - Bugs: [[Stack Screens Ignore The Bottom Safe Area]], [[Stack Screens Reserve Tab Bar Space]], [[Native Layout Direction Is Not Pinned]], [[Theme Preferences Reset On Every Launch]], [[Onboarding Shows On Every Launch]]
-- Enhancements: [[Adaptive Reminders]], [[Shared Page Link]], [[Ink Decay and Task Retirement]]
+- Enhancements: [[Adaptive Reminders]], [[Shared Page Link]]
 
 ## Notes
 `src/screens/SettingsScreen.tsx`, which is now a thin wrapper: the rows themselves live in `src/components/SettingsRows.tsx` and are rendered verbatim by [[Profile]] as well. Three of them are live and write straight to the theme context: Language toggles en/ar, Appearance is a three-way `Segmented` for light/dark/auto, and Reduce motion is a `Toggle`. Week start, reminders, text size, sync and sharing render their values but are not editable.

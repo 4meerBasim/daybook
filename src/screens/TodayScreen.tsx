@@ -7,12 +7,14 @@ import { useTabBarFootprint } from '../components/TabBar';
 import { align, marginStart, pad, row } from '../lib/rtl';
 import { isOverdue, isYesterday, longDate, startOfDay, timeLabel } from '../lib/date';
 import { useStore } from '../state/store';
+import { asksRetirement, inkDecay } from '../lib/decay';
 import { rowTitle } from '../db/schema';
 import { Screen } from '../components/Screen';
 import { PageHeader } from '../components/PageHeader';
 import { Checkbox, EmptyRules, Ledger, LedgerRow, SectionLabel } from '../components/Ledger';
 import { CapacityLine } from '../components/CapacityLine';
 import { TaskRow } from '../components/TaskRow';
+import { RetirementPrompt } from '../components/RetirementPrompt';
 import { SwipeableRow } from '../components/SwipeableRow';
 import { Stamp } from '../components/Stamp';
 import { StreakTallyIcon } from '../components/Icon';
@@ -32,7 +34,8 @@ export function TodayScreen({
 }) {
   const { c, t, ui, mono, rtl } = useTheme();
   const tabBarFootprint = useTabBarFootprint();
-  const { today, loaded, capacity, closedToday, complete, snooze, remove } = useStore();
+  const { today, loaded, capacity, closedToday, decayOn, complete, snooze, remove, retire } =
+    useStore();
   const scrollY = useSharedValue(0);
   const onScroll = useAnimatedScrollHandler((e) => {
     scrollY.value = e.contentOffset.y;
@@ -77,32 +80,43 @@ export function TodayScreen({
           {today.map((k) => {
             const done = k.completedAt !== null;
             return (
-              <SwipeableRow
-                key={k.id}
-                onComplete={() => complete(k.id, !done)}
-                onSnooze={() => snooze(k.id, 'tomorrow')}
-                onPickDate={onPickDate}
-                onDelete={() => remove(k.id)}
-                onLongPress={() => onOpenTask(k.id)}
-              >
-                <TaskRow
-                  title={rowTitle(k, t)}
-                  meta={isYesterday(k.dueDate, now) ? t.yesterday : timeLabel(k.dueDate)}
-                  dotColor={c[k.color]}
-                  done={done}
-                  carryCount={k.carryCount}
-                  overdue={isOverdue(k.dueDate, now)}
-                  onToggle={() => complete(k.id, !done)}
-                  accessibilityActions={swipeActions}
-                  onAccessibilityAction={(e) => {
-                    const action = e.nativeEvent.actionName;
-                    if (action === 'complete') complete(k.id, !done);
-                    if (action === 'snooze') snooze(k.id, 'tomorrow');
-                    if (action === 'pickDate') onPickDate();
-                    if (action === 'delete') remove(k.id);
-                  }}
-                />
-              </SwipeableRow>
+              <React.Fragment key={k.id}>
+                <SwipeableRow
+                  onComplete={() => complete(k.id, !done)}
+                  onSnooze={() => snooze(k.id, 'tomorrow')}
+                  onPickDate={onPickDate}
+                  onDelete={() => remove(k.id)}
+                  onLongPress={() => onOpenTask(k.id)}
+                >
+                  <TaskRow
+                    title={rowTitle(k, t)}
+                    meta={isYesterday(k.dueDate, now) ? t.yesterday : timeLabel(k.dueDate)}
+                    dotColor={c[k.color]}
+                    done={done}
+                    carryCount={k.carryCount}
+                    decay={inkDecay(k, now, decayOn)}
+                    overdue={isOverdue(k.dueDate, now)}
+                    onToggle={() => complete(k.id, !done)}
+                    accessibilityActions={swipeActions}
+                    onAccessibilityAction={(e) => {
+                      const action = e.nativeEvent.actionName;
+                      if (action === 'complete') complete(k.id, !done);
+                      if (action === 'snooze') snooze(k.id, 'tomorrow');
+                      if (action === 'pickDate') onPickDate();
+                      if (action === 'delete') remove(k.id);
+                    }}
+                  />
+                </SwipeableRow>
+
+                {asksRetirement(k) ? (
+                  <RetirementPrompt
+                    carryCount={k.carryCount}
+                    onDoIt={() => retire(k.id, 'doIt')}
+                    onSchedule={() => retire(k.id, 'schedule')}
+                    onShelve={() => retire(k.id, 'shelve')}
+                  />
+                ) : null}
+              </React.Fragment>
             );
           })}
 
