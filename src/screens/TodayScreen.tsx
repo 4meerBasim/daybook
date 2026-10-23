@@ -2,10 +2,10 @@ import React from 'react';
 import { Pressable, Text, View } from 'react-native';
 import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
 import { useTheme } from '../theme/ThemeProvider';
-import { maxFontSizeMultiplier } from '../theme/tokens';
+import { maxFontSizeMultiplier, metrics } from '../theme/tokens';
 import { useTabBarFootprint } from '../components/TabBar';
-import { marginStart, row } from '../lib/rtl';
-import { isOverdue, isYesterday, longDate, timeLabel } from '../lib/date';
+import { align, marginStart, pad, row } from '../lib/rtl';
+import { isOverdue, isYesterday, longDate, startOfDay, timeLabel } from '../lib/date';
 import { useStore } from '../state/store';
 import { rowTitle } from '../db/schema';
 import { Screen } from '../components/Screen';
@@ -20,17 +20,19 @@ import { StreakTallyIcon } from '../components/Icon';
 const HOUR_UNIT_MINUTES = 60;
 
 export function TodayScreen({
-  onStamp,
+  onClose,
+  onOpenClosed,
   onOpenTask,
   onPickDate,
 }: {
-  onStamp: () => void;
+  onClose: () => void;
+  onOpenClosed: (day: number) => void;
   onOpenTask: (taskId: string) => void;
   onPickDate: () => void;
 }) {
   const { c, t, ui, mono, rtl } = useTheme();
   const tabBarFootprint = useTabBarFootprint();
-  const { today, loaded, capacity, complete, snooze, remove } = useStore();
+  const { today, loaded, capacity, closedToday, complete, snooze, remove } = useStore();
   const scrollY = useSharedValue(0);
   const onScroll = useAnimatedScrollHandler((e) => {
     scrollY.value = e.contentOffset.y;
@@ -39,6 +41,7 @@ export function TodayScreen({
   const now = Date.now();
   const open = today.filter((k) => k.completedAt === null);
   const leftN = open.length;
+  const closed = closedToday !== null;
   const allDone = loaded && leftN === 0;
   const committed = open.reduce((total, k) => total + (k.duration ?? 0), 0);
   const unestimated = open.filter((k) => k.duration === null).length;
@@ -87,6 +90,7 @@ export function TodayScreen({
                   meta={isYesterday(k.dueDate, now) ? t.yesterday : timeLabel(k.dueDate)}
                   dotColor={c[k.color]}
                   done={done}
+                  carryCount={k.carryCount}
                   overdue={isOverdue(k.dueDate, now)}
                   onToggle={() => complete(k.id, !done)}
                   accessibilityActions={swipeActions}
@@ -120,19 +124,41 @@ export function TodayScreen({
             </View>
           </LedgerRow>
 
+          {closed || !leftN ? null : (
+            <Pressable
+              onPress={onClose}
+              android_ripple={null}
+              accessibilityRole="button"
+              accessibilityLabel={t.closeThePage}
+              style={({ pressed }) => ({
+                minHeight: metrics.minTap,
+                justifyContent: 'center',
+                backgroundColor: pressed ? c.paper2 : 'transparent',
+                borderBottomWidth: 1,
+                borderBottomColor: c.rule,
+              })}
+            >
+              <View style={pad(rtl, metrics.content, metrics.gutter)}>
+                <Text style={[mono(12, 500, 0.1), { color: c.ink2, textAlign: align(rtl) }]}>
+                  {t.closeThePage}
+                </Text>
+              </View>
+            </Pressable>
+          )}
+
           <EmptyRules count={4} overrun={overrunUnits} />
         </Ledger>
       </Animated.ScrollView>
 
       {allDone ? (
         <Pressable
-          onPress={onStamp}
+          onPress={() => (closed ? onOpenClosed(startOfDay(now)) : onClose())}
           android_ripple={null}
           accessibilityRole="button"
-          accessibilityLabel={t.pageClosed}
+          accessibilityLabel={closed ? t.pageClosed : t.closeThePage}
           style={{ position: 'absolute', top: 300, left: 0, right: 0, alignItems: 'center' }}
         >
-          <Stamp label={t.pageClosed} />
+          <Stamp label={closed ? t.pageClosed : t.closeThePage} />
         </Pressable>
       ) : null}
     </Screen>

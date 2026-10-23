@@ -14,13 +14,15 @@ export function SettingsRows({
   onOpenGestures,
   onOpenProjects,
   onOpenUnfiled,
+  onOpenClosedPages,
 }: {
   onOpenGestures: () => void;
   onOpenProjects: () => void;
   onOpenUnfiled: () => void;
+  onOpenClosedPages: () => void;
 }) {
   const { c, t, lang, appearance, motion, ui, rtl, setLang, setAppearance, setMotion } = useTheme();
-  const { projects, unfiled, capacity, setCapacity } = useStore();
+  const { projects, unfiled, closedDays, capacity, setCapacity } = useStore();
 
   return (
     <View style={{ borderTopWidth: 1, borderTopColor: c.rule }}>
@@ -97,6 +99,11 @@ export function SettingsRows({
       <Row onPress={onOpenProjects} label={t.projects}>
         <RowLabel label={t.projects} />
         <Text style={[ui(15), { color: c.ink3 }]}>{String(projects.length)}</Text>
+      </Row>
+
+      <Row onPress={onOpenClosedPages} label={t.closedPages}>
+        <RowLabel label={t.closedPages} />
+        <Text style={[ui(15), { color: c.ink3 }]}>{String(closedDays.length)}</Text>
       </Row>
 
       <Row onPress={onOpenUnfiled} label={t.unfiled}>

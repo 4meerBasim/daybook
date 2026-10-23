@@ -10,10 +10,12 @@ export function SettingsScreen({
   onOpenGestures,
   onOpenProjects,
   onOpenUnfiled,
+  onOpenClosedPages,
 }: {
   onOpenGestures: () => void;
   onOpenProjects: () => void;
   onOpenUnfiled: () => void;
+  onOpenClosedPages: () => void;
 }) {
   const { c, t, display, rtl } = useTheme();
   const top = useHeaderTop();
@@ -35,6 +37,7 @@ export function SettingsScreen({
           onOpenGestures={onOpenGestures}
           onOpenProjects={onOpenProjects}
           onOpenUnfiled={onOpenUnfiled}
+          onOpenClosedPages={onOpenClosedPages}
         />
       </ScrollView>
     </Screen>

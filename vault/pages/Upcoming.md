@@ -5,9 +5,9 @@ Summary: Scheduled work grouped by horizon — tomorrow, this week, later — ea
 
 ## Related
 - Connects to: [[Main Tabs]], [[Today]], [[Profile]] — the sibling panes it slides between, [[Calendar]] — long-press the Upcoming tab, [[Quick Add Sheet]] — the Add item in the bar, [[Search Results]] — the overlay that covers this pane, [[Task Detail]] — long-press a task row, [[Unfiled]] — the tomorrow swipe on an Unfiled row sets a due date, so the capture lands here
-- Features: [[Offline First Local Store]], [[Swipe Row Actions]], [[Ink Strike-Through Completion]], [[Ledger Paper Chrome]], [[Collapsing Page Header]], [[Glass Tab Bar]], [[Animated Page Transitions]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]], [[Lift The Ink]]
+- Features: [[Offline First Local Store]], [[Swipe Row Actions]], [[Ink Strike-Through Completion]], [[Ledger Paper Chrome]], [[Collapsing Page Header]], [[Glass Tab Bar]], [[Animated Page Transitions]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]], [[Lift The Ink]], [[Closing the Page Ritual]]
 - Bugs: [[Swipe Actions Not Wired Into Task Lists]], [[Quick Add Does Not Create Tasks]], [[Undated Unassigned Tasks Have No Screen]], [[Calendar Overflow Is Unreachable]], [[Task Detail And Focus Show A Mock Task]]
-- Enhancements: [[Closing the Page Ritual]], [[Ink Decay and Task Retirement]], [[Weekly Spread Review]]
+- Enhancements: [[Ink Decay and Task Retirement]], [[Weekly Spread Review]]
 
 ## Notes
 `src/screens/UpcomingScreen.tsx`, reading the `upcoming` snapshot from [[Offline First Local Store]] — open tasks dated from tomorrow onward, ordered by due date. The screen buckets them into three horizons rather than the mock's tomorrow / named weekday / next week, because the horizons are derivable from real dates without a weekday-name table: `t.tomorrow`, `t.weekGroup` for the following six days, and `t.laterGroup` beyond that. An empty bucket is dropped rather than drawn.

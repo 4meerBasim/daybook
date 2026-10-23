@@ -4,16 +4,20 @@ Route: `PageClosed` (native stack)
 Summary: The end-of-day sheet — every task struck through, a wax stamp with a timestamp across them, a closing line, the day's counts, and a "plan tomorrow" button.
 
 ## Related
-- Connects to: [[Today]] — reached by tapping the wax stamp once nothing is left, [[Main Tabs]] — "Plan tomorrow" calls `navigation.goBack()`
-- Features: [[Wax Page Closed Stamp]], [[Ledger Paper Chrome]], [[Ink Strike-Through Completion]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]], [[Day Capacity Budget]]
+- Connects to: [[Today]] — reached by tapping the wax stamp once nothing is left, [[Main Tabs]] — "Plan tomorrow" calls `navigation.goBack()`, [[Close Page]], [[Closed Pages]]
+- Features: [[Wax Page Closed Stamp]], [[Ledger Paper Chrome]], [[Ink Strike-Through Completion]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]], [[Day Capacity Budget]], [[Closing the Page Ritual]]
 - Bugs: [[Page Header Shows A Frozen Date]], [[Stack Screens Ignore The Bottom Safe Area]] — latent here; nothing on this screen reaches the gesture area yet, [[Stack Screens Reserve Tab Bar Space]], [[Ink Stroke Spans The Whole Title Column]] — not affected; uses `textDecorationLine`
 - Enhancements: [[Closing the Page Ritual]] — the decision pass that should run before the stamp lands
 
 ## Notes
-`src/screens/PageClosedScreen.tsx`. The struck lines are five `LedgerRow`s starting at the 66pt content column, followed by one `EmptyRules` line — six ruled rows in total, as before. They used to be an absolutely positioned overlay on top of six empty rules, which only worked while every line was guaranteed to be exactly one rule tall; as real rows they grow with their text and the rules stay in step. They are still non-interactive: nothing on this screen toggles.
+`src/screens/PageClosedScreen.tsx`. The screen takes a `day` route param and reads that day through `useClosedPage`, so it serves both destinations: the page just stamped by [[Close Page]], and any older page opened from [[Closed Pages]].
 
-The stamp is rendered at size 26 over them as a non-interactive overlay, with a real date/time caption from `stamped()` — the larger, timestamped variant of what [[Today]] shows. The italic date line above the page title is real too; both used to be literals, see [[Page Header Shows A Frozen Date]].
+Each row is a real `closed_entries` record rendered as a `LedgerRow` at the 66pt content column, with its outcome in the trailing mono label. Settled and struck rows strike through; a carried row stays in full ink, because it is still live work sitting on another page. The rows grow with their text and the rules stay in step. Nothing here toggles — a closed page is history.
 
-The ledger takes its height from those six rows instead of the design's literal `336px`. React Native's box model is always border-box, so a declared `336` would have included the ledger's own 1px top rule and left the sixth row a pixel short; six rows of 56 come to 336 on their own and the top rule sits above them, which is what the design's content-box `336px` plus `border-top` actually measures.
+The five hardcoded `t.task1`–`t.task5` lines this replaced were drawn whatever the day actually held; see [[Closing the Page Ritual]].
 
-The closing counts — `5 tasks · 1 habit · streak 13` — are still the mock's literals, since nothing tallies a closed day yet. [[Closing the Page Ritual]] is where that lands.
+The stamp is rendered at size 26 over the ledger as a non-interactive overlay, captioned with the real `closedAt` through `stamped()` — the larger, timestamped variant of what [[Today]] shows. It is only drawn when a `closed_days` row exists. The italic date line above the page title comes from the `day` param; both used to be literals, see [[Page Header Shows A Frozen Date]].
+
+The closing counts are derived from the entries — settled, carried, moved and struck, each omitted when zero — and when estimates exist the screen also states settled against committed minutes from [[Day Capacity Budget]]. The `5 tasks · 1 habit · streak 13` literal is gone.
+
+"Plan tomorrow" fills tomorrow from the backlog up to the remaining capacity and only navigates away if it placed something; see [[Day Capacity Budget]].

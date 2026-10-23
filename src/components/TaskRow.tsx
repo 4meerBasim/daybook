@@ -25,6 +25,7 @@ export type TaskRowProps = {
   meta?: string;
   dotColor?: string;
   done?: boolean;
+  carryCount?: number;
   overdue?: boolean;
   rule?: boolean;
   onToggle: () => void;
@@ -37,6 +38,7 @@ export function TaskRow({
   meta,
   dotColor,
   done = false,
+  carryCount = 0,
   overdue = false,
   rule = false,
   onToggle,
@@ -136,8 +138,11 @@ export function TaskRow({
           </View>
         </View>
 
-        {meta || dotColor ? (
+        {meta || dotColor || carryCount ? (
           <View style={{ flexDirection: row(rtl), alignItems: 'center', gap: 6 }}>
+            {carryCount && !done ? (
+              <Text style={[mono(11, 500, 0.1), { color: c.och }]}>{carryCount}×</Text>
+            ) : null}
             {dotColor ? <Dot color={dotColor} /> : null}
             {meta ? (
               <Text numberOfLines={1} style={[mono(12, 500), { color: overdue && !done ? c.ver : c.ink3 }]}>

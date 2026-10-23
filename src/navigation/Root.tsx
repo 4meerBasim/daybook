@@ -10,6 +10,7 @@ import { useTheme } from '../theme/ThemeProvider';
 import { useStore } from '../state/store';
 import { duration, easing } from '../theme/tokens';
 import { row } from '../lib/rtl';
+import { startOfDay } from '../lib/date';
 import { Screen, useScreenBottom } from '../components/Screen';
 import { InkSlip } from '../components/InkSlip';
 import { TabBar, TabKey, useTabBarFootprint } from '../components/TabBar';
@@ -26,7 +27,9 @@ import { CalendarScreen } from '../screens/CalendarScreen';
 import { FocusScreen } from '../screens/FocusScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
+import { ClosePageScreen } from '../screens/ClosePageScreen';
 import { PageClosedScreen } from '../screens/PageClosedScreen';
+import { ClosedPagesScreen } from '../screens/ClosedPagesScreen';
 import { SwipeStatesScreen } from '../screens/SwipeStatesScreen';
 import { QuickAddSheet } from '../screens/QuickAddSheet';
 
@@ -40,7 +43,9 @@ export type RootParams = {
   TaskDetail: { taskId: string };
   Focus: { taskId: string };
   Settings: undefined;
-  PageClosed: undefined;
+  ClosePage: undefined;
+  PageClosed: { day: number };
+  ClosedPages: undefined;
   SwipeStates: undefined;
 };
 
@@ -86,7 +91,8 @@ function MainTabs({ navigation }: NativeStackScreenProps<RootParams, 'Main'>) {
       >
         <Pane width={width} shown={tab === 'today'}>
           <TodayScreen
-            onStamp={() => navigation.navigate('PageClosed')}
+            onClose={() => navigation.navigate('ClosePage')}
+            onOpenClosed={(day) => navigation.navigate('PageClosed', { day })}
             onOpenTask={(taskId) => navigation.navigate('TaskDetail', { taskId })}
             onPickDate={() => navigation.navigate('Calendar')}
           />
@@ -101,6 +107,7 @@ function MainTabs({ navigation }: NativeStackScreenProps<RootParams, 'Main'>) {
             onOpenGestures={() => navigation.navigate('SwipeStates')}
             onOpenProjects={() => navigation.navigate('Projects')}
             onOpenUnfiled={() => navigation.navigate('Unfiled')}
+            onOpenClosedPages={() => navigation.navigate('ClosedPages')}
           />
         </Pane>
       </Animated.View>
@@ -135,7 +142,7 @@ function MainTabs({ navigation }: NativeStackScreenProps<RootParams, 'Main'>) {
   );
 }
 
-const NO_SLIP: (keyof RootParams)[] = ['Onboarding', 'Focus', 'PageClosed'];
+const NO_SLIP: (keyof RootParams)[] = ['Onboarding', 'Focus', 'PageClosed', 'ClosePage'];
 
 function GlobalSlip() {
   const route = useNavigationState((state) =>
@@ -239,11 +246,36 @@ export function Root() {
               onOpenGestures={() => navigation.navigate('SwipeStates')}
               onOpenProjects={() => navigation.navigate('Projects')}
               onOpenUnfiled={() => navigation.navigate('Unfiled')}
+              onOpenClosedPages={() => navigation.navigate('ClosedPages')}
+            />
+          )}
+        </Stack.Screen>
+        <Stack.Screen name="ClosePage">
+          {({ navigation }) => (
+            <ClosePageScreen
+              onBack={() => navigation.goBack()}
+              onClosed={() =>
+                navigation.replace('PageClosed', { day: startOfDay(Date.now()) })
+              }
             />
           )}
         </Stack.Screen>
         <Stack.Screen name="PageClosed">
-          {({ navigation }) => <PageClosedScreen onPlanTomorrow={() => navigation.goBack()} />}
+          {({ navigation, route }) => (
+            <PageClosedScreen
+              day={route.params.day}
+              onBack={() => navigation.goBack()}
+              onPlanTomorrow={() => navigation.goBack()}
+            />
+          )}
+        </Stack.Screen>
+        <Stack.Screen name="ClosedPages">
+          {({ navigation }) => (
+            <ClosedPagesScreen
+              onBack={() => navigation.goBack()}
+              onOpenDay={(day) => navigation.navigate('PageClosed', { day })}
+            />
+          )}
         </Stack.Screen>
         <Stack.Screen name="SwipeStates" component={SwipeStatesScreen} />
       </Stack.Navigator>

@@ -3,8 +3,11 @@ import { addDays, startOfDay, startOfMonth, startOfNextMonth } from '../lib/date
 import { snoozeUntil, type SnoozeOffset } from './reminders';
 import {
   DEFAULT_TASK_COLOR,
+  type ClosedDayRow,
+  type ClosedEntryRow,
   type ColorToken,
   type DatedTask,
+  type Outcome,
   type ProjectRow,
   type SubtaskRow,
   type TaskRow,
@@ -285,4 +288,98 @@ export async function deleteTask(db: SQLiteDatabase, id: string, now: number): P
 
 export async function restoreTask(db: SQLiteDatabase, id: string): Promise<void> {
   await db.runAsync('UPDATE tasks SET deletedAt = NULL WHERE id = $id', { $id: id });
+}
+
+export type Decision = { task: TaskRow; outcome: Outcome; dueDate?: number };
+
+export function selectClosedDay(db: SQLiteDatabase, day: number): Promise<ClosedDayRow | null> {
+  return db.getFirstAsync<ClosedDayRow>('SELECT * FROM closed_days WHERE day = $day', {
+    $day: startOfDay(day),
+  });
+}
+
+export function selectClosedDays(db: SQLiteDatabase): Promise<ClosedDayRow[]> {
+  return db.getAllAsync<ClosedDayRow>('SELECT * FROM closed_days ORDER BY day DESC');
+}
+
+export function selectClosedEntries(db: SQLiteDatabase, day: number): Promise<ClosedEntryRow[]> {
+  return db.getAllAsync<ClosedEntryRow>(
+    'SELECT * FROM closed_entries WHERE day = $day ORDER BY outcome, taskId',
+    { $day: startOfDay(day) }
+  );
+}
+
+export async function closeDay(
+  db: SQLiteDatabase,
+  day: number,
+  settled: TaskRow[],
+  decisions: Decision[],
+  now: number
+): Promise<void> {
+  const stamp = startOfDay(day);
+  const entries: { task: TaskRow; outcome: Outcome }[] = [
+    ...settled.map((task) => ({ task, outcome: 'settled' as Outcome })),
+    ...decisions.map((d) => ({ task: d.task, outcome: d.outcome })),
+  ];
+
+  const minutes = (rows: TaskRow[]) => rows.reduce((total, k) => total + (k.duration ?? 0), 0);
+  const count = (outcome: Outcome) => decisions.filter((d) => d.outcome === outcome).length;
+
+  await db.withTransactionAsync(async () => {
+    for (const d of decisions) {
+      if (d.outcome === 'carried') {
+        await db.runAsync(
+          `UPDATE tasks SET dueDate = $dueDate, carryCount = carryCount + 1 WHERE id = $id`,
+          { $dueDate: d.dueDate ?? startOfDay(addDays(stamp, 1)), $id: d.task.id }
+        );
+      }
+      if (d.outcome === 'rescheduled') {
+        await db.runAsync('UPDATE tasks SET dueDate = $dueDate WHERE id = $id', {
+          $dueDate: d.dueDate ?? startOfDay(addDays(stamp, 7)),
+          $id: d.task.id,
+        });
+      }
+      if (d.outcome === 'struck') {
+        await db.runAsync('UPDATE tasks SET deletedAt = $deletedAt WHERE id = $id', {
+          $deletedAt: now,
+          $id: d.task.id,
+        });
+      }
+    }
+
+    await db.runAsync(
+      `INSERT INTO closed_days
+        (day, closedAt, settled, carried, struck, rescheduled, committedMinutes, settledMinutes)
+        VALUES ($day, $closedAt, $settled, $carried, $struck, $rescheduled, $committed, $settledMinutes)
+        ON CONFLICT(day) DO UPDATE SET
+          closedAt = $closedAt, settled = $settled, carried = $carried, struck = $struck,
+          rescheduled = $rescheduled, committedMinutes = $committed, settledMinutes = $settledMinutes`,
+      {
+        $day: stamp,
+        $closedAt: now,
+        $settled: settled.length,
+        $carried: count('carried'),
+        $struck: count('struck'),
+        $rescheduled: count('rescheduled'),
+        $committed: minutes([...settled, ...decisions.map((d) => d.task)]),
+        $settledMinutes: minutes(settled),
+      }
+    );
+
+    await db.runAsync('DELETE FROM closed_entries WHERE day = $day', { $day: stamp });
+
+    for (const entry of entries) {
+      await db.runAsync(
+        `INSERT INTO closed_entries (day, taskId, title, seedKey, outcome)
+          VALUES ($day, $taskId, $title, $seedKey, $outcome)`,
+        {
+          $day: stamp,
+          $taskId: entry.task.id,
+          $title: entry.task.title,
+          $seedKey: entry.task.seedKey,
+          $outcome: entry.outcome,
+        }
+      );
+    }
+  });
 }

@@ -5,7 +5,7 @@ import { splitTags } from '../lib/parse';
 
 export const DB_NAME = 'daybook.db';
 
-const SCHEMA_VERSION = 3;
+const SCHEMA_VERSION = 4;
 
 export const DISPLAY_NAME = 'displayName';
 
@@ -48,9 +48,31 @@ export type TaskRow = {
   sortOrder: number;
   reminderAt: number | null;
   tags: string | null;
+  carryCount: number;
 };
 
 export type DatedTask = TaskRow & { dueDate: number };
+
+export type Outcome = 'settled' | 'carried' | 'struck' | 'rescheduled';
+
+export type ClosedDayRow = {
+  day: number;
+  closedAt: number;
+  settled: number;
+  carried: number;
+  struck: number;
+  rescheduled: number;
+  committedMinutes: number;
+  settledMinutes: number;
+};
+
+export type ClosedEntryRow = {
+  day: number;
+  taskId: string;
+  title: string;
+  seedKey: StringKey | null;
+  outcome: Outcome;
+};
 
 export type ProjectRow = {
   id: string;
@@ -138,6 +160,30 @@ CREATE TABLE prefs (
 );
 `;
 
+const V4 = `
+ALTER TABLE tasks ADD COLUMN carryCount INTEGER NOT NULL DEFAULT 0;
+
+CREATE TABLE closed_days (
+  day INTEGER PRIMARY KEY NOT NULL,
+  closedAt INTEGER NOT NULL,
+  settled INTEGER NOT NULL,
+  carried INTEGER NOT NULL,
+  struck INTEGER NOT NULL,
+  rescheduled INTEGER NOT NULL,
+  committedMinutes INTEGER NOT NULL,
+  settledMinutes INTEGER NOT NULL
+);
+
+CREATE TABLE closed_entries (
+  day INTEGER NOT NULL REFERENCES closed_days(day),
+  taskId TEXT NOT NULL,
+  title TEXT NOT NULL,
+  seedKey TEXT,
+  outcome TEXT NOT NULL,
+  PRIMARY KEY (day, taskId)
+);
+`;
+
 async function liftTagsFromTitles(db: SQLiteDatabase): Promise<void> {
   const written = await db.getAllAsync<{ id: string; title: string }>(
     "SELECT id, title FROM tasks WHERE seedKey IS NULL AND title LIKE '%#%'"
@@ -161,6 +207,7 @@ const STEPS: ((db: SQLiteDatabase) => Promise<void>)[] = [
     await liftTagsFromTitles(db);
   },
   (db) => db.execAsync(V3),
+  (db) => db.execAsync(V4),
 ];
 
 export async function migrate(db: SQLiteDatabase): Promise<void> {

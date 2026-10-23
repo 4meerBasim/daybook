@@ -8,6 +8,8 @@ import {
   DISPLAY_NAME,
   ONBOARDED,
   PROJECT_COLORS,
+  type ClosedDayRow,
+  type ClosedEntryRow,
   type DatedTask,
   type ProjectRow,
   type SubtaskRow,
@@ -16,11 +18,15 @@ import {
 import {
   archiveProject,
   assignDueDate,
+  closeDay,
   deleteTask,
   insertProject,
   insertTask,
   restoreTask,
   selectAssigned,
+  selectClosedDay,
+  selectClosedDays,
+  selectClosedEntries,
   selectDay,
   selectMonth,
   selectPref,
@@ -38,6 +44,7 @@ import {
   snoozeTask,
   updateProjectName,
   updateTask,
+  type Decision,
   type NewTask,
   type TaskPatch,
 } from '../db/queries';
@@ -57,6 +64,8 @@ type Snapshot = {
   unfiled: TaskRow[];
   projects: ProjectRow[];
   month: DatedTask[];
+  closedToday: ClosedDayRow | null;
+  closedDays: ClosedDayRow[];
   displayName: string;
   capacity: number;
   onboarded: boolean;
@@ -82,6 +91,7 @@ type Store = Snapshot & {
   setDisplayName: (name: string) => void;
   setCapacity: (minutes: number) => void;
   planTomorrow: () => Promise<number>;
+  closePage: (decisions: Decision[]) => Promise<void>;
   markOnboarded: () => void;
   qa: string;
   setQa: (v: string) => void;
@@ -96,6 +106,8 @@ const EMPTY: Snapshot = {
   unfiled: [],
   projects: [],
   month: [],
+  closedToday: null,
+  closedDays: [],
   displayName: '',
   capacity: DEFAULT_CAPACITY_MINUTES,
   onboarded: false,
@@ -115,18 +127,31 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const reload = useCallback(async () => {
     const now = Date.now();
     try {
-      const [today, upcoming, assigned, unfiled, projects, month, displayName, capacity, onboarded] =
-        await Promise.all([
-          selectToday(db, now),
-          selectUpcoming(db, now),
-          selectAssigned(db),
-          selectUnfiled(db),
-          selectProjects(db),
-          selectMonth(db, now),
-          selectPref(db, DISPLAY_NAME),
-          selectPref(db, CAPACITY),
-          selectPref(db, ONBOARDED),
-        ]);
+      const [
+        today,
+        upcoming,
+        assigned,
+        unfiled,
+        projects,
+        month,
+        closedToday,
+        closedDays,
+        displayName,
+        capacity,
+        onboarded,
+      ] = await Promise.all([
+        selectToday(db, now),
+        selectUpcoming(db, now),
+        selectAssigned(db),
+        selectUnfiled(db),
+        selectProjects(db),
+        selectMonth(db, now),
+        selectClosedDay(db, now),
+        selectClosedDays(db),
+        selectPref(db, DISPLAY_NAME),
+        selectPref(db, CAPACITY),
+        selectPref(db, ONBOARDED),
+      ]);
       setSnapshot({
         today,
         upcoming,
@@ -134,6 +159,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         unfiled,
         projects,
         month,
+        closedToday,
+        closedDays,
         displayName: displayName ?? '',
         capacity: capacity ? Number(capacity) : DEFAULT_CAPACITY_MINUTES,
         onboarded: onboarded === 'true',
@@ -226,6 +253,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         await reload();
         return filling.length;
       },
+      closePage: async (decisions) => {
+        const settled = snapshot.today.filter((k) => k.completedAt !== null);
+        await closeDay(db, Date.now(), settled, decisions, Date.now());
+        await reload();
+      },
       markOnboarded: () => after(setPref(db, ONBOARDED, 'true')),
       qa,
       setQa,
@@ -246,6 +278,33 @@ export function useStore() {
 export type TaskDetail = { task: TaskRow | null; subtasks: SubtaskRow[] };
 
 const NO_DETAIL: TaskDetail = { task: null, subtasks: [] };
+
+export type ClosedPage = { day: ClosedDayRow | null; entries: ClosedEntryRow[] };
+
+const NO_PAGE: ClosedPage = { day: null, entries: [] };
+
+export function useClosedPage(day: number): ClosedPage {
+  const db = useSQLiteContext();
+  const { revision } = useStore();
+  const [page, setPage] = useState<ClosedPage>(NO_PAGE);
+
+  useEffect(() => {
+    let live = true;
+    const load = async () => {
+      const [closed, entries] = await Promise.all([
+        selectClosedDay(db, day),
+        selectClosedEntries(db, day),
+      ]);
+      if (live) setPage({ day: closed, entries });
+    };
+    load();
+    return () => {
+      live = false;
+    };
+  }, [db, day, revision]);
+
+  return page;
+}
 
 export function useTaskDetail(taskId: string): TaskDetail {
   const db = useSQLiteContext();
