@@ -22,7 +22,7 @@ export function UnfiledScreen({
   const { c, t, display, ui, rtl } = useTheme();
   const top = useHeaderTop();
   const bottom = useScreenBottom();
-  const { unfiled, complete, edit, remove } = useStore();
+  const { unfiled, complete, reschedule, remove } = useStore();
 
   const swipeActions = [
     { name: 'complete', label: t.done },
@@ -86,7 +86,7 @@ export function UnfiledScreen({
               <SwipeableRow
                 key={k.id}
                 onComplete={() => complete(k.id, !done)}
-                onSnooze={() => edit(k.id, { dueDate: startOfDay(addDays(Date.now(), 1)) })}
+                onSnooze={() => reschedule(k.id, startOfDay(addDays(Date.now(), 1)))}
                 onDelete={() => remove(k.id)}
                 onLongPress={() => onOpenTask(k.id)}
               >
@@ -98,7 +98,7 @@ export function UnfiledScreen({
                   onAccessibilityAction={(e) => {
                     const action = e.nativeEvent.actionName;
                     if (action === 'complete') complete(k.id, !done);
-                    if (action === 'snooze') edit(k.id, { dueDate: startOfDay(addDays(Date.now(), 1)) });
+                    if (action === 'snooze') reschedule(k.id, startOfDay(addDays(Date.now(), 1)));
                     if (action === 'delete') remove(k.id);
                   }}
                 />

@@ -213,6 +213,17 @@ export async function setSubtaskCompleted(
   });
 }
 
+export async function setTaskSnoozedUntil(
+  db: SQLiteDatabase,
+  id: string,
+  snoozedUntil: number | null
+): Promise<void> {
+  await db.runAsync('UPDATE tasks SET snoozedUntil = $snoozedUntil WHERE id = $id', {
+    $snoozedUntil: snoozedUntil,
+    $id: id,
+  });
+}
+
 export async function snoozeTask(
   db: SQLiteDatabase,
   id: string,

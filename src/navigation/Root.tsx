@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { View, useWindowDimensions } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
+import { NavigationContainer, DefaultTheme, useNavigationState } from '@react-navigation/native';
 import {
   createNativeStackNavigator,
   type NativeStackScreenProps,
@@ -10,8 +10,9 @@ import { useTheme } from '../theme/ThemeProvider';
 import { useStore } from '../state/store';
 import { duration, easing } from '../theme/tokens';
 import { row } from '../lib/rtl';
-import { Screen } from '../components/Screen';
-import { TabBar, TabKey } from '../components/TabBar';
+import { Screen, useScreenBottom } from '../components/Screen';
+import { InkSlip } from '../components/InkSlip';
+import { TabBar, TabKey, useTabBarFootprint } from '../components/TabBar';
 import { TodayScreen } from '../screens/TodayScreen';
 import { UpcomingScreen } from '../screens/UpcomingScreen';
 import { SearchResults } from '../screens/SearchResults';
@@ -134,6 +135,19 @@ function MainTabs({ navigation }: NativeStackScreenProps<RootParams, 'Main'>) {
   );
 }
 
+const NO_SLIP: (keyof RootParams)[] = ['Onboarding', 'Focus', 'PageClosed'];
+
+function GlobalSlip() {
+  const route = useNavigationState((state) =>
+    state ? (state.routes[state.index].name as keyof RootParams) : undefined
+  );
+  const footprint = useTabBarFootprint();
+  const bottom = useScreenBottom();
+
+  if (!route || NO_SLIP.includes(route)) return null;
+  return <InkSlip bottom={route === 'Main' ? footprint : bottom} />;
+}
+
 function Pane({
   width,
   shown,
@@ -233,6 +247,7 @@ export function Root() {
         </Stack.Screen>
         <Stack.Screen name="SwipeStates" component={SwipeStatesScreen} />
       </Stack.Navigator>
+      <GlobalSlip />
     </NavigationContainer>
   );
 }

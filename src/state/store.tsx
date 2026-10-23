@@ -29,12 +29,21 @@ import {
   setPref,
   setSubtaskCompleted,
   setTaskCompleted,
+  setTaskSnoozedUntil,
   snoozeTask,
   updateProjectName,
   updateTask,
   type NewTask,
   type TaskPatch,
 } from '../db/queries';
+
+export type Reversal =
+  | { kind: 'struck'; seq: number; taskId: string }
+  | { kind: 'deleted'; seq: number; taskId: string }
+  | { kind: 'snoozed'; seq: number; taskId: string; previous: number | null }
+  | { kind: 'rescheduled'; seq: number; taskId: string; previous: number | null };
+
+type Unsequenced<T> = T extends unknown ? Omit<T, 'seq'> : never;
 
 type Snapshot = {
   today: DatedTask[];
@@ -55,8 +64,12 @@ type Store = Snapshot & {
   complete: (id: string, done: boolean) => void;
   completeSubtask: (id: string, done: boolean) => void;
   snooze: (id: string, offset: SnoozeOffset) => void;
+  reschedule: (id: string, dueDate: number | null) => void;
   remove: (id: string) => void;
   restore: (id: string) => void;
+  reversal: Reversal | null;
+  lift: () => void;
+  clearReversal: (seq: number) => void;
   createProject: (name: string) => void;
   renameProject: (id: string, name: string) => void;
   removeProject: (id: string) => void;
@@ -88,6 +101,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [revision, setRevision] = useState(0);
   const [qa, setQa] = useState('');
   const [sel, setSel] = useState(() => dayOfMonth(Date.now()));
+  const [reversal, setReversal] = useState<Reversal | null>(null);
 
   const reload = useCallback(async () => {
     const now = Date.now();
@@ -129,18 +143,50 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       work.then(reload);
     };
 
+    const find = (id: string): TaskRow | undefined =>
+      [snapshot.today, snapshot.upcoming, snapshot.assigned, snapshot.unfiled, snapshot.month]
+        .flat()
+        .find((k) => k.id === id);
+
+    const offer = (next: Unsequenced<Reversal>) =>
+      setReversal((prev) => ({ ...next, seq: (prev?.seq ?? 0) + 1 } as Reversal));
+
     return {
       ...snapshot,
       loaded,
       revision,
       create: (task) => after(insertTask(db, task, Date.now())),
       edit: (id, patch) => after(updateTask(db, id, patch)),
-      complete: (id, done) => after(setTaskCompleted(db, id, done ? Date.now() : null)),
+      complete: (id, done) => {
+        if (done) offer({ kind: 'struck', taskId: id });
+        after(setTaskCompleted(db, id, done ? Date.now() : null));
+      },
       completeSubtask: (id, done) =>
         after(setSubtaskCompleted(db, id, done ? Date.now() : null)),
-      snooze: (id, offset) => after(snoozeTask(db, id, offset, Date.now())),
-      remove: (id) => after(deleteTask(db, id, Date.now())),
+      snooze: (id, offset) => {
+        offer({ kind: 'snoozed', taskId: id, previous: find(id)?.snoozedUntil ?? null });
+        after(snoozeTask(db, id, offset, Date.now()));
+      },
+      reschedule: (id, dueDate) => {
+        offer({ kind: 'rescheduled', taskId: id, previous: find(id)?.dueDate ?? null });
+        after(updateTask(db, id, { dueDate }));
+      },
+      remove: (id) => {
+        offer({ kind: 'deleted', taskId: id });
+        after(deleteTask(db, id, Date.now()));
+      },
       restore: (id) => after(restoreTask(db, id)),
+      reversal,
+      lift: () => {
+        if (!reversal) return;
+        const { kind, taskId } = reversal;
+        setReversal(null);
+        if (kind === 'struck') after(setTaskCompleted(db, taskId, null));
+        if (kind === 'deleted') after(restoreTask(db, taskId));
+        if (kind === 'snoozed') after(setTaskSnoozedUntil(db, taskId, reversal.previous));
+        if (kind === 'rescheduled') after(updateTask(db, taskId, { dueDate: reversal.previous }));
+      },
+      clearReversal: (seq) => setReversal((prev) => (prev && prev.seq === seq ? null : prev)),
       createProject: (name) => {
         const color = PROJECT_COLORS[snapshot.projects.length % PROJECT_COLORS.length];
         after(insertProject(db, name, color, Date.now()));
@@ -154,7 +200,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       sel,
       setSel,
     };
-  }, [db, reload, snapshot, loaded, revision, qa, sel]);
+  }, [db, reload, snapshot, loaded, revision, qa, sel, reversal]);
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
 }
