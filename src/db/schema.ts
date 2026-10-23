@@ -5,7 +5,7 @@ import { splitTags } from '../lib/parse';
 
 export const DB_NAME = 'daybook.db';
 
-const SCHEMA_VERSION = 9;
+const SCHEMA_VERSION = 10;
 
 export const DISPLAY_NAME = 'displayName';
 
@@ -119,6 +119,16 @@ export type NoteLineRow = {
   sortOrder: number;
   text: string;
   taskId: string | null;
+};
+
+export type AttachmentRow = {
+  id: string;
+  noteId: string | null;
+  taskId: string | null;
+  uri: string;
+  bytes: number;
+  durationMs: number;
+  createdAt: number;
 };
 
 export type SubtaskRow = {
@@ -290,6 +300,22 @@ ALTER TABLE tasks ADD COLUMN escapeNote TEXT;
 CREATE INDEX tasks_reminderAt ON tasks (reminderAt) WHERE deletedAt IS NULL AND completedAt IS NULL;
 `;
 
+const V10 = `
+CREATE TABLE attachments (
+  id TEXT PRIMARY KEY NOT NULL,
+  noteId TEXT REFERENCES notes(id),
+  taskId TEXT REFERENCES tasks(id),
+  uri TEXT NOT NULL,
+  bytes INTEGER NOT NULL,
+  durationMs INTEGER NOT NULL,
+  createdAt INTEGER NOT NULL,
+  CHECK ((noteId IS NULL) <> (taskId IS NULL))
+);
+
+CREATE INDEX attachments_noteId ON attachments (noteId) WHERE noteId IS NOT NULL;
+CREATE INDEX attachments_taskId ON attachments (taskId) WHERE taskId IS NOT NULL;
+`;
+
 const STEPS: ((db: SQLiteDatabase) => Promise<void>)[] = [
   (db) => db.execAsync(DDL),
   async (db) => {
@@ -303,6 +329,7 @@ const STEPS: ((db: SQLiteDatabase) => Promise<void>)[] = [
   (db) => db.execAsync(V7),
   (db) => db.execAsync(V8),
   (db) => db.execAsync(V9),
+  (db) => db.execAsync(V10),
 ];
 
 export async function migrate(db: SQLiteDatabase): Promise<void> {

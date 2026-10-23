@@ -11,6 +11,7 @@ import {
   type ClosedEntryRow,
   type ColorToken,
   type DatedTask,
+  type AttachmentRow,
   type NoteLineRow,
   type NoteRow,
   type Outcome,
@@ -563,6 +564,88 @@ export async function promoteNoteLine(
       $id: id,
     });
   });
+}
+
+export function selectAttachments(
+  db: SQLiteDatabase,
+  owner: { noteId?: string; taskId?: string }
+): Promise<AttachmentRow[]> {
+  if (owner.noteId) {
+    return db.getAllAsync<AttachmentRow>(
+      'SELECT * FROM attachments WHERE noteId = $id ORDER BY createdAt',
+      { $id: owner.noteId }
+    );
+  }
+  return db.getAllAsync<AttachmentRow>(
+    'SELECT * FROM attachments WHERE taskId = $id ORDER BY createdAt',
+    { $id: owner.taskId ?? '' }
+  );
+}
+
+export async function insertDump(
+  db: SQLiteDatabase,
+  title: string,
+  items: { text: string; task: NewTask }[],
+  audio: { uri: string; bytes: number; durationMs: number } | null,
+  now: number
+): Promise<string> {
+  const noteId = newId();
+  const tail = await db.getFirstAsync<{ next: number }>(
+    'SELECT COALESCE(MAX(sortOrder), 0) + 1 AS next FROM tasks'
+  );
+  let order = tail ? tail.next : 1;
+
+  await db.withTransactionAsync(async () => {
+    await db.runAsync(
+      'INSERT INTO notes (id, title, createdAt, updatedAt) VALUES ($id, $title, $now, $now)',
+      { $id: noteId, $title: title, $now: now }
+    );
+
+    for (let i = 0; i < items.length; i += 1) {
+      const { text, task } = items[i];
+      const taskId = newId();
+      await db.runAsync(
+        `INSERT INTO tasks
+          (id, title, tags, color, dueDate, createdAt, duration, priority, sortOrder)
+          VALUES ($id, $title, $tags, $color, $dueDate, $now, $duration, $priority, $sortOrder)`,
+        {
+          $id: taskId,
+          $title: task.title,
+          $tags: task.tags.length ? task.tags.join(',') : null,
+          $color: DEFAULT_TASK_COLOR,
+          $dueDate: task.dueDate,
+          $now: now,
+          $duration: task.duration,
+          $priority: task.priority,
+          $sortOrder: order,
+        }
+      );
+      order += 1;
+
+      await db.runAsync(
+        `INSERT INTO note_lines (id, noteId, sortOrder, text, taskId)
+          VALUES ($id, $noteId, $sortOrder, $text, $taskId)`,
+        { $id: newId(), $noteId: noteId, $sortOrder: i + 1, $text: text, $taskId: taskId }
+      );
+    }
+
+    if (audio) {
+      await db.runAsync(
+        `INSERT INTO attachments (id, noteId, uri, bytes, durationMs, createdAt)
+          VALUES ($id, $noteId, $uri, $bytes, $durationMs, $now)`,
+        {
+          $id: newId(),
+          $noteId: noteId,
+          $uri: audio.uri,
+          $bytes: audio.bytes,
+          $durationMs: audio.durationMs,
+          $now: now,
+        }
+      );
+    }
+  });
+
+  return noteId;
 }
 
 export async function demoteNoteLine(db: SQLiteDatabase, id: string): Promise<void> {

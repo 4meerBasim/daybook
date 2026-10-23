@@ -15,6 +15,7 @@ import {
   REMINDERS,
   ONBOARDED,
   PROJECT_COLORS,
+  type AttachmentRow,
   type ClosedDayRow,
   type ClosedEntryRow,
   type DatedTask,
@@ -33,6 +34,7 @@ import {
   deleteNoteLine,
   deleteTask,
   demoteNoteLine,
+  insertDump,
   insertNote,
   insertNoteLine,
   insertProject,
@@ -46,6 +48,7 @@ import {
   selectClosedEntries,
   selectDay,
   selectMonth,
+  selectAttachments,
   selectNote,
   selectNoteLineForTask,
   selectNoteLines,
@@ -127,6 +130,11 @@ type Store = Snapshot & {
   lift: () => void;
   clearReversal: (seq: number) => void;
   createNote: (title: string) => Promise<string>;
+  createDump: (
+    title: string,
+    items: { text: string; task: NewTask }[],
+    audio: { uri: string; bytes: number; durationMs: number } | null
+  ) => Promise<string>;
   renameNote: (id: string, title: string) => void;
   removeNote: (id: string) => void;
   addLine: (noteId: string, text: string, after: number) => Promise<string>;
@@ -366,6 +374,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         await reload();
         return id;
       },
+      createDump: async (title, items, audio) => {
+        const id = await insertDump(db, title, items, audio, Date.now());
+        await reload();
+        return id;
+      },
       renameNote: (id, title) => after(renameNote(db, id, title, Date.now())),
       removeNote: (id) => after(deleteNote(db, id, Date.now())),
       addLine: async (noteId, text, position) => {
@@ -475,9 +488,14 @@ export type TaskDetail = {
 
 const NO_DETAIL: TaskDetail = { task: null, subtasks: [], source: null };
 
-export type NoteDetail = { note: NoteRow | null; lines: NoteLineRow[]; tasks: TaskRow[] };
+export type NoteDetail = {
+  note: NoteRow | null;
+  lines: NoteLineRow[];
+  tasks: TaskRow[];
+  audio: AttachmentRow[];
+};
 
-const NO_NOTE: NoteDetail = { note: null, lines: [], tasks: [] };
+const NO_NOTE: NoteDetail = { note: null, lines: [], tasks: [], audio: [] };
 
 export function useNote(noteId: string): NoteDetail {
   const db = useSQLiteContext();
@@ -487,9 +505,10 @@ export function useNote(noteId: string): NoteDetail {
   useEffect(() => {
     let live = true;
     const load = async () => {
-      const [note, lines] = await Promise.all([
+      const [note, lines, audio] = await Promise.all([
         selectNote(db, noteId),
         selectNoteLines(db, noteId),
+        selectAttachments(db, { noteId }),
       ]);
       const ids = lines.map((l) => l.taskId).filter((id): id is string => id !== null);
       const tasks = await Promise.all(ids.map((id) => selectTask(db, id)));
@@ -498,6 +517,7 @@ export function useNote(noteId: string): NoteDetail {
           note,
           lines,
           tasks: tasks.filter((task): task is TaskRow => task !== null),
+          audio,
         });
       }
     };

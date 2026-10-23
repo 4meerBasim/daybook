@@ -43,6 +43,7 @@ import { WeeklyScreen } from '../screens/WeeklyScreen';
 import { DealScreen } from '../screens/DealScreen';
 import { NotesScreen } from '../screens/NotesScreen';
 import { NoteScreen } from '../screens/NoteScreen';
+import { BrainDumpScreen } from '../screens/BrainDumpScreen';
 import { SwipeStatesScreen } from '../screens/SwipeStatesScreen';
 import { QuickAddSheet } from '../screens/QuickAddSheet';
 
@@ -63,6 +64,7 @@ export type RootParams = {
   Deal: undefined;
   Notes: undefined;
   Note: { noteId: string };
+  BrainDump: undefined;
   SwipeStates: undefined;
 };
 
@@ -141,6 +143,7 @@ function MainTabs({ navigation }: NativeStackScreenProps<RootParams, 'Main'>) {
         onSelect={setTab}
         onAdd={() => setAdding(true)}
         onLongPress={(k) => {
+          if (k === 'add') navigation.navigate('BrainDump');
           if (k === 'today') navigation.navigate('Settings');
           if (k === 'upcoming') navigation.navigate('Calendar');
           if (k === 'profile') navigation.navigate('Deal');
@@ -312,6 +315,14 @@ export function Root() {
               noteId={route.params.noteId}
               onBack={() => navigation.goBack()}
               onOpenTask={(taskId) => navigation.navigate('TaskDetail', { taskId })}
+            />
+          )}
+        </Stack.Screen>
+        <Stack.Screen name="BrainDump">
+          {({ navigation }) => (
+            <BrainDumpScreen
+              onBack={() => navigation.goBack()}
+              onCommitted={(noteId) => navigation.replace('Note', { noteId })}
             />
           )}
         </Stack.Screen>

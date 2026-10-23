@@ -18,7 +18,7 @@ import { align, insetEnd, insetStart, row } from '../lib/rtl';
 import { CalendarIcon, CloseIcon, PageIcon, PersonIcon, PlusIcon, SearchIcon } from './Icon';
 
 export type TabKey = 'today' | 'upcoming' | 'profile';
-type ItemKey = TabKey | 'add';
+export type ItemKey = TabKey | 'add';
 
 type TabIcon = (props: { size?: number; color: string }) => React.ReactElement;
 
@@ -53,7 +53,7 @@ export function TabBar({
   active: TabKey;
   onSelect: (k: TabKey) => void;
   onAdd: () => void;
-  onLongPress?: (k: TabKey) => void;
+  onLongPress?: (k: ItemKey) => void;
   searching: boolean;
   searchProgress: SharedValue<number>;
   query: string;
@@ -176,7 +176,7 @@ export function TabBar({
                 }
                 onSelect(k);
               }}
-              onLongPress={k !== 'add' && onLongPress ? () => onLongPress(k) : undefined}
+              onLongPress={onLongPress ? () => onLongPress(k) : undefined}
             />
           ))}
         </View>

@@ -8,7 +8,7 @@ import { useNote, useStore } from '../state/store';
 import { CHECKBOX_MARK, type NoteLineRow, type TaskRow } from '../db/schema';
 import { Screen, useHeaderTop, useScreenBottom } from '../components/Screen';
 import { Checkbox, Ledger, useRuling } from '../components/Ledger';
-import { ChevronBackIcon, PlusIcon } from '../components/Icon';
+import { ChevronBackIcon, PaperclipIcon, PlusIcon } from '../components/Icon';
 
 function NoteLine({
   line,
@@ -130,7 +130,7 @@ export function NoteScreen({
   onOpenTask: (taskId: string) => void;
 }) {
   const { c, t, ui, mono, display, rtl } = useTheme();
-  const { note, lines, tasks } = useNote(noteId);
+  const { note, lines, tasks, audio } = useNote(noteId);
   const {
     renameNote,
     addLine,
@@ -239,6 +239,33 @@ export function NoteScreen({
             </View>
           </Pressable>
         </Ledger>
+
+        {audio.length ? (
+          <View style={{ paddingHorizontal: metrics.gutter, paddingTop: 20, gap: 6 }}>
+            <Text style={[mono(11, 500, 0.1), { color: c.ink3, textAlign: align(rtl) }]}>
+              {t.attachment}
+            </Text>
+            {audio.map((file) => (
+              <View
+                key={file.id}
+                style={{
+                  flexDirection: row(rtl),
+                  alignItems: 'center',
+                  gap: 10,
+                  minHeight: metrics.minTap,
+                }}
+              >
+                <PaperclipIcon size={18} color={c.ink3} />
+                <Text style={[ui(15), { color: c.ink2 }]}>
+                  {t.audioOf.replace('{s}', String(Math.round(file.durationMs / 1000)))}
+                </Text>
+                <Text style={[mono(12, 500), { color: c.ink3 }]}>
+                  {Math.max(1, Math.round(file.bytes / 1024))} KB
+                </Text>
+              </View>
+            ))}
+          </View>
+        ) : null}
 
         {tasks.length ? (
           <View style={{ paddingHorizontal: metrics.gutter, paddingTop: 20, gap: 6 }}>
