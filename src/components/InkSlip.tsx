@@ -19,6 +19,8 @@ function slipLabel(kind: Reversal['kind'], t: Strings): string {
       return t.slipSnoozed;
     case 'rescheduled':
       return t.slipRescheduled;
+    case 'shelved':
+      return t.slipShelved;
   }
 }
 

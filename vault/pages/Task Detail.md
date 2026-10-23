@@ -4,8 +4,8 @@ Route: `TaskDetail` (native stack)
 Summary: One task opened up — title, when/remind/priority/subtasks label rows, checkable subtasks and a note, all read from the row the caller passed in.
 
 ## Related
-- Connects to: [[Today]] — reached by long-pressing a task row, [[Focus Mode]] — the ellipsis button in the header, [[Main Tabs]] — the back chevron calls `navigation.goBack()`, [[Project Detail]], [[Unfiled]] — long-pressing an Unfiled row opens this screen, [[Upcoming]] — long-pressing a row there opens it too
-- Features: [[Offline First Local Store]], [[Glass Tab Bar]] — not rendered here, which is the bug above, [[Ledger Paper Chrome]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]], [[Ink Strike-Through Completion]], [[Day Capacity Budget]]
+- Connects to: [[Today]] — reached by long-pressing a task row, [[Focus Mode]] — the ellipsis button in the header, [[Main Tabs]] — the back chevron calls `navigation.goBack()`, [[Project Detail]], [[Unfiled]] — long-pressing an Unfiled row opens this screen, [[Upcoming]] — long-pressing a row there opens it too, [[Project Picker]]
+- Features: [[Offline First Local Store]], [[Glass Tab Bar]] — not rendered here, which is the bug above, [[Ledger Paper Chrome]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]], [[Ink Strike-Through Completion]], [[Day Capacity Budget]], [[Inbox Triage Chips]]
 - Bugs: [[Focus Mode Unreachable]], [[Task And Subtask Ids Share One Done Map]], [[Stack Screens Reserve Tab Bar Space]], [[Undated Unassigned Tasks Have No Screen]] — long-pressing an [[Unfiled]] row opens this screen, [[Stack Screens Ignore The Bottom Safe Area]], [[Ink Stroke Spans The Whole Title Column]] — not affected; its subtasks use `textDecorationLine`, [[Task Detail And Focus Show A Mock Task]]
 - Enhancements: [[Waiting On Follow-Ups]], [[Notes With Live Task Lines]], [[Voice Brain Dump Capture]], [[Adaptive Reminders]]
 

@@ -111,7 +111,7 @@ function DecisionRow({
           <OutcomeButton label={t.strike} on={outcome === 'struck'} tint={c.ver} onPress={onStrike} />
           <OutcomeButton
             label={t.move}
-            on={outcome === 'rescheduled'}
+            on={outcome === 'rescheduled' || outcome === 'shelved'}
             tint={c.blue}
             onPress={onMove}
           />
@@ -259,6 +259,19 @@ export function ClosePageScreen({
               </Text>
             </SheetRow>
           ))}
+
+          <SheetRow
+            label={t.shelveIt}
+            onPress={() => {
+              decide(moving, 'shelved');
+              setMoving(null);
+            }}
+          >
+            <Text style={[ui(17), { flex: 1, color: c.ink2, textAlign: align(rtl) }]}>
+              {t.shelveIt}
+            </Text>
+            <Text style={[mono(12, 500), { color: c.ink3 }]}>{t.noDate}</Text>
+          </SheetRow>
         </Sheet>
       ) : null}
     </Screen>

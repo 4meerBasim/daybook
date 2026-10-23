@@ -33,6 +33,7 @@ import {
   selectProjects,
   selectSubtasks,
   selectTask,
+  selectSomeday,
   selectToday,
   selectUndated,
   selectUnfiled,
@@ -41,6 +42,7 @@ import {
   setSubtaskCompleted,
   setTaskCompleted,
   setTaskSnoozedUntil,
+  setTaskSomeday,
   snoozeTask,
   updateProjectName,
   updateTask,
@@ -53,7 +55,8 @@ export type Reversal =
   | { kind: 'struck'; seq: number; taskId: string }
   | { kind: 'deleted'; seq: number; taskId: string }
   | { kind: 'snoozed'; seq: number; taskId: string; previous: number | null }
-  | { kind: 'rescheduled'; seq: number; taskId: string; previous: number | null };
+  | { kind: 'rescheduled'; seq: number; taskId: string; previous: number | null }
+  | { kind: 'shelved'; seq: number; taskId: string; previous: number | null };
 
 type Unsequenced<T> = T extends unknown ? Omit<T, 'seq'> : never;
 
@@ -62,6 +65,7 @@ type Snapshot = {
   upcoming: DatedTask[];
   assigned: TaskRow[];
   unfiled: TaskRow[];
+  someday: TaskRow[];
   projects: ProjectRow[];
   month: DatedTask[];
   closedToday: ClosedDayRow | null;
@@ -80,6 +84,8 @@ type Store = Snapshot & {
   completeSubtask: (id: string, done: boolean) => void;
   snooze: (id: string, offset: SnoozeOffset) => void;
   reschedule: (id: string, dueDate: number | null) => void;
+  shelve: (id: string) => void;
+  unshelve: (id: string, dueDate: number | null) => void;
   remove: (id: string) => void;
   restore: (id: string) => void;
   reversal: Reversal | null;
@@ -104,6 +110,7 @@ const EMPTY: Snapshot = {
   upcoming: [],
   assigned: [],
   unfiled: [],
+  someday: [],
   projects: [],
   month: [],
   closedToday: null,
@@ -132,6 +139,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         upcoming,
         assigned,
         unfiled,
+        someday,
         projects,
         month,
         closedToday,
@@ -144,6 +152,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         selectUpcoming(db, now),
         selectAssigned(db),
         selectUnfiled(db),
+        selectSomeday(db),
         selectProjects(db),
         selectMonth(db, now),
         selectClosedDay(db, now),
@@ -157,6 +166,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         upcoming,
         assigned,
         unfiled,
+        someday,
         projects,
         month,
         closedToday,
@@ -182,7 +192,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     };
 
     const find = (id: string): TaskRow | undefined =>
-      [snapshot.today, snapshot.upcoming, snapshot.assigned, snapshot.unfiled, snapshot.month]
+      [
+        snapshot.today,
+        snapshot.upcoming,
+        snapshot.assigned,
+        snapshot.unfiled,
+        snapshot.someday,
+        snapshot.month,
+      ]
         .flat()
         .find((k) => k.id === id);
 
@@ -209,6 +226,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         offer({ kind: 'rescheduled', taskId: id, previous: find(id)?.dueDate ?? null });
         after(updateTask(db, id, { dueDate }));
       },
+      shelve: (id) => {
+        offer({ kind: 'shelved', taskId: id, previous: find(id)?.dueDate ?? null });
+        after(setTaskSomeday(db, id, Date.now(), null));
+      },
+      unshelve: (id, dueDate) => after(setTaskSomeday(db, id, null, dueDate)),
       remove: (id) => {
         offer({ kind: 'deleted', taskId: id });
         after(deleteTask(db, id, Date.now()));
@@ -223,6 +245,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         if (kind === 'deleted') after(restoreTask(db, taskId));
         if (kind === 'snoozed') after(setTaskSnoozedUntil(db, taskId, reversal.previous));
         if (kind === 'rescheduled') after(updateTask(db, taskId, { dueDate: reversal.previous }));
+        if (kind === 'shelved') after(setTaskSomeday(db, taskId, null, reversal.previous));
       },
       clearReversal: (seq) => setReversal((prev) => (prev && prev.seq === seq ? null : prev)),
       createProject: (name) => {

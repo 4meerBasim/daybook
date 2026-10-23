@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useTheme } from '../theme/ThemeProvider';
@@ -18,6 +18,7 @@ import { Screen, useHeaderTop, useScreenBottom } from '../components/Screen';
 import { Checkbox, rowContent, useRuling } from '../components/Ledger';
 import { Chip } from '../components/Chip';
 import { Segmented } from '../components/Segmented';
+import { ProjectPickerSheet } from './ProjectPickerSheet';
 import { ChevronBackIcon, EllipsisIcon } from '../components/Icon';
 
 function SubtaskRow({ task, onToggle }: { task: SubtaskRowData; onToggle: () => void }) {
@@ -111,6 +112,7 @@ export function TaskDetailScreen({
   const { task, subtasks } = useTaskDetail(taskId);
   const top = useHeaderTop();
   const bottom = useScreenBottom();
+  const [filing, setFiling] = useState(false);
 
   if (!task) return <Screen />;
 
@@ -223,6 +225,24 @@ export function TaskDetailScreen({
             </Text>
           </Field>
 
+          <Pressable
+            onPress={() => setFiling(true)}
+            android_ripple={null}
+            accessibilityRole="button"
+            accessibilityLabel={t.moveToProject}
+          >
+            <Field label={t.project}>
+              <Text
+                style={[
+                  ui(15),
+                  { lineHeight: undefined, color: project ? c.ink : c.ink3 },
+                ]}
+              >
+                {project ? projectName(project, t) : t.noProject}
+              </Text>
+            </Field>
+          </Pressable>
+
           <Field label={t.estimate}>
             <Segmented
               options={[
@@ -306,6 +326,8 @@ export function TaskDetailScreen({
           ) : null}
         </View>
       </ScrollView>
+
+      {filing ? <ProjectPickerSheet task={task} onClose={() => setFiling(false)} /> : null}
     </Screen>
   );
 }

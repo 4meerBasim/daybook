@@ -73,7 +73,18 @@ export function selectUnfiled(db: SQLiteDatabase): Promise<TaskRow[]> {
       WHERE deletedAt IS NULL
         AND dueDate IS NULL
         AND projectId IS NULL
+        AND somedayAt IS NULL
       ORDER BY sortOrder`
+  );
+}
+
+export function selectSomeday(db: SQLiteDatabase): Promise<TaskRow[]> {
+  return db.getAllAsync<TaskRow>(
+    `SELECT * FROM tasks
+      WHERE deletedAt IS NULL
+        AND completedAt IS NULL
+        AND somedayAt IS NOT NULL
+      ORDER BY somedayAt DESC`
   );
 }
 
@@ -83,6 +94,7 @@ export function selectUndated(db: SQLiteDatabase): Promise<TaskRow[]> {
       WHERE deletedAt IS NULL
         AND completedAt IS NULL
         AND dueDate IS NULL
+        AND somedayAt IS NULL
       ORDER BY sortOrder`
   );
 }
@@ -256,6 +268,18 @@ export async function setSubtaskCompleted(
   });
 }
 
+export async function setTaskSomeday(
+  db: SQLiteDatabase,
+  id: string,
+  somedayAt: number | null,
+  dueDate: number | null
+): Promise<void> {
+  await db.runAsync(
+    'UPDATE tasks SET somedayAt = $somedayAt, dueDate = $dueDate WHERE id = $id',
+    { $somedayAt: somedayAt, $dueDate: dueDate, $id: id }
+  );
+}
+
 export async function setTaskSnoozedUntil(
   db: SQLiteDatabase,
   id: string,
@@ -339,6 +363,12 @@ export async function closeDay(
           $id: d.task.id,
         });
       }
+      if (d.outcome === 'shelved') {
+        await db.runAsync(
+          'UPDATE tasks SET somedayAt = $now, dueDate = NULL WHERE id = $id',
+          { $now: now, $id: d.task.id }
+        );
+      }
       if (d.outcome === 'struck') {
         await db.runAsync('UPDATE tasks SET deletedAt = $deletedAt WHERE id = $id', {
           $deletedAt: now,
@@ -349,11 +379,12 @@ export async function closeDay(
 
     await db.runAsync(
       `INSERT INTO closed_days
-        (day, closedAt, settled, carried, struck, rescheduled, committedMinutes, settledMinutes)
-        VALUES ($day, $closedAt, $settled, $carried, $struck, $rescheduled, $committed, $settledMinutes)
+        (day, closedAt, settled, carried, struck, rescheduled, shelved, committedMinutes, settledMinutes)
+        VALUES ($day, $closedAt, $settled, $carried, $struck, $rescheduled, $shelved, $committed, $settledMinutes)
         ON CONFLICT(day) DO UPDATE SET
           closedAt = $closedAt, settled = $settled, carried = $carried, struck = $struck,
-          rescheduled = $rescheduled, committedMinutes = $committed, settledMinutes = $settledMinutes`,
+          rescheduled = $rescheduled, shelved = $shelved, committedMinutes = $committed,
+          settledMinutes = $settledMinutes`,
       {
         $day: stamp,
         $closedAt: now,
@@ -361,6 +392,7 @@ export async function closeDay(
         $carried: count('carried'),
         $struck: count('struck'),
         $rescheduled: count('rescheduled'),
+        $shelved: count('shelved'),
         $committed: minutes([...settled, ...decisions.map((d) => d.task)]),
         $settledMinutes: minutes(settled),
       }

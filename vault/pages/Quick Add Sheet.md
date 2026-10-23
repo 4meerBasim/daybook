@@ -5,9 +5,9 @@ Summary: The capture sheet behind the bar's Add item: a growing field that is sy
 
 ## Related
 - Connects to: [[Main Tabs]] — opened by the Add item in the bar from any pane and closed by pan-down or backdrop tap, [[Today]], [[Upcoming]], [[Profile]]
-- Features: [[Natural Language Quick Add]], [[Offline First Local Store]], [[Projects As A Real Entity]], [[Glass Tab Bar]], [[Pen FAB]], [[Expanding Search Field]] — the sibling surface sharing the bar, [[Reduced Motion Mode]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]], [[Ledger Paper Chrome]], [[Day Capacity Budget]]
+- Features: [[Natural Language Quick Add]], [[Offline First Local Store]], [[Projects As A Real Entity]], [[Glass Tab Bar]], [[Pen FAB]], [[Expanding Search Field]] — the sibling surface sharing the bar, [[Reduced Motion Mode]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]], [[Ledger Paper Chrome]], [[Day Capacity Budget]], [[Inbox Triage Chips]]
 - Bugs: [[Quick Add Does Not Create Tasks]], [[Bottom Sheet Text Input Crashes On Web]], [[Quick Add Highlight Drifts From The Caret]], [[Undated Unassigned Tasks Have No Screen]]
-- Enhancements: [[Voice Brain Dump Capture]], [[System Capture Entry Points]], [[Inbox Triage Chips]]
+- Enhancements: [[Voice Brain Dump Capture]], [[System Capture Entry Points]]
 
 ## Notes
 `src/screens/QuickAddSheet.tsx`. The visible text is a coloured `Text` built from the parser's tokens with a transparent `BottomSheetTextInput` laid over it, which is how the underlining follows typing.

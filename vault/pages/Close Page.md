@@ -5,7 +5,7 @@ Summary: The decision pass — every row left on today's page with Carry / Strik
 
 ## Related
 - Connects to: [[Today]] — the "Close the page" ledger row and the stamp both open this screen, [[Page Closed]] — stamping replaces this screen with the closed page, [[Main Tabs]] — the back chevron returns without closing
-- Features: [[Closing the Page Ritual]], [[Day Capacity Budget]], [[Ledger Paper Chrome]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]]
+- Features: [[Closing the Page Ritual]], [[Day Capacity Budget]], [[Ledger Paper Chrome]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]], [[Inbox Triage Chips]]
 
 ## Notes
 `src/screens/ClosePageScreen.tsx`. Decisions are held in local state keyed by task id and committed in one transaction when the page is stamped, so backing out of the screen writes nothing. A row carrying a previous count shows `carried 4×` under its title in ochre.

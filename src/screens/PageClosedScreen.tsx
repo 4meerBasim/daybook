@@ -21,6 +21,8 @@ function outcomeLabel(outcome: Outcome, t: ReturnType<typeof useTheme>['t']): st
       return t.struckWord;
     case 'rescheduled':
       return t.movedWord;
+    case 'shelved':
+      return t.shelvedWord;
   }
 }
 
@@ -44,6 +46,7 @@ export function PageClosedScreen({
   const carried = entries.filter((e) => e.outcome === 'carried');
   const struck = entries.filter((e) => e.outcome === 'struck');
   const moved = entries.filter((e) => e.outcome === 'rescheduled');
+  const shelved = entries.filter((e) => e.outcome === 'shelved');
 
   return (
     <Screen>
@@ -87,7 +90,8 @@ export function PageClosedScreen({
                   {
                     flex: 1,
                     minWidth: 0,
-                    color: entry.outcome === 'carried' ? c.ink : c.ink3,
+                    color:
+                      entry.outcome === 'carried' || entry.outcome === 'shelved' ? c.ink : c.ink3,
                     textDecorationLine:
                       entry.outcome === 'settled' || entry.outcome === 'struck'
                         ? 'line-through'
@@ -132,6 +136,7 @@ export function PageClosedScreen({
             {settled.length} {t.settledWord}
             {carried.length ? ` · ${carried.length} ${t.carriedWord}` : ''}
             {moved.length ? ` · ${moved.length} ${t.movedWord}` : ''}
+            {shelved.length ? ` · ${shelved.length} ${t.shelvedWord}` : ''}
             {struck.length ? ` · ${struck.length} ${t.struckWord}` : ''}
           </Text>
 

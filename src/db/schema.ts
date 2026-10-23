@@ -5,7 +5,7 @@ import { splitTags } from '../lib/parse';
 
 export const DB_NAME = 'daybook.db';
 
-const SCHEMA_VERSION = 4;
+const SCHEMA_VERSION = 5;
 
 export const DISPLAY_NAME = 'displayName';
 
@@ -49,11 +49,12 @@ export type TaskRow = {
   reminderAt: number | null;
   tags: string | null;
   carryCount: number;
+  somedayAt: number | null;
 };
 
 export type DatedTask = TaskRow & { dueDate: number };
 
-export type Outcome = 'settled' | 'carried' | 'struck' | 'rescheduled';
+export type Outcome = 'settled' | 'carried' | 'struck' | 'rescheduled' | 'shelved';
 
 export type ClosedDayRow = {
   day: number;
@@ -62,6 +63,7 @@ export type ClosedDayRow = {
   carried: number;
   struck: number;
   rescheduled: number;
+  shelved: number;
   committedMinutes: number;
   settledMinutes: number;
 };
@@ -200,6 +202,14 @@ async function liftTagsFromTitles(db: SQLiteDatabase): Promise<void> {
   }
 }
 
+const V5 = `
+ALTER TABLE tasks ADD COLUMN somedayAt INTEGER;
+
+ALTER TABLE closed_days ADD COLUMN shelved INTEGER NOT NULL DEFAULT 0;
+
+CREATE INDEX tasks_someday ON tasks (somedayAt) WHERE deletedAt IS NULL;
+`;
+
 const STEPS: ((db: SQLiteDatabase) => Promise<void>)[] = [
   (db) => db.execAsync(DDL),
   async (db) => {
@@ -208,6 +218,7 @@ const STEPS: ((db: SQLiteDatabase) => Promise<void>)[] = [
   },
   (db) => db.execAsync(V3),
   (db) => db.execAsync(V4),
+  (db) => db.execAsync(V5),
 ];
 
 export async function migrate(db: SQLiteDatabase): Promise<void> {

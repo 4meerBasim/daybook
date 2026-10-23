@@ -28,6 +28,7 @@ export type TaskRowProps = {
   carryCount?: number;
   overdue?: boolean;
   rule?: boolean;
+  actions?: React.ReactNode;
   onToggle: () => void;
   accessibilityActions?: AccessibilityActionInfo[];
   onAccessibilityAction?: (e: AccessibilityActionEvent) => void;
@@ -41,6 +42,7 @@ export function TaskRow({
   carryCount = 0,
   overdue = false,
   rule = false,
+  actions,
   onToggle,
   accessibilityActions,
   onAccessibilityAction,
@@ -137,6 +139,8 @@ export function TaskRow({
             )}
           </View>
         </View>
+
+        {actions}
 
         {meta || dotColor || carryCount ? (
           <View style={{ flexDirection: row(rtl), alignItems: 'center', gap: 6 }}>
