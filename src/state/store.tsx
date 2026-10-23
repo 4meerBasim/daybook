@@ -12,6 +12,8 @@ import {
   type ClosedDayRow,
   type ClosedEntryRow,
   type DatedTask,
+  type NoteLineRow,
+  type NoteRow,
   type ProjectRow,
   type SubtaskRow,
   type TaskRow,
@@ -20,9 +22,16 @@ import {
   archiveProject,
   assignDueDate,
   closeDay,
+  deleteNote,
+  deleteNoteLine,
   deleteTask,
+  demoteNoteLine,
+  insertNote,
+  insertNoteLine,
   insertProject,
   insertTask,
+  promoteNoteLine,
+  renameNote,
   restoreTask,
   selectAssigned,
   selectClosedDay,
@@ -30,6 +39,10 @@ import {
   selectClosedEntries,
   selectDay,
   selectMonth,
+  selectNote,
+  selectNoteLineForTask,
+  selectNoteLines,
+  selectNotes,
   selectPref,
   selectProjects,
   selectSubtasks,
@@ -48,6 +61,7 @@ import {
   setTaskSnoozedUntil,
   setTaskSomeday,
   snoozeTask,
+  updateNoteLine,
   updateProjectName,
   updateTask,
   type Decision,
@@ -73,6 +87,7 @@ type Snapshot = {
   someday: TaskRow[];
   waiting: TaskRow[];
   projects: ProjectRow[];
+  notes: NoteRow[];
   month: DatedTask[];
   closedToday: ClosedDayRow | null;
   closedDays: ClosedDayRow[];
@@ -100,6 +115,14 @@ type Store = Snapshot & {
   reversal: Reversal | null;
   lift: () => void;
   clearReversal: (seq: number) => void;
+  createNote: (title: string) => Promise<string>;
+  renameNote: (id: string, title: string) => void;
+  removeNote: (id: string) => void;
+  addLine: (noteId: string, text: string, after: number) => Promise<string>;
+  editLine: (id: string, text: string) => void;
+  removeLine: (id: string) => void;
+  promoteLine: (id: string, text: string) => void;
+  demoteLine: (id: string) => void;
   createProject: (name: string) => void;
   renameProject: (id: string, name: string) => void;
   removeProject: (id: string) => void;
@@ -125,6 +148,7 @@ const EMPTY: Snapshot = {
   someday: [],
   waiting: [],
   projects: [],
+  notes: [],
   month: [],
   closedToday: null,
   closedDays: [],
@@ -157,6 +181,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         someday,
         waiting,
         projects,
+        notes,
         month,
         closedToday,
         closedDays,
@@ -173,6 +198,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         selectSomeday(db),
         selectWaiting(db),
         selectProjects(db),
+        selectNotes(db),
         selectMonth(db, now),
         selectClosedDay(db, now),
         selectClosedDays(db),
@@ -190,6 +216,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         someday,
         waiting,
         projects,
+        notes,
         month,
         closedToday,
         closedDays,
@@ -275,6 +302,23 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         if (kind === 'shelved') after(setTaskSomeday(db, taskId, null, reversal.previous));
       },
       clearReversal: (seq) => setReversal((prev) => (prev && prev.seq === seq ? null : prev)),
+      createNote: async (title) => {
+        const id = await insertNote(db, title, Date.now());
+        await reload();
+        return id;
+      },
+      renameNote: (id, title) => after(renameNote(db, id, title, Date.now())),
+      removeNote: (id) => after(deleteNote(db, id, Date.now())),
+      addLine: async (noteId, text, position) => {
+        const id = await insertNoteLine(db, noteId, text, position, Date.now());
+        await reload();
+        return id;
+      },
+      editLine: (id, text) => after(updateNoteLine(db, id, text, Date.now())),
+      removeLine: (id) => after(deleteNoteLine(db, id, Date.now())),
+      promoteLine: (id, text) =>
+        after(promoteNoteLine(db, id, text, startOfDay(Date.now()), Date.now())),
+      demoteLine: (id) => after(demoteNoteLine(db, id)),
       createProject: (name) => {
         const color = PROJECT_COLORS[snapshot.projects.length % PROJECT_COLORS.length];
         after(insertProject(db, name, color, Date.now()));
@@ -345,9 +389,48 @@ export function useStore() {
   return ctx;
 }
 
-export type TaskDetail = { task: TaskRow | null; subtasks: SubtaskRow[] };
+export type TaskDetail = {
+  task: TaskRow | null;
+  subtasks: SubtaskRow[];
+  source: NoteRow | null;
+};
 
-const NO_DETAIL: TaskDetail = { task: null, subtasks: [] };
+const NO_DETAIL: TaskDetail = { task: null, subtasks: [], source: null };
+
+export type NoteDetail = { note: NoteRow | null; lines: NoteLineRow[]; tasks: TaskRow[] };
+
+const NO_NOTE: NoteDetail = { note: null, lines: [], tasks: [] };
+
+export function useNote(noteId: string): NoteDetail {
+  const db = useSQLiteContext();
+  const { revision } = useStore();
+  const [detail, setDetail] = useState<NoteDetail>(NO_NOTE);
+
+  useEffect(() => {
+    let live = true;
+    const load = async () => {
+      const [note, lines] = await Promise.all([
+        selectNote(db, noteId),
+        selectNoteLines(db, noteId),
+      ]);
+      const ids = lines.map((l) => l.taskId).filter((id): id is string => id !== null);
+      const tasks = await Promise.all(ids.map((id) => selectTask(db, id)));
+      if (live) {
+        setDetail({
+          note,
+          lines,
+          tasks: tasks.filter((task): task is TaskRow => task !== null),
+        });
+      }
+    };
+    load();
+    return () => {
+      live = false;
+    };
+  }, [db, noteId, revision]);
+
+  return detail;
+}
 
 export type ClosedPage = { day: ClosedDayRow | null; entries: ClosedEntryRow[] };
 
@@ -384,11 +467,13 @@ export function useTaskDetail(taskId: string): TaskDetail {
   useEffect(() => {
     let live = true;
     const load = async () => {
-      const [task, subtasks] = await Promise.all([
+      const [task, subtasks, line] = await Promise.all([
         selectTask(db, taskId),
         selectSubtasks(db, taskId),
+        selectNoteLineForTask(db, taskId),
       ]);
-      if (live) setDetail({ task, subtasks });
+      const source = line ? await selectNote(db, line.noteId) : null;
+      if (live) setDetail({ task, subtasks, source });
     };
     load();
     return () => {

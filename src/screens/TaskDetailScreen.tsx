@@ -103,14 +103,16 @@ export function TaskDetailScreen({
   taskId,
   onBack,
   onFocus,
+  onOpenNote,
 }: {
   taskId: string;
   onBack: () => void;
   onFocus: () => void;
+  onOpenNote: (noteId: string) => void;
 }) {
   const { c, t, ui, mono, display, rtl } = useTheme();
   const { projects, complete, completeSubtask, edit, block, unblock } = useStore();
-  const { task, subtasks } = useTaskDetail(taskId);
+  const { task, subtasks, source } = useTaskDetail(taskId);
   const top = useHeaderTop();
   const bottom = useScreenBottom();
   const [filing, setFiling] = useState(false);
@@ -321,6 +323,21 @@ export function TaskDetailScreen({
                 ))}
               </View>
             </>
+          ) : null}
+
+          {source ? (
+            <Pressable
+              onPress={() => onOpenNote(source.id)}
+              android_ripple={null}
+              accessibilityRole="button"
+              accessibilityLabel={source.title}
+            >
+              <Field label={t.fromNote}>
+                <Text numberOfLines={1} style={[ui(15), { lineHeight: undefined, color: c.ink }]}>
+                  {source.title}
+                </Text>
+              </Field>
+            </Pressable>
           ) : null}
 
           {task.notes ? (

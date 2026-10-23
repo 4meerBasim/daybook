@@ -32,6 +32,8 @@ import { PageClosedScreen } from '../screens/PageClosedScreen';
 import { ClosedPagesScreen } from '../screens/ClosedPagesScreen';
 import { WeeklyScreen } from '../screens/WeeklyScreen';
 import { DealScreen } from '../screens/DealScreen';
+import { NotesScreen } from '../screens/NotesScreen';
+import { NoteScreen } from '../screens/NoteScreen';
 import { SwipeStatesScreen } from '../screens/SwipeStatesScreen';
 import { QuickAddSheet } from '../screens/QuickAddSheet';
 
@@ -50,6 +52,8 @@ export type RootParams = {
   ClosedPages: undefined;
   Weekly: undefined;
   Deal: undefined;
+  Notes: undefined;
+  Note: { noteId: string };
   SwipeStates: undefined;
 };
 
@@ -112,6 +116,7 @@ function MainTabs({ navigation }: NativeStackScreenProps<RootParams, 'Main'>) {
             onOpenUnfiled={() => navigation.navigate('Unfiled')}
             onOpenClosedPages={() => navigation.navigate('ClosedPages')}
             onOpenWeekly={() => navigation.navigate('Weekly')}
+            onOpenNotes={() => navigation.navigate('Notes')}
           />
         </Pane>
       </Animated.View>
@@ -226,6 +231,23 @@ export function Root() {
         <Stack.Screen name="Weekly">
           {({ navigation }) => <WeeklyScreen onBack={() => navigation.goBack()} />}
         </Stack.Screen>
+        <Stack.Screen name="Notes">
+          {({ navigation }) => (
+            <NotesScreen
+              onBack={() => navigation.goBack()}
+              onOpenNote={(noteId) => navigation.navigate('Note', { noteId })}
+            />
+          )}
+        </Stack.Screen>
+        <Stack.Screen name="Note">
+          {({ navigation, route }) => (
+            <NoteScreen
+              noteId={route.params.noteId}
+              onBack={() => navigation.goBack()}
+              onOpenTask={(taskId) => navigation.navigate('TaskDetail', { taskId })}
+            />
+          )}
+        </Stack.Screen>
         <Stack.Screen name="Deal" options={{ presentation: 'fullScreenModal' }}>
           {({ navigation }) => (
             <DealScreen
@@ -258,6 +280,7 @@ export function Root() {
               taskId={route.params.taskId}
               onBack={() => navigation.goBack()}
               onFocus={() => navigation.navigate('Focus', { taskId: route.params.taskId })}
+              onOpenNote={(noteId) => navigation.navigate('Note', { noteId })}
             />
           )}
         </Stack.Screen>
@@ -274,6 +297,7 @@ export function Root() {
               onOpenUnfiled={() => navigation.navigate('Unfiled')}
               onOpenClosedPages={() => navigation.navigate('ClosedPages')}
               onOpenWeekly={() => navigation.navigate('Weekly')}
+              onOpenNotes={() => navigation.navigate('Notes')}
             />
           )}
         </Stack.Screen>

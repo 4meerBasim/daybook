@@ -5,7 +5,7 @@ import { splitTags } from '../lib/parse';
 
 export const DB_NAME = 'daybook.db';
 
-const SCHEMA_VERSION = 7;
+const SCHEMA_VERSION = 8;
 
 export const DISPLAY_NAME = 'displayName';
 
@@ -91,6 +91,22 @@ export type ProjectRow = {
   archivedAt: number | null;
 };
 
+export type NoteRow = {
+  id: string;
+  title: string;
+  createdAt: number;
+  updatedAt: number;
+  deletedAt: number | null;
+};
+
+export type NoteLineRow = {
+  id: string;
+  noteId: string;
+  sortOrder: number;
+  text: string;
+  taskId: string | null;
+};
+
 export type SubtaskRow = {
   id: string;
   parentTaskId: string;
@@ -107,6 +123,8 @@ export function rowTitle(row: { title: string; seedKey: StringKey | null }, t: S
 export function projectName(project: ProjectRow, t: Strings): string {
   return project.seedKey ? t[project.seedKey] : project.name;
 }
+
+export const CHECKBOX_MARK = /^\s*[-*]?\s*\[\s*[xX ]?\s*\]\s*/;
 
 export function taskTags(task: { tags: string | null }): string[] {
   return task.tags ? task.tags.split(',') : [];
@@ -228,6 +246,27 @@ ALTER TABLE tasks ADD COLUMN nudgeAt INTEGER;
 CREATE INDEX tasks_blocked ON tasks (nudgeAt) WHERE deletedAt IS NULL AND blockedBy IS NOT NULL;
 `;
 
+const V8 = `
+CREATE TABLE notes (
+  id TEXT PRIMARY KEY NOT NULL,
+  title TEXT NOT NULL,
+  createdAt INTEGER NOT NULL,
+  updatedAt INTEGER NOT NULL,
+  deletedAt INTEGER
+);
+
+CREATE TABLE note_lines (
+  id TEXT PRIMARY KEY NOT NULL,
+  noteId TEXT NOT NULL REFERENCES notes(id),
+  sortOrder INTEGER NOT NULL,
+  text TEXT NOT NULL,
+  taskId TEXT REFERENCES tasks(id)
+);
+
+CREATE INDEX note_lines_noteId ON note_lines (noteId, sortOrder);
+CREATE INDEX note_lines_taskId ON note_lines (taskId) WHERE taskId IS NOT NULL;
+`;
+
 const STEPS: ((db: SQLiteDatabase) => Promise<void>)[] = [
   (db) => db.execAsync(DDL),
   async (db) => {
@@ -239,6 +278,7 @@ const STEPS: ((db: SQLiteDatabase) => Promise<void>)[] = [
   (db) => db.execAsync(V5),
   (db) => db.execAsync(V6),
   (db) => db.execAsync(V7),
+  (db) => db.execAsync(V8),
 ];
 
 export async function migrate(db: SQLiteDatabase): Promise<void> {

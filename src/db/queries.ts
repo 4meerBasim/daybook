@@ -7,6 +7,8 @@ import {
   type ClosedEntryRow,
   type ColorToken,
   type DatedTask,
+  type NoteLineRow,
+  type NoteRow,
   type Outcome,
   type ProjectRow,
   type SubtaskRow,
@@ -351,6 +353,156 @@ export async function deleteTask(db: SQLiteDatabase, id: string, now: number): P
     $deletedAt: now,
     $id: id,
   });
+}
+
+export function selectNotes(db: SQLiteDatabase): Promise<NoteRow[]> {
+  return db.getAllAsync<NoteRow>(
+    'SELECT * FROM notes WHERE deletedAt IS NULL ORDER BY updatedAt DESC'
+  );
+}
+
+export function selectNote(db: SQLiteDatabase, id: string): Promise<NoteRow | null> {
+  return db.getFirstAsync<NoteRow>('SELECT * FROM notes WHERE id = $id', { $id: id });
+}
+
+export function selectNoteLines(db: SQLiteDatabase, noteId: string): Promise<NoteLineRow[]> {
+  return db.getAllAsync<NoteLineRow>(
+    'SELECT * FROM note_lines WHERE noteId = $noteId ORDER BY sortOrder',
+    { $noteId: noteId }
+  );
+}
+
+export function selectNoteLineForTask(
+  db: SQLiteDatabase,
+  taskId: string
+): Promise<NoteLineRow | null> {
+  return db.getFirstAsync<NoteLineRow>('SELECT * FROM note_lines WHERE taskId = $taskId', {
+    $taskId: taskId,
+  });
+}
+
+export async function insertNote(db: SQLiteDatabase, title: string, now: number): Promise<string> {
+  const id = newId();
+  await db.runAsync(
+    `INSERT INTO notes (id, title, createdAt, updatedAt) VALUES ($id, $title, $now, $now)`,
+    { $id: id, $title: title, $now: now }
+  );
+  return id;
+}
+
+export async function renameNote(
+  db: SQLiteDatabase,
+  id: string,
+  title: string,
+  now: number
+): Promise<void> {
+  await db.runAsync('UPDATE notes SET title = $title, updatedAt = $now WHERE id = $id', {
+    $title: title,
+    $now: now,
+    $id: id,
+  });
+}
+
+export async function deleteNote(db: SQLiteDatabase, id: string, now: number): Promise<void> {
+  await db.withTransactionAsync(async () => {
+    await db.runAsync('UPDATE note_lines SET taskId = NULL WHERE noteId = $id', { $id: id });
+    await db.runAsync('UPDATE notes SET deletedAt = $now WHERE id = $id', { $now: now, $id: id });
+  });
+}
+
+export async function insertNoteLine(
+  db: SQLiteDatabase,
+  noteId: string,
+  text: string,
+  after: number,
+  now: number
+): Promise<string> {
+  const id = newId();
+  await db.withTransactionAsync(async () => {
+    await db.runAsync(
+      'UPDATE note_lines SET sortOrder = sortOrder + 1 WHERE noteId = $noteId AND sortOrder > $after',
+      { $noteId: noteId, $after: after }
+    );
+    await db.runAsync(
+      `INSERT INTO note_lines (id, noteId, sortOrder, text) VALUES ($id, $noteId, $sortOrder, $text)`,
+      { $id: id, $noteId: noteId, $sortOrder: after + 1, $text: text }
+    );
+    await db.runAsync('UPDATE notes SET updatedAt = $now WHERE id = $noteId', {
+      $now: now,
+      $noteId: noteId,
+    });
+  });
+  return id;
+}
+
+export async function updateNoteLine(
+  db: SQLiteDatabase,
+  id: string,
+  text: string,
+  now: number
+): Promise<void> {
+  await db.withTransactionAsync(async () => {
+    await db.runAsync('UPDATE note_lines SET text = $text WHERE id = $id', {
+      $text: text,
+      $id: id,
+    });
+    await db.runAsync(
+      `UPDATE tasks SET title = $text, seedKey = NULL
+        WHERE id = (SELECT taskId FROM note_lines WHERE id = $id)`,
+      { $text: text, $id: id }
+    );
+    await db.runAsync(
+      'UPDATE notes SET updatedAt = $now WHERE id = (SELECT noteId FROM note_lines WHERE id = $id)',
+      { $now: now, $id: id }
+    );
+  });
+}
+
+export async function deleteNoteLine(db: SQLiteDatabase, id: string, now: number): Promise<void> {
+  await db.withTransactionAsync(async () => {
+    await db.runAsync(
+      'UPDATE notes SET updatedAt = $now WHERE id = (SELECT noteId FROM note_lines WHERE id = $id)',
+      { $now: now, $id: id }
+    );
+    await db.runAsync('DELETE FROM note_lines WHERE id = $id', { $id: id });
+  });
+}
+
+export async function promoteNoteLine(
+  db: SQLiteDatabase,
+  id: string,
+  text: string,
+  dueDate: number,
+  now: number
+): Promise<void> {
+  const taskId = newId();
+  const tail = await db.getFirstAsync<{ next: number }>(
+    'SELECT COALESCE(MAX(sortOrder), 0) + 1 AS next FROM tasks'
+  );
+  await db.withTransactionAsync(async () => {
+    await db.runAsync(
+      `INSERT INTO tasks (id, title, color, dueDate, createdAt, sortOrder)
+        VALUES ($id, $title, $color, $dueDate, $now, $sortOrder)`,
+      {
+        $id: taskId,
+        $title: text,
+        $color: DEFAULT_TASK_COLOR,
+        $dueDate: dueDate,
+        $now: now,
+        $sortOrder: tail ? tail.next : 1,
+      }
+    );
+    await db.runAsync('UPDATE note_lines SET text = $text, taskId = $taskId WHERE id = $id', {
+      $text: text,
+      $taskId: taskId,
+      $id: id,
+    });
+  });
+}
+
+export async function demoteNoteLine(db: SQLiteDatabase, id: string): Promise<void> {
+  // the task outlives the link: unchecking a line must not destroy a commitment
+  await db.runAsync('UPDATE note_lines SET taskId = NULL WHERE id = $id', { $id: id });
 }
 
 export async function restoreTask(db: SQLiteDatabase, id: string): Promise<void> {

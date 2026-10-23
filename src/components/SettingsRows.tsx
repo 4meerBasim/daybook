@@ -16,15 +16,17 @@ export function SettingsRows({
   onOpenUnfiled,
   onOpenClosedPages,
   onOpenWeekly,
+  onOpenNotes,
 }: {
   onOpenGestures: () => void;
   onOpenProjects: () => void;
   onOpenUnfiled: () => void;
   onOpenClosedPages: () => void;
   onOpenWeekly: () => void;
+  onOpenNotes: () => void;
 }) {
   const { c, t, lang, appearance, motion, ui, rtl, setLang, setAppearance, setMotion } = useTheme();
-  const { projects, unfiled, closedDays, capacity, setCapacity, decayOn, setDecayOn } =
+  const { projects, unfiled, notes, closedDays, capacity, setCapacity, decayOn, setDecayOn } =
     useStore();
 
   return (
@@ -102,6 +104,11 @@ export function SettingsRows({
           <Keycap label="⌘" />
           <Keycap label="N" />
         </View>
+      </Row>
+
+      <Row onPress={onOpenNotes} label={t.notesTitle}>
+        <RowLabel label={t.notesTitle} />
+        <Text style={[ui(15), { color: c.ink3 }]}>{String(notes.length)}</Text>
       </Row>
 
       <Row onPress={onOpenProjects} label={t.projects}>
