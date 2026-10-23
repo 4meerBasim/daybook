@@ -4,10 +4,10 @@ Route: `Main` (native stack screen wrapping the `MainTabs` component in `src/nav
 Summary: The tab shell that hosts the three primary panes, the quick-add sheet and the search overlay, and that owns the long-press shortcuts to the secondary screens.
 
 ## Related
-- Connects to: [[Today]], [[Upcoming]], [[Profile]], [[Search Results]], [[Quick Add Sheet]], [[Settings]], [[Calendar]], [[Task Detail]], [[Project Detail]], [[Projects]], [[Project Picker]], [[Page Closed]], [[Swipe States]], [[Onboarding]], [[Focus Mode]], [[Unfiled]]
-- Features: [[Glass Tab Bar]], [[Animated Page Transitions]], [[Expanding Search Field]], [[Pen FAB]], [[Projects As A Real Entity]], [[Light and Dark Paper Palettes]], [[In-App RTL and Arabic Typography]], [[Reduced Motion Mode]]
+- Connects to: [[Today]], [[Upcoming]], [[Profile]], [[Search Results]], [[Quick Add Sheet]], [[Settings]], [[Calendar]], [[Task Detail]], [[Project Detail]], [[Projects]], [[Project Picker]], [[Page Closed]], [[Swipe States]], [[Onboarding]], [[Focus Mode]], [[Unfiled]], [[Deal]]
+- Features: [[Glass Tab Bar]], [[Animated Page Transitions]], [[Expanding Search Field]], [[Pen FAB]], [[Projects As A Real Entity]], [[Light and Dark Paper Palettes]], [[In-App RTL and Arabic Typography]], [[Reduced Motion Mode]], [[Deal Me One Task Picker]]
 - Bugs: [[Focus Mode Unreachable]], [[Startup Crash From Mismatched Worklets]], [[Stack Screens Reserve Tab Bar Space]], [[Active Tab Icon Knockout Is Opaque On Glass]], [[Undated Unassigned Tasks Have No Screen]], [[Native Layout Direction Is Not Pinned]], [[Theme Preferences Reset On Every Launch]], [[Onboarding Shows On Every Launch]]
-- Enhancements: [[Deal Me One Task Picker]], [[Inbox Triage Chips]], [[System Capture Entry Points]]
+- Enhancements: [[Inbox Triage Chips]], [[System Capture Entry Points]]
 
 ## Notes
 Tab switching is local `useState` inside `MainTabs`, not a navigator. `TABS` is `['today', 'upcoming', 'profile']` — three panes, down from five since the Inbox and Search tabs were removed. All three stay mounted inside one horizontal strip and the strip slides; the old `display: none` toggling is gone, and each `Pane` now takes a `shown` flag that hides the two inactive ones from the accessibility tree, which `display: none` used to do on its own — see [[Animated Page Transitions]].

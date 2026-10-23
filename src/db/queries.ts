@@ -82,6 +82,20 @@ export function selectUnfiled(db: SQLiteDatabase): Promise<TaskRow[]> {
   );
 }
 
+export function selectDealable(db: SQLiteDatabase, now: number): Promise<TaskRow[]> {
+  return db.getAllAsync<TaskRow>(
+    `SELECT * FROM tasks
+      WHERE deletedAt IS NULL
+        AND completedAt IS NULL
+        AND somedayAt IS NULL
+        AND (snoozedUntil IS NULL OR snoozedUntil <= $now)
+        AND (blockedBy IS NULL OR nudgeAt IS NULL OR nudgeAt <= $now)
+        AND (dueDate IS NULL OR dueDate < $dayEnd)
+      ORDER BY sortOrder`,
+    { $now: now, $dayEnd: startOfDay(addDays(now, 1)) }
+  );
+}
+
 export function selectWaiting(db: SQLiteDatabase): Promise<TaskRow[]> {
   return db.getAllAsync<TaskRow>(
     `SELECT * FROM tasks

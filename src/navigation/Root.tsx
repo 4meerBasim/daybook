@@ -31,6 +31,7 @@ import { ClosePageScreen } from '../screens/ClosePageScreen';
 import { PageClosedScreen } from '../screens/PageClosedScreen';
 import { ClosedPagesScreen } from '../screens/ClosedPagesScreen';
 import { WeeklyScreen } from '../screens/WeeklyScreen';
+import { DealScreen } from '../screens/DealScreen';
 import { SwipeStatesScreen } from '../screens/SwipeStatesScreen';
 import { QuickAddSheet } from '../screens/QuickAddSheet';
 
@@ -48,6 +49,7 @@ export type RootParams = {
   PageClosed: { day: number };
   ClosedPages: undefined;
   Weekly: undefined;
+  Deal: undefined;
   SwipeStates: undefined;
 };
 
@@ -127,6 +129,7 @@ function MainTabs({ navigation }: NativeStackScreenProps<RootParams, 'Main'>) {
         onLongPress={(k) => {
           if (k === 'today') navigation.navigate('Settings');
           if (k === 'upcoming') navigation.navigate('Calendar');
+          if (k === 'profile') navigation.navigate('Deal');
         }}
         searching={searching}
         searchProgress={searchProgress}
@@ -144,7 +147,13 @@ function MainTabs({ navigation }: NativeStackScreenProps<RootParams, 'Main'>) {
   );
 }
 
-const NO_SLIP: (keyof RootParams)[] = ['Onboarding', 'Focus', 'PageClosed', 'ClosePage'];
+const NO_SLIP: (keyof RootParams)[] = [
+  'Onboarding',
+  'Focus',
+  'PageClosed',
+  'ClosePage',
+  'Deal',
+];
 
 function GlobalSlip() {
   const route = useNavigationState((state) =>
@@ -216,6 +225,14 @@ export function Root() {
         </Stack.Screen>
         <Stack.Screen name="Weekly">
           {({ navigation }) => <WeeklyScreen onBack={() => navigation.goBack()} />}
+        </Stack.Screen>
+        <Stack.Screen name="Deal" options={{ presentation: 'fullScreenModal' }}>
+          {({ navigation }) => (
+            <DealScreen
+              onClose={() => navigation.goBack()}
+              onFocus={(taskId) => navigation.replace('Focus', { taskId })}
+            />
+          )}
         </Stack.Screen>
         <Stack.Screen name="Project">
           {({ route }) => <ProjectScreen projectId={route.params.projectId} />}

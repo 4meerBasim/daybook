@@ -34,6 +34,7 @@ import {
   selectProjects,
   selectSubtasks,
   selectTask,
+  selectDealable,
   selectSomeday,
   selectToday,
   selectUndated,
@@ -68,6 +69,7 @@ type Snapshot = {
   upcoming: DatedTask[];
   assigned: TaskRow[];
   unfiled: TaskRow[];
+  dealable: TaskRow[];
   someday: TaskRow[];
   waiting: TaskRow[];
   projects: ProjectRow[];
@@ -119,6 +121,7 @@ const EMPTY: Snapshot = {
   upcoming: [],
   assigned: [],
   unfiled: [],
+  dealable: [],
   someday: [],
   waiting: [],
   projects: [],
@@ -150,6 +153,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         upcoming,
         assigned,
         unfiled,
+        dealable,
         someday,
         waiting,
         projects,
@@ -165,6 +169,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         selectUpcoming(db, now),
         selectAssigned(db),
         selectUnfiled(db),
+        selectDealable(db, now),
         selectSomeday(db),
         selectWaiting(db),
         selectProjects(db),
@@ -181,6 +186,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         upcoming,
         assigned,
         unfiled,
+        dealable,
         someday,
         waiting,
         projects,
