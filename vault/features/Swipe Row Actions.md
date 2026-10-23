@@ -1,7 +1,7 @@
 # Swipe Row Actions
 
 Status: shipped
-Summary: Dragging a task row reveals complete, snooze, pick-date and delete actions, each committed at a different fraction of the row width.
+Summary: Dragging a task row reveals complete, snooze, waiting-on and delete actions, each committed at a different fraction of the row width.
 
 ## Details
 `src/components/SwipeableRow.tsx`, built on `react-native-gesture-handler`'s `Gesture.Pan`. On release the translation is normalised to a fraction of the row width and matched against four thresholds:
@@ -10,18 +10,18 @@ Summary: Dragging a task row reveals complete, snooze, pick-date and delete acti
 |---|---|---|
 | Leading | 40% (`DONE`) | complete |
 | Trailing | 30% (`SNOOZE`) | snooze to tomorrow |
-| Trailing | 55% (`PICK`) | pick date |
+| Trailing | 55% (`WAITING`) | waiting on |
 | Trailing | 70% (`DELETE`) | delete |
 
 Three absolutely positioned action layers sit behind the row face and cross-fade by opacity as the drag progresses — moss for complete, blue for the two scheduling actions, vermilion for delete, so the destructive layer only appears past 70%. The row always settles back to zero after release.
 
 Direction is mirrored by a `sign` derived from `rtl`, so "leading" is a right-drag in English and a left-drag in Arabic. `activeOffsetX([-12, 12])` with `failOffsetY([-10, 10])` keeps vertical list scrolling intact. A simultaneous `Gesture.LongPress` at 320ms lifts the row onto `paper2` for reordering. Every threshold crossing fires a medium impact haptic; under [[Reduced Motion Mode]] the settle is an instant assignment instead of a timed spring.
 
-Mounted on every [[Today]] row. Complete calls `complete(id, done)`, which writes `completedAt`; snooze calls `snooze(id, 'tomorrow')`, which writes `snoozedUntil`; delete calls `remove(id)`, which writes `deletedAt` as a soft delete; pick-date opens [[Calendar]]. Snooze and delete used to be the same call into one `cleared` map — see [[Snooze And Delete Share One Cleared Map]] for why that was wrong and what each now means.
+Mounted on every [[Today]] row. Complete calls `complete(id, done)`, which writes `completedAt`; snooze calls `snooze(id, 'tomorrow')`, which writes `snoozedUntil`; delete calls `remove(id)`, which writes `deletedAt` as a soft delete; the 55% slot opens the blocker question from [[Waiting On Follow-Ups]] — it used to open [[Calendar]], which could not write a date. Snooze and delete used to be the same call into one `cleared` map — see [[Snooze And Delete Share One Cleared Map]] for why that was wrong and what each now means.
 
-[[Today]] wires all four. [[Upcoming]] and [[Project Detail]] wire only complete and delete: snooze writes `snoozedUntil`, which only `selectToday` reads and only for a row already due today, so it is a silent no-op on a future-dated row, and pick-date opens [[Calendar]], which takes no task and cannot record one. Neither `onSnooze` nor `onPickDate` is passed on those two screens, and `onSnooze` was made optional on the wrapper to allow that — `onPickDate` already was. [[Project Detail]] also routes its long-press to its project picker rather than to task detail, and adds an `assign` action to the row.
+[[Today]] wires all four. [[Upcoming]] and [[Project Detail]] wire only complete and delete: snooze writes `snoozedUntil`, which only `selectToday` reads and only for a row already due today, so it is a silent no-op on a future-dated row, and the 55% slot's blocker question belongs on [[Task Detail]] for a row that is not on today's page. Neither `onSnooze` nor `onWaiting` is passed on those two screens, and `onSnooze` was made optional on the wrapper to allow that — the 55% handler already was. [[Project Detail]] also routes its long-press to its project picker rather than to task detail, and adds an `assign` action to the row.
 
-Omitting the two handlers is not enough on its own. The wrapper renders three action layers whose opacity is driven by how far the row has travelled, and the blue layer — labelled with tomorrow and pick-date — covered the whole trailing range below the delete threshold. Leaving that in place meant a row on [[Upcoming]] showed a blue "tomorrow" pane for a swipe that would commit nothing, which is the same dishonesty [[Unfiled]] avoided by dropping pick-date rather than shipping it inert. So when neither mid-swipe handler is passed, the blue layer is suppressed and the vermilion delete layer covers the trailing range instead. A short trailing swipe then reads as delete and settles back because it did not reach 70% — which is what every swipe list does — rather than promising an action that never fires.
+Omitting the two handlers is not enough on its own. The wrapper renders three action layers whose opacity is driven by how far the row has travelled, and the blue layer — labelled with tomorrow and waiting-on — covered the whole trailing range below the delete threshold. Leaving that in place meant a row on [[Upcoming]] showed a blue "tomorrow" pane for a swipe that would commit nothing, which is the same dishonesty [[Unfiled]] avoided by dropping the slot rather than shipping it inert. So when neither mid-swipe handler is passed, the blue layer is suppressed and the vermilion delete layer covers the trailing range instead. A short trailing swipe then reads as delete and settles back because it did not reach 70% — which is what every swipe list does — rather than promising an action that never fires.
 
 The snooze offsets are named constants in `src/db/reminders.ts` rather than inline arithmetic, so the scheduler that [[Adaptive Reminders]] eventually adds reads the same ten-minute, one-hour and tomorrow values this swipe uses.
 
@@ -38,5 +38,5 @@ The thresholds are documented on-screen by the annotation rows in [[Swipe States
 ## Related
 - Page: [[Today]], [[Upcoming]], [[Project Detail]], [[Swipe States]], [[Settings]], [[Calendar]], [[Unfiled]]
 - Features: [[Offline First Local Store]], [[Reduced Motion Mode]], [[In-App RTL and Arabic Typography]], [[Ink Strike-Through Completion]], [[Animated Page Transitions]] — the horizontal pan a pane swipe would have to be arbitrated against
-- Bugs: [[Swipe Actions Not Wired Into Task Lists]], [[Startup Crash From Mismatched Worklets]], [[Snooze And Delete Share One Cleared Map]], [[Undated Unassigned Tasks Have No Screen]] — [[Unfiled]] carries these actions, minus pick-date, [[Native Layout Direction Is Not Pinned]]
+- Bugs: [[Swipe Actions Not Wired Into Task Lists]], [[Startup Crash From Mismatched Worklets]], [[Snooze And Delete Share One Cleared Map]], [[Undated Unassigned Tasks Have No Screen]] — [[Unfiled]] carries complete, delete and its own triage chips, [[Native Layout Direction Is Not Pinned]]
 - Enhancements: [[Waiting On Follow-Ups]], [[Adaptive Reminders]], [[Lift The Ink]]

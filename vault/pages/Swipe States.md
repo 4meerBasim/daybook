@@ -1,7 +1,7 @@
 # Swipe States
 
 Route: `SwipeStates` (native stack)
-Summary: A gesture reference page showing each swipe threshold held open — complete, snooze, pick date, delete — plus the long-press reorder state, each with an annotation row.
+Summary: A gesture reference page showing each swipe threshold held open — complete, snooze, waiting-on, delete — plus the long-press reorder state, each with an annotation row.
 
 ## Related
 - Connects to: [[Settings]], [[Profile]] — reached from the Shortcuts row on either; returns via the system back gesture, [[Main Tabs]], [[Project Picker]] — what long-press actually does now
