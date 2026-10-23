@@ -6,7 +6,7 @@ import { align, row } from '../lib/rtl';
 import { addDays, startOfDay } from '../lib/date';
 import { useStore } from '../state/store';
 import { rowTitle } from '../db/schema';
-import { Screen, useHeaderTop } from '../components/Screen';
+import { Screen, useHeaderTop, useScreenBottom } from '../components/Screen';
 import { EmptyRules, Ledger } from '../components/Ledger';
 import { TaskRow } from '../components/TaskRow';
 import { SwipeableRow } from '../components/SwipeableRow';
@@ -21,6 +21,7 @@ export function UnfiledScreen({
 }) {
   const { c, t, display, ui, rtl } = useTheme();
   const top = useHeaderTop();
+  const bottom = useScreenBottom();
   const { unfiled, complete, edit, remove } = useStore();
 
   const swipeActions = [
@@ -31,7 +32,7 @@ export function UnfiledScreen({
 
   return (
     <Screen>
-      <ScrollView contentContainerStyle={{ paddingBottom: metrics.gutter }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: bottom }}>
         <View style={{ paddingTop: top, paddingHorizontal: metrics.gutter, paddingBottom: 12 }}>
           <View style={{ flexDirection: row(rtl), marginBottom: 4 }}>
             <Pressable

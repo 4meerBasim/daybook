@@ -6,7 +6,7 @@ import { maxFontSizeMultiplier, metrics, radius } from '../theme/tokens';
 import { align, insetStart, marginStart, pad, row } from '../lib/rtl';
 import { useStore } from '../state/store';
 import { rowTitle, type SubtaskRow as SubtaskRowData } from '../db/schema';
-import { Screen, useHeaderTop } from '../components/Screen';
+import { Screen, useHeaderTop, useScreenBottom } from '../components/Screen';
 import { Checkbox, rowContent, useRuling } from '../components/Ledger';
 import { Chip } from '../components/Chip';
 import { ChevronBackIcon, EllipsisIcon, PaperclipIcon } from '../components/Icon';
@@ -61,12 +61,13 @@ export function TaskDetailScreen({ onBack, onFocus }: { onBack: () => void; onFo
   const { c, t, ui, mono, display, rtl, unit } = useTheme();
   const { subtasks, completeSubtask } = useStore();
   const top = useHeaderTop();
+  const bottom = useScreenBottom();
 
   const doneCount = subtasks.filter((s) => s.completedAt !== null).length;
 
   return (
     <Screen>
-      <ScrollView contentContainerStyle={{ paddingBottom: metrics.gutter }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: bottom }}>
         <View
           style={{
             paddingTop: top + 40,

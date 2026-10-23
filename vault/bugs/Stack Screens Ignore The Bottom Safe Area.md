@@ -1,7 +1,8 @@
 # Stack Screens Ignore The Bottom Safe Area
 
-Status: not-fixed
-Found: `src/components/Screen.tsx:15` — applies no bottom inset, and no stack screen supplies one itself
+Status: fixed
+Found: `src/components/Screen.tsx:15` — applied no bottom inset, and no stack screen supplied one itself
+Fixed: `src/components/Screen.tsx` — `useScreenBottom()` returns `max(insets.bottom, metrics.gutter)`, and every scrolling stack screen pads its content to it
 Summary: The scrolling stack screens end their content at the physical bottom edge, under the home indicator, because `Screen` pads neither edge and `useTabBarFootprint()` — the one mechanism that folds the inset in — applies only to screens that sit under the tab bar.
 
 ## Details
@@ -19,7 +20,16 @@ So the affected set is the stack routes that scroll and can therefore reach thei
 
 Noticed while fixing [[Stack Screens Reserve Tab Bar Space]] and deliberately left out of that branch — it is a different concern and it touches five screens rather than two.
 
+## Fix
+`Screen.tsx` gained `useScreenBottom()`, the bottom counterpart to `useHeaderTop()`: `Math.max(insets.bottom, metrics.gutter)`. The `max` is what makes it a drop-in — a 34pt home indicator gets 34, a 12pt or 0pt inset still gets the 20pt gutter the four padded screens already had, so nothing loses spacing.
+
+Applied to every stack screen that scrolls: [[Settings]] (which had no `contentContainerStyle` at all), [[Task Detail]], [[Projects]], [[Project Detail]], [[Unfiled]] and [[Calendar]]. Calendar was not in the original affected set — its inner `ScrollView` arrived later with the real-month work, and it had no bottom padding either. [[Page Closed]] took the pad on its final block, because the Plan Tomorrow button is a real tap target that was flowing toward the gesture area.
+
+[[Swipe States]] is left alone on purpose: its last element is `EmptyRules`, decorative ruling that belongs to the `Ledger` grid, and padding inside it would break the ruling rhythm for a demo screen with no tap target near the edge.
+
+Unchanged by design: the three [[Glass Tab Bar]] panes and [[Search Results]] keep `useTabBarFootprint()`, and [[Onboarding]] and [[Focus Mode]] keep their 56pt constants, which already clear the 34pt maximum.
+
 ## Related
-- Page: [[Settings]], [[Task Detail]], [[Projects]], [[Project Detail]], [[Unfiled]], [[Page Closed]], [[Swipe States]], [[Search Results]], [[Onboarding]], [[Focus Mode]]
+- Page: [[Settings]], [[Task Detail]], [[Projects]], [[Project Detail]], [[Unfiled]], [[Calendar]], [[Page Closed]], [[Swipe States]], [[Search Results]], [[Onboarding]], [[Focus Mode]]
 - Features: [[Ledger Paper Chrome]], [[Glass Tab Bar]]
 - Bugs: [[Stack Screens Reserve Tab Bar Space]], [[Calendar Overflow Is Unreachable]], [[Theme Preferences Reset On Every Launch]]
