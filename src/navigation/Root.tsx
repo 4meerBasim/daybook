@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { View, useWindowDimensions } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import * as Notifications from 'expo-notifications';
 import { NavigationContainer, DefaultTheme, useNavigationState } from '@react-navigation/native';
 import {
   createNativeStackNavigator,
@@ -13,6 +14,8 @@ import { row } from '../lib/rtl';
 import { startOfDay } from '../lib/date';
 import { Screen, useScreenBottom } from '../components/Screen';
 import { InkSlip } from '../components/InkSlip';
+import { EscapeSheet } from '../components/EscapeSheet';
+import { prepareChannels, reschedule } from '../lib/reminders';
 import { TabBar, TabKey, useTabBarFootprint } from '../components/TabBar';
 import { TodayScreen } from '../screens/TodayScreen';
 import { UpcomingScreen } from '../screens/UpcomingScreen';
@@ -191,6 +194,42 @@ function Pane({
   );
 }
 
+function Reminders() {
+  const { t } = useTheme();
+  const { reminders, remindersOn, revision, escaping, escape, closeEscape, openEscape } =
+    useStore();
+
+  useEffect(() => {
+    if (!remindersOn) {
+      Notifications.cancelAllScheduledNotificationsAsync();
+      return;
+    }
+    prepareChannels();
+    reschedule(reminders, Date.now(), t);
+  }, [remindersOn, revision, t]);
+
+  useEffect(() => {
+    const tapped = Notifications.addNotificationResponseReceivedListener((response) => {
+      const data = response.notification.request.content.data as {
+        taskId?: string;
+        insistent?: boolean;
+      };
+      if (data.insistent && data.taskId) openEscape(data.taskId);
+    });
+    return () => tapped.remove();
+  }, [openEscape]);
+
+  if (!escaping) return null;
+
+  return (
+    <EscapeSheet
+      task={escaping}
+      onDoIt={closeEscape}
+      onEscape={(reason) => escape(escaping.id, reason)}
+    />
+  );
+}
+
 export function Root() {
   const { c } = useTheme();
   const { loaded, onboarded, markOnboarded } = useStore();
@@ -331,6 +370,7 @@ export function Root() {
         <Stack.Screen name="SwipeStates" component={SwipeStatesScreen} />
       </Stack.Navigator>
       <GlobalSlip />
+      <Reminders />
     </NavigationContainer>
   );
 }

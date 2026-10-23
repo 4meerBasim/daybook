@@ -6,6 +6,7 @@ import { align, row } from '../lib/rtl';
 import { useStore } from '../state/store';
 import { CAPACITY_OPTIONS } from '../db/schema';
 import { minutesLabel } from '../lib/date';
+import { askPermission } from '../lib/reminders';
 import { Segmented } from './Segmented';
 import { Toggle } from './Toggle';
 import { Dot } from './Ledger';
@@ -26,8 +27,18 @@ export function SettingsRows({
   onOpenNotes: () => void;
 }) {
   const { c, t, lang, appearance, motion, ui, rtl, setLang, setAppearance, setMotion } = useTheme();
-  const { projects, unfiled, notes, closedDays, capacity, setCapacity, decayOn, setDecayOn } =
-    useStore();
+  const {
+    projects,
+    unfiled,
+    notes,
+    closedDays,
+    capacity,
+    setCapacity,
+    decayOn,
+    setDecayOn,
+    remindersOn,
+    setRemindersOn,
+  } = useStore();
 
   return (
     <View style={{ borderTopWidth: 1, borderTopColor: c.rule }}>
@@ -68,7 +79,17 @@ export function SettingsRows({
 
       <Row>
         <RowLabel label={t.reminders} />
-        <Text style={[ui(15), { color: c.ink3 }]}>{`09:00 · ${t.eveningReview}`}</Text>
+        <Toggle
+          value={remindersOn}
+          onChange={async (on) => {
+            if (!on) {
+              setRemindersOn(false);
+              return;
+            }
+            setRemindersOn(await askPermission());
+          }}
+          accessibilityLabel={t.reminders}
+        />
       </Row>
 
       <Row>

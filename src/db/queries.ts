@@ -1,8 +1,12 @@
 import type { SQLiteBindValue, SQLiteDatabase } from 'expo-sqlite';
-import { addDays, startOfDay, startOfMonth, startOfNextMonth } from '../lib/date';
+import { addDays, atTime, startOfDay, startOfMonth, startOfNextMonth } from '../lib/date';
 import { snoozeUntil, type SnoozeOffset } from './reminders';
 import {
+  DEFAULT_REMINDER_HOUR,
   DEFAULT_TASK_COLOR,
+  DISMISSALS_BEFORE_SHIFT,
+  MAX_SHIFT_MINUTES,
+  SHIFT_MINUTES,
   type ClosedDayRow,
   type ClosedEntryRow,
   type ColorToken,
@@ -31,6 +35,8 @@ export type TaskPatch = {
   duration?: number | null;
   priority?: number | null;
   reminderAt?: number | null;
+  insistent?: number;
+  escapeNote?: string | null;
   somedayAt?: number | null;
   retireAskedCarry?: number | null;
 };
@@ -81,6 +87,15 @@ export function selectUnfiled(db: SQLiteDatabase): Promise<TaskRow[]> {
         AND projectId IS NULL
         AND somedayAt IS NULL
       ORDER BY sortOrder`
+  );
+}
+
+export function selectReminders(db: SQLiteDatabase): Promise<TaskRow[]> {
+  return db.getAllAsync<TaskRow>(
+    `SELECT * FROM tasks
+      WHERE deletedAt IS NULL
+        AND completedAt IS NULL
+        AND (reminderAt IS NOT NULL OR nudgeAt IS NOT NULL)`
   );
 }
 
@@ -296,6 +311,52 @@ export async function setSubtaskCompleted(
     $completedAt: completedAt,
     $id: id,
   });
+}
+
+export async function countMissedReminders(
+  db: SQLiteDatabase,
+  now: number
+): Promise<TaskRow[]> {
+  // only reminders from a previous day count as dismissed; one that fired an hour ago
+  // is probably why the app is open right now
+  const missed = await db.getAllAsync<TaskRow>(
+    `SELECT * FROM tasks
+      WHERE deletedAt IS NULL
+        AND completedAt IS NULL
+        AND reminderAt IS NOT NULL
+        AND reminderAt < $dayStart`,
+    { $dayStart: startOfDay(now) }
+  );
+  if (!missed.length) return missed;
+
+  await db.withTransactionAsync(async () => {
+    for (const task of missed) {
+      const dismissals = task.dismissCount + 1;
+      const shift =
+        dismissals >= DISMISSALS_BEFORE_SHIFT
+          ? Math.min(task.reminderShift + SHIFT_MINUTES, MAX_SHIFT_MINUTES)
+          : task.reminderShift;
+      await db.runAsync(
+        `UPDATE tasks SET
+          dismissCount = $dismissals,
+          reminderShift = $shift,
+          reminderAt = $next
+          WHERE id = $id`,
+        {
+          $dismissals: dismissals >= DISMISSALS_BEFORE_SHIFT ? 0 : dismissals,
+          $shift: shift,
+          $next: atTime(
+            addDays(task.reminderAt as number, 1),
+            DEFAULT_REMINDER_HOUR + Math.floor(shift / 60),
+            shift % 60
+          ),
+          $id: task.id,
+        }
+      );
+    }
+  });
+
+  return missed;
 }
 
 export async function setTaskBlocked(

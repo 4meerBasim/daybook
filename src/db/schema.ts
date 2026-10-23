@@ -5,7 +5,7 @@ import { splitTags } from '../lib/parse';
 
 export const DB_NAME = 'daybook.db';
 
-const SCHEMA_VERSION = 8;
+const SCHEMA_VERSION = 9;
 
 export const DISPLAY_NAME = 'displayName';
 
@@ -16,6 +16,16 @@ export const APPEARANCE = 'appearance';
 export const MOTION = 'motion';
 
 export const INK_DECAY = 'inkDecay';
+
+export const REMINDERS = 'reminders';
+
+export const DEFAULT_REMINDER_HOUR = 9;
+
+export const DISMISSALS_BEFORE_SHIFT = 3;
+
+export const SHIFT_MINUTES = 120;
+
+export const MAX_SHIFT_MINUTES = 480;
 
 export const ONBOARDED = 'onboarded';
 
@@ -56,6 +66,10 @@ export type TaskRow = {
   blockedBy: string | null;
   blockedAt: number | null;
   nudgeAt: number | null;
+  insistent: number;
+  dismissCount: number;
+  reminderShift: number;
+  escapeNote: string | null;
 };
 
 export type DatedTask = TaskRow & { dueDate: number };
@@ -267,6 +281,15 @@ CREATE INDEX note_lines_noteId ON note_lines (noteId, sortOrder);
 CREATE INDEX note_lines_taskId ON note_lines (taskId) WHERE taskId IS NOT NULL;
 `;
 
+const V9 = `
+ALTER TABLE tasks ADD COLUMN insistent INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE tasks ADD COLUMN dismissCount INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE tasks ADD COLUMN reminderShift INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE tasks ADD COLUMN escapeNote TEXT;
+
+CREATE INDEX tasks_reminderAt ON tasks (reminderAt) WHERE deletedAt IS NULL AND completedAt IS NULL;
+`;
+
 const STEPS: ((db: SQLiteDatabase) => Promise<void>)[] = [
   (db) => db.execAsync(DDL),
   async (db) => {
@@ -279,6 +302,7 @@ const STEPS: ((db: SQLiteDatabase) => Promise<void>)[] = [
   (db) => db.execAsync(V6),
   (db) => db.execAsync(V7),
   (db) => db.execAsync(V8),
+  (db) => db.execAsync(V9),
 ];
 
 export async function migrate(db: SQLiteDatabase): Promise<void> {

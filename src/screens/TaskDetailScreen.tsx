@@ -4,7 +4,7 @@ import * as Haptics from 'expo-haptics';
 import { useTheme } from '../theme/ThemeProvider';
 import { maxFontSizeMultiplier, metrics } from '../theme/tokens';
 import { align, insetStart, marginStart, pad, row } from '../lib/rtl';
-import { longDate, minutesLabel, timeLabel } from '../lib/date';
+import { addDays, atTime, longDate, minutesLabel, startOfDay, timeLabel } from '../lib/date';
 import { tagColors } from '../lib/parse';
 import { useStore, useTaskDetail } from '../state/store';
 import {
@@ -18,6 +18,7 @@ import { Screen, useHeaderTop, useScreenBottom } from '../components/Screen';
 import { Checkbox, rowContent, useRuling } from '../components/Ledger';
 import { Chip } from '../components/Chip';
 import { Segmented } from '../components/Segmented';
+import { Toggle } from '../components/Toggle';
 import { ProjectPickerSheet } from './ProjectPickerSheet';
 import { WaitingSheet } from '../components/WaitingSheet';
 import { ChevronBackIcon, EllipsisIcon } from '../components/Icon';
@@ -70,6 +71,8 @@ function SubtaskRow({ task, onToggle }: { task: SubtaskRowData; onToggle: () => 
 
 const ESTIMATE_OPTIONS = [15, 30, 60, 120];
 
+const REMIND_HOURS = [7, 9, 13, 18];
+
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   const { c, mono, rtl, unit } = useTheme();
   return (
@@ -111,7 +114,8 @@ export function TaskDetailScreen({
   onOpenNote: (noteId: string) => void;
 }) {
   const { c, t, ui, mono, display, rtl } = useTheme();
-  const { projects, complete, completeSubtask, edit, block, unblock } = useStore();
+  const { projects, complete, completeSubtask, edit, block, unblock, setReminderAt, setInsistent } =
+    useStore();
   const { task, subtasks, source } = useTaskDetail(taskId);
   const top = useHeaderTop();
   const bottom = useScreenBottom();
@@ -126,6 +130,8 @@ export function TaskDetailScreen({
   const doneCount = subtasks.filter((s) => s.completedAt !== null).length;
   const clock = timeLabel(task.dueDate);
   const estimate = task.duration === null ? 'none' : String(task.duration);
+  const remind =
+    task.reminderAt === null ? 'none' : String(new Date(task.reminderAt).getHours());
 
   return (
     <Screen>
@@ -219,15 +225,56 @@ export function TaskDetailScreen({
           </Field>
 
           <Field label={t.reminder}>
-            <Text
-              style={[
-                ui(15),
-                { lineHeight: undefined, color: task.reminderAt === null ? c.ink3 : c.ink },
+            <Segmented
+              options={[
+                { key: 'none', label: t.estimateNone },
+                ...REMIND_HOURS.map((h) => ({
+                  key: String(h),
+                  label: `${String(h).padStart(2, '0')}:00`,
+                })),
               ]}
-            >
-              {task.reminderAt === null ? t.noReminder : timeLabel(task.reminderAt)}
-            </Text>
+              value={remind}
+              onChange={(next) =>
+                setReminderAt(
+                  task.id,
+                  next === 'none'
+                    ? null
+                    : atTime(
+                        startOfDay(task.dueDate ?? addDays(Date.now(), 1)),
+                        Number(next),
+                        0
+                      )
+                )
+              }
+            />
           </Field>
+
+          {task.reminderShift ? (
+            <Field label={t.remindAt}>
+              <Text style={[ui(15), { lineHeight: undefined, color: c.ink }]}>
+                {t.movedTo.replace('{time}', timeLabel(task.reminderAt))}
+              </Text>
+            </Field>
+          ) : null}
+
+          <Field label={t.insistentLabel}>
+            <Text style={[ui(15), { flex: 1, lineHeight: undefined, color: c.ink2 }]}>
+              {t.insistentRow}
+            </Text>
+            <Toggle
+              value={task.insistent === 1}
+              onChange={(on) => setInsistent(task.id, on)}
+              accessibilityLabel={t.insistentRow}
+            />
+          </Field>
+
+          {task.escapeNote ? (
+            <Field label={t.escapedBecause}>
+              <Text numberOfLines={2} style={[ui(15), { flex: 1, color: c.ink2 }]}>
+                {task.escapeNote}
+              </Text>
+            </Field>
+          ) : null}
 
           <Pressable
             onPress={() => setFiling(true)}

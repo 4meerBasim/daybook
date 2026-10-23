@@ -5,9 +5,9 @@ Summary: One task opened up — title, when/remind/priority/subtasks label rows,
 
 ## Related
 - Connects to: [[Today]] — reached by long-pressing a task row, [[Focus Mode]] — the ellipsis button in the header, [[Main Tabs]] — the back chevron calls `navigation.goBack()`, [[Project Detail]], [[Unfiled]] — long-pressing an Unfiled row opens this screen, [[Upcoming]] — long-pressing a row there opens it too, [[Project Picker]], [[Note]]
-- Features: [[Offline First Local Store]], [[Glass Tab Bar]] — not rendered here, which is the bug above, [[Ledger Paper Chrome]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]], [[Ink Strike-Through Completion]], [[Day Capacity Budget]], [[Inbox Triage Chips]], [[Waiting On Follow-Ups]], [[Notes With Live Task Lines]]
+- Features: [[Offline First Local Store]], [[Glass Tab Bar]] — not rendered here, which is the bug above, [[Ledger Paper Chrome]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]], [[Ink Strike-Through Completion]], [[Day Capacity Budget]], [[Inbox Triage Chips]], [[Waiting On Follow-Ups]], [[Notes With Live Task Lines]], [[Adaptive Reminders]]
 - Bugs: [[Focus Mode Unreachable]], [[Task And Subtask Ids Share One Done Map]], [[Stack Screens Reserve Tab Bar Space]], [[Undated Unassigned Tasks Have No Screen]] — long-pressing an [[Unfiled]] row opens this screen, [[Stack Screens Ignore The Bottom Safe Area]], [[Ink Stroke Spans The Whole Title Column]] — not affected; its subtasks use `textDecorationLine`, [[Task Detail And Focus Show A Mock Task]]
-- Enhancements: [[Voice Brain Dump Capture]], [[Adaptive Reminders]]
+- Enhancements: [[Voice Brain Dump Capture]]
 
 ## Notes
 `src/screens/TaskDetailScreen.tsx`. The subtasks are still the only interactive part, and they now come from the `subtasks` table in [[Offline First Local Store]] rather than a literal array in the screen — their own id space under a `parentTaskId`, their own `completedAt`, and a derived `n / m` tally where the mock had the string `1 / 3`. They keep the plain line-through rather than the animated stroke. See [[Task And Subtask Ids Share One Done Map]] for the id space this replaced.

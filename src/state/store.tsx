@@ -1,12 +1,14 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useSQLiteContext } from 'expo-sqlite';
-import { addDays, dayOfMonth, startOfDay } from '../lib/date';
+import { addDays, atTime, dayOfMonth, startOfDay } from '../lib/date';
 import type { SnoozeOffset } from '../db/reminders';
 import {
   CAPACITY,
   DEFAULT_CAPACITY_MINUTES,
+  DEFAULT_REMINDER_HOUR,
   DISPLAY_NAME,
   INK_DECAY,
+  REMINDERS,
   ONBOARDED,
   PROJECT_COLORS,
   type ClosedDayRow,
@@ -22,6 +24,7 @@ import {
   archiveProject,
   assignDueDate,
   closeDay,
+  countMissedReminders,
   deleteNote,
   deleteNoteLine,
   deleteTask,
@@ -45,6 +48,7 @@ import {
   selectNotes,
   selectPref,
   selectProjects,
+  selectReminders,
   selectSubtasks,
   selectTask,
   selectDealable,
@@ -91,6 +95,8 @@ type Snapshot = {
   month: DatedTask[];
   closedToday: ClosedDayRow | null;
   closedDays: ClosedDayRow[];
+  reminders: TaskRow[];
+  escaping: TaskRow | null;
   displayName: string;
   capacity: number;
   decayOn: boolean;
@@ -129,6 +135,13 @@ type Store = Snapshot & {
   setDisplayName: (name: string) => void;
   setCapacity: (minutes: number) => void;
   setDecayOn: (on: boolean) => void;
+  remindersOn: boolean;
+  setRemindersOn: (on: boolean) => void;
+  setReminderAt: (id: string, at: number | null) => void;
+  setInsistent: (id: string, on: boolean) => void;
+  escape: (id: string, reason: string) => void;
+  openEscape: (id: string) => void;
+  closeEscape: () => void;
   retire: (id: string, outcome: 'doIt' | 'schedule' | 'shelve') => void;
   planTomorrow: () => Promise<number>;
   closePage: (decisions: Decision[]) => Promise<void>;
@@ -152,6 +165,8 @@ const EMPTY: Snapshot = {
   month: [],
   closedToday: null,
   closedDays: [],
+  reminders: [],
+  escaping: null,
   displayName: '',
   capacity: DEFAULT_CAPACITY_MINUTES,
   decayOn: true,
@@ -168,6 +183,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [qa, setQa] = useState('');
   const [sel, setSel] = useState(() => dayOfMonth(Date.now()));
   const [reversal, setReversal] = useState<Reversal | null>(null);
+  const [remindersOn, setRemindersOn] = useState(false);
+  const [escaping, setEscaping] = useState<TaskRow | null>(null);
 
   const reload = useCallback(async () => {
     const now = Date.now();
@@ -185,9 +202,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         month,
         closedToday,
         closedDays,
+        reminders,
         displayName,
         capacity,
         decayOn,
+        remindersOn,
         onboarded,
       ] = await Promise.all([
         selectToday(db, now),
@@ -202,9 +221,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         selectMonth(db, now),
         selectClosedDay(db, now),
         selectClosedDays(db),
+        selectReminders(db),
         selectPref(db, DISPLAY_NAME),
         selectPref(db, CAPACITY),
         selectPref(db, INK_DECAY),
+        selectPref(db, REMINDERS),
         selectPref(db, ONBOARDED),
       ]);
       setSnapshot({
@@ -220,11 +241,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         month,
         closedToday,
         closedDays,
+        reminders,
+        escaping: null,
         displayName: displayName ?? '',
         capacity: capacity ? Number(capacity) : DEFAULT_CAPACITY_MINUTES,
         decayOn: decayOn !== 'false',
         onboarded: onboarded === 'true',
       });
+      setRemindersOn(remindersOn === 'true');
       setRevision((r) => r + 1);
     } finally {
       // Root gates on this, so a failed read must still release it or the app never renders
@@ -235,6 +259,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     reload();
   }, [reload]);
+
+  useEffect(() => {
+    const sweep = async () => {
+      await countMissedReminders(db, Date.now());
+      await reload();
+    };
+    sweep();
+  }, [db]);
 
   const value = useMemo<Store>(() => {
     const after = (work: Promise<void>) => {
@@ -328,6 +360,25 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       setDisplayName: (name) => after(setPref(db, DISPLAY_NAME, name)),
       setCapacity: (minutes) => after(setPref(db, CAPACITY, String(minutes))),
       setDecayOn: (on) => after(setPref(db, INK_DECAY, on ? 'true' : 'false')),
+      remindersOn,
+      setRemindersOn: (on) => {
+        setRemindersOn(on);
+        after(setPref(db, REMINDERS, on ? 'true' : 'false'));
+      },
+      setReminderAt: (id, at) => after(updateTask(db, id, { reminderAt: at })),
+      setInsistent: (id, on) => after(updateTask(db, id, { insistent: on ? 1 : 0 })),
+      escape: (id, reason) => {
+        setEscaping(null);
+        after(
+          updateTask(db, id, {
+            escapeNote: reason,
+            reminderAt: atTime(addDays(Date.now(), 1), DEFAULT_REMINDER_HOUR, 0),
+          })
+        );
+      },
+      openEscape: (id) => setEscaping(find(id) ?? null),
+      closeEscape: () => setEscaping(null),
+      escaping,
       retire: (id, outcome) => {
         const task = find(id);
         if (!task) return;
@@ -378,7 +429,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       sel,
       setSel,
     };
-  }, [db, reload, snapshot, loaded, revision, qa, sel, reversal]);
+  }, [db, reload, snapshot, loaded, revision, qa, sel, reversal, remindersOn, escaping]);
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
 }
