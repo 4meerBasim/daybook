@@ -11,10 +11,13 @@ import { rowTitle } from '../db/schema';
 import { Screen } from '../components/Screen';
 import { PageHeader } from '../components/PageHeader';
 import { Checkbox, EmptyRules, Ledger, LedgerRow, SectionLabel } from '../components/Ledger';
+import { CapacityLine } from '../components/CapacityLine';
 import { TaskRow } from '../components/TaskRow';
 import { SwipeableRow } from '../components/SwipeableRow';
 import { Stamp } from '../components/Stamp';
 import { StreakTallyIcon } from '../components/Icon';
+
+const HOUR_UNIT_MINUTES = 60;
 
 export function TodayScreen({
   onStamp,
@@ -27,15 +30,22 @@ export function TodayScreen({
 }) {
   const { c, t, ui, mono, rtl } = useTheme();
   const tabBarFootprint = useTabBarFootprint();
-  const { today, loaded, complete, snooze, remove } = useStore();
+  const { today, loaded, capacity, complete, snooze, remove } = useStore();
   const scrollY = useSharedValue(0);
   const onScroll = useAnimatedScrollHandler((e) => {
     scrollY.value = e.contentOffset.y;
   });
 
   const now = Date.now();
-  const leftN = today.filter((k) => k.completedAt === null).length;
+  const open = today.filter((k) => k.completedAt === null);
+  const leftN = open.length;
   const allDone = loaded && leftN === 0;
+  const committed = open.reduce((total, k) => total + (k.duration ?? 0), 0);
+  const unestimated = open.filter((k) => k.duration === null).length;
+  const overrunUnits = Math.min(
+    4,
+    Math.ceil(Math.max(committed - capacity, 0) / HOUR_UNIT_MINUTES)
+  );
 
   const swipeActions = [
     { name: 'complete', label: t.done },
@@ -57,6 +67,8 @@ export function TodayScreen({
           trailing={leftN ? `${leftN} ${t.left}` : t.allDoneShort}
           scrollY={scrollY}
         />
+
+        <CapacityLine committed={committed} capacity={capacity} unestimated={unestimated} />
 
         <Ledger>
           {today.map((k) => {
@@ -108,7 +120,7 @@ export function TodayScreen({
             </View>
           </LedgerRow>
 
-          <EmptyRules count={4} />
+          <EmptyRules count={4} overrun={overrunUnits} />
         </Ledger>
       </Animated.ScrollView>
 

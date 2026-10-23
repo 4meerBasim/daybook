@@ -1,7 +1,8 @@
 import type { Palette } from '../theme/palette';
-import { addDays, atTime, nextWeekday, startOfDay } from './date';
+import type { Strings } from '../i18n/strings';
+import { addDays, atTime, minutesLabel, nextWeekday, startOfDay } from './date';
 
-export type TokenKind = 'plain' | 'date' | 'time' | 'tag' | 'pri' | 'rep';
+export type TokenKind = 'plain' | 'date' | 'time' | 'tag' | 'pri' | 'rep' | 'dur';
 
 export type Token = { text: string; kind: TokenKind };
 export type Chip = { label: string; kind: Exclude<TokenKind, 'plain'> };
@@ -9,7 +10,26 @@ export type Chip = { label: string; kind: Exclude<TokenKind, 'plain'> };
 export type Parsed = { tokens: Token[]; chips: Chip[]; hasDate: boolean };
 
 const RE =
-  /(\btomorrow\b|\btoday\b|\btonight\b|\bnext (?:week|monday|friday)\b|\bevery (?:day|week|monday|friday|month)\b|غداً|غدا|اليوم|كل (?:يوم|أسبوع|شهر)|\d{1,2}(?::\d{2})?\s*(?:am|pm)\b|#[\w؀-ۿ]+|!+|مهم)/gi;
+  /(\btomorrow\b|\btoday\b|\btonight\b|\bnext (?:week|monday|friday)\b|\bevery (?:day|week|monday|friday|month)\b|غداً|غدا|اليوم|كل (?:يوم|أسبوع|شهر)|\d{1,2}(?::\d{2})?\s*(?:am|pm)\b|[\d٠-٩]{1,3}\s*(?:h(?:rs?|ours?)?|m(?:ins?|inutes?)?)\b|[\d٠-٩]{1,3}\s*(?:دقائق|دقيقة|ساعات|ساعة|د|س)|#[\w؀-ۿ]+|!+|مهم)/gi;
+
+const DURATION_RE = /^([\d٠-٩]{1,3})\s*(.*)$/;
+
+const HOUR_UNITS = /^(?:h|hr|hrs|hour|hours|س|ساعة|ساعات)$/i;
+
+const ARABIC_ZERO = '٠'.charCodeAt(0);
+
+function latinDigits(text: string): string {
+  return text.replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - ARABIC_ZERO));
+}
+
+export function durationMinutes(text: string): number | null {
+  const m = DURATION_RE.exec(text.trim());
+  if (!m) return null;
+  const n = Number(latinDigits(m[1]));
+  if (!n) return null;
+  return HOUR_UNITS.test(m[2].trim()) ? n * 60 : n;
+}
+
 
 const TAG_RE = /#[\w؀-ۿ]+/g;
 
@@ -21,7 +41,7 @@ export function splitTags(title: string): { title: string; tags: string[] } {
   };
 }
 
-export function parse(q: string, ar: boolean): Parsed {
+export function parse(q: string, ar: boolean, t: Strings): Parsed {
   const tokens: Token[] = [];
   const chips: Chip[] = [];
   const re = new RegExp(RE.source, 'gi');
@@ -46,9 +66,13 @@ export function parse(q: string, ar: boolean): Parsed {
         label: '↻ ' + (ar ? 'يتكرر' : 'Repeats ' + lw.replace('every ', '')),
         kind: 'rep',
       });
-    } else if (/\d/.test(w)) {
+    } else if (/^\d+\s*(?:am|pm)|^\d+:\d/i.test(w)) {
       kind = 'time';
       chips.push({ label: w.toUpperCase().replace(/\s+/, ' '), kind: 'time' });
+    } else if (/^[\d٠-٩]/.test(w)) {
+      const minutes = durationMinutes(w);
+      kind = 'dur';
+      chips.push({ label: minutes ? minutesLabel(minutes, t) : w, kind: 'dur' });
     } else {
       kind = 'date';
       const L: Record<string, string> = {
@@ -76,7 +100,13 @@ export function parse(q: string, ar: boolean): Parsed {
   return { tokens, chips, hasDate };
 }
 
-export type Draft = { title: string; tags: string[]; dueDate: number | null; high: boolean };
+export type Draft = {
+  title: string;
+  tags: string[];
+  dueDate: number | null;
+  duration: number | null;
+  high: boolean;
+};
 
 const MONDAY = 1;
 const FRIDAY = 5;
@@ -111,14 +141,22 @@ export function draft(p: Parsed, now: number): Draft {
 
   const { title, tags } = splitTags(written);
   const high = p.tokens.some((tk) => tk.kind === 'pri');
+  const durToken = p.tokens.find((tk) => tk.kind === 'dur');
+  const duration = durToken ? durationMinutes(durToken.text) : null;
 
-  if (!p.hasDate) return { title, tags, dueDate: null, high };
+  if (!p.hasDate) return { title, tags, dueDate: null, duration, high };
 
   const dateToken = p.tokens.find((tk) => tk.kind === 'date');
   const timeToken = p.tokens.find((tk) => tk.kind === 'time');
   const day = dateToken ? resolveDay(dateToken.text, now) : startOfDay(now);
 
-  return { title, tags, dueDate: timeToken ? applyTime(day, timeToken.text) : day, high };
+  return {
+    title,
+    tags,
+    dueDate: timeToken ? applyTime(day, timeToken.text) : day,
+    duration,
+    high,
+  };
 }
 
 export function tokenColor(kind: TokenKind, c: Palette): string {
@@ -131,6 +169,8 @@ export function tokenColor(kind: TokenKind, c: Palette): string {
     case 'pri':
       return c.ver;
     case 'rep':
+      return c.moss;
+    case 'dur':
       return c.moss;
     default:
       return c.ink;
@@ -161,6 +201,7 @@ export function chipColors(kind: Chip['kind'], c: Palette): { bg: string; fg: st
     case 'pri':
       return { bg: c.verS, fg: c.ver };
     case 'rep':
+    case 'dur':
       return { bg: c.mossS, fg: c.moss };
   }
 }

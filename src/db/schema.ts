@@ -17,6 +17,12 @@ export const MOTION = 'motion';
 
 export const ONBOARDED = 'onboarded';
 
+export const CAPACITY = 'capacity';
+
+export const DEFAULT_CAPACITY_MINUTES = 360;
+
+export const CAPACITY_OPTIONS = [240, 360, 480] as const;
+
 export const PRIORITY_HIGH = 3;
 
 export const DEFAULT_TASK_COLOR: ColorToken = 'blue';

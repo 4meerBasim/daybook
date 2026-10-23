@@ -1,16 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { useTheme } from '../theme/ThemeProvider';
 import { maxFontSizeMultiplier, metrics, radius } from '../theme/tokens';
 import { align } from '../lib/rtl';
 import { longDate, stamped } from '../lib/date';
+import { useStore } from '../state/store';
 import { Screen, useScreenBottom } from '../components/Screen';
 import { EmptyRules, Ledger, LedgerRow } from '../components/Ledger';
 import { Stamp } from '../components/Stamp';
 
 export function PageClosedScreen({ onPlanTomorrow }: { onPlanTomorrow: () => void }) {
   const { c, t, ui, mono, display, rtl } = useTheme();
+  const { planTomorrow } = useStore();
   const bottom = useScreenBottom();
+  const [filled, setFilled] = useState<number | null>(null);
   const struck = [t.task1, t.task2, t.task3, t.task4, t.task5];
   const now = Date.now();
 
@@ -63,7 +66,11 @@ export function PageClosedScreen({ onPlanTomorrow }: { onPlanTomorrow: () => voi
         </Text>
 
         <Pressable
-          onPress={onPlanTomorrow}
+          onPress={async () => {
+            const count = await planTomorrow();
+            if (count) onPlanTomorrow();
+            else setFilled(0);
+          }}
           android_ripple={null}
           accessibilityRole="button"
           accessibilityLabel={t.planTomorrow}
@@ -79,6 +86,14 @@ export function PageClosedScreen({ onPlanTomorrow }: { onPlanTomorrow: () => voi
         >
           <Text style={[ui(17, 500), { color: c.ink }]}>{t.planTomorrow}</Text>
         </Pressable>
+
+        {filled === 0 ? (
+          <Text
+            style={[mono(12, 500, 0.1), { color: c.ink3, marginTop: 10, textAlign: align(rtl) }]}
+          >
+            {t.nothingFits}
+          </Text>
+        ) : null}
       </View>
     </Screen>
   );

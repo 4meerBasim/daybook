@@ -4,7 +4,7 @@ import * as Haptics from 'expo-haptics';
 import { useTheme } from '../theme/ThemeProvider';
 import { maxFontSizeMultiplier, metrics } from '../theme/tokens';
 import { align, insetStart, marginStart, pad, row } from '../lib/rtl';
-import { longDate, timeLabel } from '../lib/date';
+import { longDate, minutesLabel, timeLabel } from '../lib/date';
 import { tagColors } from '../lib/parse';
 import { useStore, useTaskDetail } from '../state/store';
 import {
@@ -17,6 +17,7 @@ import {
 import { Screen, useHeaderTop, useScreenBottom } from '../components/Screen';
 import { Checkbox, rowContent, useRuling } from '../components/Ledger';
 import { Chip } from '../components/Chip';
+import { Segmented } from '../components/Segmented';
 import { ChevronBackIcon, EllipsisIcon } from '../components/Icon';
 
 function SubtaskRow({ task, onToggle }: { task: SubtaskRowData; onToggle: () => void }) {
@@ -65,6 +66,8 @@ function SubtaskRow({ task, onToggle }: { task: SubtaskRowData; onToggle: () => 
   );
 }
 
+const ESTIMATE_OPTIONS = [15, 30, 60, 120];
+
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   const { c, mono, rtl, unit } = useTheme();
   return (
@@ -104,7 +107,7 @@ export function TaskDetailScreen({
   onFocus: () => void;
 }) {
   const { c, t, ui, mono, display, rtl } = useTheme();
-  const { projects, complete, completeSubtask } = useStore();
+  const { projects, complete, completeSubtask, edit } = useStore();
   const { task, subtasks } = useTaskDetail(taskId);
   const top = useHeaderTop();
   const bottom = useScreenBottom();
@@ -116,6 +119,7 @@ export function TaskDetailScreen({
   const tags = taskTags(task);
   const doneCount = subtasks.filter((s) => s.completedAt !== null).length;
   const clock = timeLabel(task.dueDate);
+  const estimate = task.duration === null ? 'none' : String(task.duration);
 
   return (
     <Screen>
@@ -217,6 +221,19 @@ export function TaskDetailScreen({
             >
               {task.reminderAt === null ? t.noReminder : timeLabel(task.reminderAt)}
             </Text>
+          </Field>
+
+          <Field label={t.estimate}>
+            <Segmented
+              options={[
+                { key: 'none', label: t.estimateNone },
+                ...ESTIMATE_OPTIONS.map((m) => ({ key: String(m), label: minutesLabel(m, t) })),
+              ]}
+              value={estimate}
+              onChange={(next) =>
+                edit(task.id, { duration: next === 'none' ? null : Number(next) })
+              }
+            />
           </Field>
 
           {task.priority === PRIORITY_HIGH || tags.length ? (

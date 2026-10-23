@@ -4,6 +4,8 @@ import { useTheme } from '../theme/ThemeProvider';
 import { maxFontSizeMultiplier, metrics, radius } from '../theme/tokens';
 import { align, row } from '../lib/rtl';
 import { useStore } from '../state/store';
+import { CAPACITY_OPTIONS } from '../db/schema';
+import { minutesLabel } from '../lib/date';
 import { Segmented } from './Segmented';
 import { Toggle } from './Toggle';
 import { Dot } from './Ledger';
@@ -18,7 +20,7 @@ export function SettingsRows({
   onOpenUnfiled: () => void;
 }) {
   const { c, t, lang, appearance, motion, ui, rtl, setLang, setAppearance, setMotion } = useTheme();
-  const { projects, unfiled } = useStore();
+  const { projects, unfiled, capacity, setCapacity } = useStore();
 
   return (
     <View style={{ borderTopWidth: 1, borderTopColor: c.rule }}>
@@ -40,6 +42,15 @@ export function SettingsRows({
           ]}
           value={appearance}
           onChange={setAppearance}
+        />
+      </Row>
+
+      <Row>
+        <RowLabel label={t.dayCapacity} />
+        <Segmented
+          options={CAPACITY_OPTIONS.map((m) => ({ key: String(m), label: minutesLabel(m, t) }))}
+          value={String(capacity)}
+          onChange={(v) => setCapacity(Number(v))}
         />
       </Row>
 

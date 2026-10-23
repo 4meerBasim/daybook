@@ -14,6 +14,7 @@ export type NewTask = {
   title: string;
   tags: string[];
   dueDate: number | null;
+  duration: number | null;
   priority: number | null;
 };
 
@@ -73,6 +74,27 @@ export function selectUnfiled(db: SQLiteDatabase): Promise<TaskRow[]> {
   );
 }
 
+export function selectUndated(db: SQLiteDatabase): Promise<TaskRow[]> {
+  return db.getAllAsync<TaskRow>(
+    `SELECT * FROM tasks
+      WHERE deletedAt IS NULL
+        AND completedAt IS NULL
+        AND dueDate IS NULL
+      ORDER BY sortOrder`
+  );
+}
+
+export function selectDay(db: SQLiteDatabase, day: number): Promise<DatedTask[]> {
+  return db.getAllAsync<DatedTask>(
+    `SELECT * FROM tasks
+      WHERE deletedAt IS NULL
+        AND dueDate >= $from
+        AND dueDate < $to
+      ORDER BY sortOrder`,
+    { $from: startOfDay(day), $to: startOfDay(addDays(day, 1)) }
+  );
+}
+
 export function selectProjects(db: SQLiteDatabase): Promise<ProjectRow[]> {
   return db.getAllAsync<ProjectRow>(
     'SELECT * FROM projects WHERE archivedAt IS NULL ORDER BY createdAt'
@@ -122,8 +144,8 @@ export async function insertTask(db: SQLiteDatabase, task: NewTask, now: number)
     'SELECT COALESCE(MAX(sortOrder), 0) + 1 AS next FROM tasks'
   );
   await db.runAsync(
-    `INSERT INTO tasks (id, title, tags, color, dueDate, createdAt, priority, sortOrder)
-      VALUES ($id, $title, $tags, $color, $dueDate, $createdAt, $priority, $sortOrder)`,
+    `INSERT INTO tasks (id, title, tags, color, dueDate, createdAt, duration, priority, sortOrder)
+      VALUES ($id, $title, $tags, $color, $dueDate, $createdAt, $duration, $priority, $sortOrder)`,
     {
       $id: newId(),
       $title: task.title,
@@ -131,6 +153,7 @@ export async function insertTask(db: SQLiteDatabase, task: NewTask, now: number)
       $color: DEFAULT_TASK_COLOR,
       $dueDate: task.dueDate,
       $createdAt: now,
+      $duration: task.duration,
       $priority: task.priority,
       $sortOrder: tail ? tail.next : 1,
     }
@@ -174,6 +197,23 @@ export async function archiveProject(
       $id: id,
     });
   });
+}
+
+export async function assignDueDate(
+  db: SQLiteDatabase,
+  ids: string[],
+  dueDate: number
+): Promise<void> {
+  if (!ids.length) return;
+  const slots = ids.map((_, i) => `$id${i}`).join(', ');
+  const params: Record<string, SQLiteBindValue> = { $dueDate: dueDate };
+  ids.forEach((id, i) => {
+    params[`$id${i}`] = id;
+  });
+  await db.runAsync(
+    `UPDATE tasks SET dueDate = $dueDate WHERE id IN (${slots})`,
+    params
+  );
 }
 
 export async function updateTask(

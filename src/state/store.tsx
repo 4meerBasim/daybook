@@ -1,8 +1,10 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useSQLiteContext } from 'expo-sqlite';
-import { dayOfMonth } from '../lib/date';
+import { addDays, dayOfMonth, startOfDay } from '../lib/date';
 import type { SnoozeOffset } from '../db/reminders';
 import {
+  CAPACITY,
+  DEFAULT_CAPACITY_MINUTES,
   DISPLAY_NAME,
   ONBOARDED,
   PROJECT_COLORS,
@@ -13,17 +15,20 @@ import {
 } from '../db/schema';
 import {
   archiveProject,
+  assignDueDate,
   deleteTask,
   insertProject,
   insertTask,
   restoreTask,
   selectAssigned,
+  selectDay,
   selectMonth,
   selectPref,
   selectProjects,
   selectSubtasks,
   selectTask,
   selectToday,
+  selectUndated,
   selectUnfiled,
   selectUpcoming,
   setPref,
@@ -53,6 +58,7 @@ type Snapshot = {
   projects: ProjectRow[];
   month: DatedTask[];
   displayName: string;
+  capacity: number;
   onboarded: boolean;
 };
 
@@ -74,6 +80,8 @@ type Store = Snapshot & {
   renameProject: (id: string, name: string) => void;
   removeProject: (id: string) => void;
   setDisplayName: (name: string) => void;
+  setCapacity: (minutes: number) => void;
+  planTomorrow: () => Promise<number>;
   markOnboarded: () => void;
   qa: string;
   setQa: (v: string) => void;
@@ -89,6 +97,7 @@ const EMPTY: Snapshot = {
   projects: [],
   month: [],
   displayName: '',
+  capacity: DEFAULT_CAPACITY_MINUTES,
   onboarded: false,
 };
 
@@ -106,7 +115,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const reload = useCallback(async () => {
     const now = Date.now();
     try {
-      const [today, upcoming, assigned, unfiled, projects, month, displayName, onboarded] =
+      const [today, upcoming, assigned, unfiled, projects, month, displayName, capacity, onboarded] =
         await Promise.all([
           selectToday(db, now),
           selectUpcoming(db, now),
@@ -115,6 +124,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           selectProjects(db),
           selectMonth(db, now),
           selectPref(db, DISPLAY_NAME),
+          selectPref(db, CAPACITY),
           selectPref(db, ONBOARDED),
         ]);
       setSnapshot({
@@ -125,6 +135,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         projects,
         month,
         displayName: displayName ?? '',
+        capacity: capacity ? Number(capacity) : DEFAULT_CAPACITY_MINUTES,
         onboarded: onboarded === 'true',
       });
       setRevision((r) => r + 1);
@@ -194,6 +205,27 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       renameProject: (id, name) => after(updateProjectName(db, id, name)),
       removeProject: (id) => after(archiveProject(db, id, Date.now())),
       setDisplayName: (name) => after(setPref(db, DISPLAY_NAME, name)),
+      setCapacity: (minutes) => after(setPref(db, CAPACITY, String(minutes))),
+      planTomorrow: async () => {
+        const tomorrow = startOfDay(addDays(Date.now(), 1));
+        const [onDay, undated] = await Promise.all([selectDay(db, tomorrow), selectUndated(db)]);
+        const booked = onDay
+          .filter((k) => k.completedAt === null)
+          .reduce((total, k) => total + (k.duration ?? 0), 0);
+
+        let room = snapshot.capacity - booked;
+        const filling: string[] = [];
+        for (const k of undated) {
+          if (room <= 0) break;
+          if (k.duration === null || k.duration > room) continue;
+          filling.push(k.id);
+          room -= k.duration;
+        }
+
+        await assignDueDate(db, filling, tomorrow);
+        await reload();
+        return filling.length;
+      },
       markOnboarded: () => after(setPref(db, ONBOARDED, 'true')),
       qa,
       setQa,

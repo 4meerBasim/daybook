@@ -51,6 +51,13 @@ export function timeLabel(ts: number | null): string {
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
 
+export function minutesLabel(minutes: number, t: Strings): string {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  if (!h) return `${m}${t.minuteShort}`;
+  return m ? `${h}${t.hourShort} ${m}${t.minuteShort}` : `${h}${t.hourShort}`;
+}
+
 export function isOverdue(ts: number, now: number): boolean {
   return ts < startOfDay(now);
 }
