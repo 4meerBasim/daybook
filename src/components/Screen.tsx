@@ -2,6 +2,7 @@ import React from 'react';
 import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../theme/ThemeProvider';
+import { metrics } from '../theme/tokens';
 
 export function Screen({
   children,
@@ -20,4 +21,8 @@ export function Screen({
 
 export function useHeaderTop() {
   return useSafeAreaInsets().top + 2;
+}
+
+export function useScreenBottom() {
+  return Math.max(useSafeAreaInsets().bottom, metrics.gutter);
 }

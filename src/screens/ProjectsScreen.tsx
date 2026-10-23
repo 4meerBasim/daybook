@@ -5,7 +5,7 @@ import { maxFontSizeMultiplier, metrics } from '../theme/tokens';
 import { align, marginStart, row } from '../lib/rtl';
 import { useStore } from '../state/store';
 import { projectName, type ProjectRow, type TaskRow } from '../db/schema';
-import { Screen, useHeaderTop } from '../components/Screen';
+import { Screen, useHeaderTop, useScreenBottom } from '../components/Screen';
 import { Dot, EmptyRules, Ledger, rowContent, useRuling } from '../components/Ledger';
 import { Sheet, SheetButton, SheetRow } from '../components/Sheet';
 import { NameSheet } from '../components/NameSheet';
@@ -15,12 +15,13 @@ export function ProjectsScreen({ onOpenProject }: { onOpenProject: (projectId: s
   const { c, t, display, rtl } = useTheme();
   const { projects, assigned, createProject, renameProject, removeProject } = useStore();
   const top = useHeaderTop();
+  const bottom = useScreenBottom();
   const [managed, setManaged] = useState<ProjectRow | null>(null);
   const [named, setNamed] = useState<ProjectRow | 'new' | null>(null);
 
   return (
     <Screen>
-      <ScrollView contentContainerStyle={{ paddingBottom: metrics.gutter }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: bottom }}>
         <View style={{ paddingTop: top, paddingHorizontal: metrics.gutter, paddingBottom: 12 }}>
           <Text
             maxFontSizeMultiplier={maxFontSizeMultiplier}

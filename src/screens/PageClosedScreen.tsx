@@ -4,12 +4,13 @@ import { useTheme } from '../theme/ThemeProvider';
 import { maxFontSizeMultiplier, metrics, radius } from '../theme/tokens';
 import { align } from '../lib/rtl';
 import { longDate, stamped } from '../lib/date';
-import { Screen } from '../components/Screen';
+import { Screen, useScreenBottom } from '../components/Screen';
 import { EmptyRules, Ledger, LedgerRow } from '../components/Ledger';
 import { Stamp } from '../components/Stamp';
 
 export function PageClosedScreen({ onPlanTomorrow }: { onPlanTomorrow: () => void }) {
   const { c, t, ui, mono, display, rtl } = useTheme();
+  const bottom = useScreenBottom();
   const struck = [t.task1, t.task2, t.task3, t.task4, t.task5];
   const now = Date.now();
 
@@ -53,7 +54,7 @@ export function PageClosedScreen({ onPlanTomorrow }: { onPlanTomorrow: () => voi
         </View>
       </Ledger>
 
-      <View style={{ paddingHorizontal: 20, paddingTop: 24 }}>
+      <View style={{ paddingHorizontal: 20, paddingTop: 24, paddingBottom: bottom }}>
         <Text style={[display(24, { italic: true }), { color: c.ink, textAlign: align(rtl) }]}>
           {t.closingLine}
         </Text>

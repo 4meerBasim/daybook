@@ -6,7 +6,7 @@ import { align, insetStart, pad, row } from '../lib/rtl';
 import { addDays, dayOfMonth, startOfMonth, startOfNextMonth, timeLabel } from '../lib/date';
 import { useStore } from '../state/store';
 import { rowTitle } from '../db/schema';
-import { Screen, useHeaderTop } from '../components/Screen';
+import { Screen, useHeaderTop, useScreenBottom } from '../components/Screen';
 import { EmptyRules } from '../components/Ledger';
 import { TaskRow } from '../components/TaskRow';
 import { TallyMarks } from '../components/TallyMarks';
@@ -17,6 +17,7 @@ export function CalendarScreen() {
   const { c, t, rtl, display, mono, unit } = useTheme();
   const { month, sel, setSel, complete } = useStore();
   const top = useHeaderTop();
+  const bottom = useScreenBottom();
 
   const now = Date.now();
   const d = new Date(now);
@@ -131,7 +132,7 @@ export function CalendarScreen() {
           ))}
         </View>
 
-        <ScrollView style={{ flex: 1 }}>
+        <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: bottom }}>
           <View style={{ borderTopWidth: 1, borderTopColor: c.rule, marginTop: 8 }}>
             <View
               style={[

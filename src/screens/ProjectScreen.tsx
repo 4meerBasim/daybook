@@ -8,7 +8,7 @@ import { tagColors } from '../lib/parse';
 import { useStore } from '../state/store';
 import { projectName, rowTitle, taskTags, type TaskRow as TaskRowData } from '../db/schema';
 import { SEED_PROJECT_ID } from '../db/seed';
-import { Screen, useHeaderTop } from '../components/Screen';
+import { Screen, useHeaderTop, useScreenBottom } from '../components/Screen';
 import { Ledger, SectionLabel, EmptyRules } from '../components/Ledger';
 import { TaskRow } from '../components/TaskRow';
 import { SwipeableRow } from '../components/SwipeableRow';
@@ -87,6 +87,7 @@ export function ProjectScreen({ projectId }: { projectId: string }) {
   const { c, t, display, ui, mono, rtl } = useTheme();
   const { projects, assigned } = useStore();
   const top = useHeaderTop();
+  const bottom = useScreenBottom();
   const [picking, setPicking] = useState<TaskRowData | null>(null);
 
   const project = projects.find((p) => p.id === projectId);
@@ -101,7 +102,7 @@ export function ProjectScreen({ projectId }: { projectId: string }) {
 
   return (
     <Screen>
-      <ScrollView contentContainerStyle={{ paddingBottom: metrics.gutter }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: bottom }}>
         <View style={{ paddingTop: top, paddingHorizontal: metrics.gutter, gap: 6 }}>
           <View style={{ flexDirection: row(rtl), alignItems: 'center', gap: 8 }}>
             <View

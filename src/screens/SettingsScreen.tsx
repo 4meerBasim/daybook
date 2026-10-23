@@ -3,7 +3,7 @@ import { ScrollView, Text, View } from 'react-native';
 import { useTheme } from '../theme/ThemeProvider';
 import { maxFontSizeMultiplier, metrics } from '../theme/tokens';
 import { align } from '../lib/rtl';
-import { Screen, useHeaderTop } from '../components/Screen';
+import { Screen, useHeaderTop, useScreenBottom } from '../components/Screen';
 import { SettingsRows } from '../components/SettingsRows';
 
 export function SettingsScreen({
@@ -17,10 +17,11 @@ export function SettingsScreen({
 }) {
   const { c, t, display, rtl } = useTheme();
   const top = useHeaderTop();
+  const bottom = useScreenBottom();
 
   return (
     <Screen>
-      <ScrollView>
+      <ScrollView contentContainerStyle={{ paddingBottom: bottom }}>
         <View style={{ paddingTop: top, paddingHorizontal: metrics.gutter, paddingBottom: 12 }}>
           <Text
             maxFontSizeMultiplier={maxFontSizeMultiplier}
