@@ -5,7 +5,7 @@ Summary: A month grid where each day carries tally marks for its workload, with 
 
 ## Related
 - Connects to: [[Upcoming]] — reached by long-pressing the Upcoming tab; returns via the system back gesture, [[Today]] — reached by swiping a row past the pick-date threshold, [[Main Tabs]], [[Unfiled]] — will route here via its pick-date swipe once Calendar can apply a date to a task
-- Features: [[Offline First Local Store]], [[Calendar Tally Marks]], [[Glass Tab Bar]] — not rendered here, which is the bug above, [[Ledger Paper Chrome]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]], [[Lift The Ink]], [[Day Capacity Budget]]
+- Features: [[Offline First Local Store]], [[Calendar Tally Marks]], [[Glass Tab Bar]] — not rendered here, which is the bug above, [[Ledger Paper Chrome]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]], [[Lift The Ink]], [[Day Capacity Budget]], [[Waiting On Follow-Ups]]
 - Bugs: [[Snooze And Delete Share One Cleared Map]], [[Page Header Shows A Frozen Date]], [[Stack Screens Reserve Tab Bar Space]], [[Calendar Overflow Is Unreachable]], [[Native Layout Direction Is Not Pinned]], [[Swipe Actions Not Wired Into Task Lists]], [[Stack Screens Ignore The Bottom Safe Area]]
 - Enhancements: [[Weekly Spread Review]]
 

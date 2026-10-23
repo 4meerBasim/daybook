@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
 import { useTheme } from '../theme/ThemeProvider';
@@ -8,13 +8,14 @@ import { align, marginStart, pad, row } from '../lib/rtl';
 import { isOverdue, isYesterday, longDate, startOfDay, timeLabel } from '../lib/date';
 import { useStore } from '../state/store';
 import { asksRetirement, inkDecay } from '../lib/decay';
-import { rowTitle } from '../db/schema';
+import { rowTitle, type TaskRow as TaskRowData } from '../db/schema';
 import { Screen } from '../components/Screen';
 import { PageHeader } from '../components/PageHeader';
 import { Checkbox, EmptyRules, Ledger, LedgerRow, SectionLabel } from '../components/Ledger';
 import { CapacityLine } from '../components/CapacityLine';
 import { TaskRow } from '../components/TaskRow';
 import { RetirementPrompt } from '../components/RetirementPrompt';
+import { WaitingSheet } from '../components/WaitingSheet';
 import { SwipeableRow } from '../components/SwipeableRow';
 import { Stamp } from '../components/Stamp';
 import { StreakTallyIcon } from '../components/Icon';
@@ -25,17 +26,16 @@ export function TodayScreen({
   onClose,
   onOpenClosed,
   onOpenTask,
-  onPickDate,
 }: {
   onClose: () => void;
   onOpenClosed: (day: number) => void;
   onOpenTask: (taskId: string) => void;
-  onPickDate: () => void;
 }) {
   const { c, t, ui, mono, rtl } = useTheme();
   const tabBarFootprint = useTabBarFootprint();
-  const { today, loaded, capacity, closedToday, decayOn, complete, snooze, remove, retire } =
+  const { today, loaded, capacity, closedToday, decayOn, complete, snooze, remove, retire, block, unblock } =
     useStore();
+  const [blocking, setBlocking] = useState<TaskRowData | null>(null);
   const scrollY = useSharedValue(0);
   const onScroll = useAnimatedScrollHandler((e) => {
     scrollY.value = e.contentOffset.y;
@@ -56,7 +56,7 @@ export function TodayScreen({
   const swipeActions = [
     { name: 'complete', label: t.done },
     { name: 'snooze', label: t.tomorrow },
-    { name: 'pickDate', label: t.pickDate },
+    { name: 'waiting', label: t.waitingOn },
     { name: 'delete', label: t.delete },
   ];
 
@@ -84,13 +84,16 @@ export function TodayScreen({
                 <SwipeableRow
                   onComplete={() => complete(k.id, !done)}
                   onSnooze={() => snooze(k.id, 'tomorrow')}
-                  onPickDate={onPickDate}
+                  onWaiting={() => setBlocking(k)}
                   onDelete={() => remove(k.id)}
                   onLongPress={() => onOpenTask(k.id)}
                 >
                   <TaskRow
                     title={rowTitle(k, t)}
-                    meta={isYesterday(k.dueDate, now) ? t.yesterday : timeLabel(k.dueDate)}
+                    meta={
+                      k.blockedBy ??
+                      (isYesterday(k.dueDate, now) ? t.yesterday : timeLabel(k.dueDate))
+                    }
                     dotColor={c[k.color]}
                     done={done}
                     carryCount={k.carryCount}
@@ -102,7 +105,7 @@ export function TodayScreen({
                       const action = e.nativeEvent.actionName;
                       if (action === 'complete') complete(k.id, !done);
                       if (action === 'snooze') snooze(k.id, 'tomorrow');
-                      if (action === 'pickDate') onPickDate();
+                      if (action === 'waiting') setBlocking(k);
                       if (action === 'delete') remove(k.id);
                     }}
                   />
@@ -174,6 +177,15 @@ export function TodayScreen({
         >
           <Stamp label={closed ? t.pageClosed : t.closeThePage} />
         </Pressable>
+      ) : null}
+
+      {blocking ? (
+        <WaitingSheet
+          task={blocking}
+          onClose={() => setBlocking(null)}
+          onSubmit={(who, nudgeAt) => block(blocking.id, who, nudgeAt)}
+          onClear={() => unblock(blocking.id)}
+        />
       ) : null}
     </Screen>
   );

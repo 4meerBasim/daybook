@@ -3,7 +3,7 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 import { useTheme } from '../theme/ThemeProvider';
 import { maxFontSizeMultiplier, metrics } from '../theme/tokens';
 import { align, row } from '../lib/rtl';
-import { addDays, startOfDay } from '../lib/date';
+import { addDays, longDate, startOfDay } from '../lib/date';
 import { useStore } from '../state/store';
 import { inkDecay } from '../lib/decay';
 import { rowTitle } from '../db/schema';
@@ -24,7 +24,7 @@ export function UnfiledScreen({
   const { c, t, display, ui, rtl } = useTheme();
   const top = useHeaderTop();
   const bottom = useScreenBottom();
-  const { unfiled, someday, decayOn, complete, reschedule, shelve, unshelve, remove } =
+  const { unfiled, someday, waiting, decayOn, complete, reschedule, shelve, unshelve, unblock, remove } =
     useStore();
 
   const now = Date.now();
@@ -66,7 +66,7 @@ export function UnfiledScreen({
           </Text>
         </View>
 
-        {unfiled.length === 0 && someday.length === 0 ? (
+        {unfiled.length === 0 && someday.length === 0 && waiting.length === 0 ? (
           <View style={{ paddingHorizontal: metrics.gutter, paddingBottom: 24, gap: 4 }}>
             <Text
               maxFontSizeMultiplier={maxFontSizeMultiplier}
@@ -132,6 +132,45 @@ export function UnfiledScreen({
             );
           })}
 
+          {waiting.length ? (
+            <>
+              <SectionLabel label={t.waiting} />
+              {waiting.map((k) => (
+                <SwipeableRow
+                  key={k.id}
+                  onComplete={() => complete(k.id, true)}
+                  onDelete={() => remove(k.id)}
+                  onLongPress={() => onOpenTask(k.id)}
+                >
+                  <TaskRow
+                    title={rowTitle(k, t)}
+                    meta={k.blockedBy ?? undefined}
+                    decay={inkDecay(k, now, decayOn)}
+                    onToggle={() => complete(k.id, true)}
+                    actions={
+                      <TriageChip
+                        label={t.notWaiting}
+                        tint={c.mossS}
+                        onPress={() => unblock(k.id)}
+                      />
+                    }
+                    accessibilityActions={[
+                      { name: 'complete', label: t.done },
+                      { name: 'unblock', label: t.notWaiting },
+                      { name: 'delete', label: t.delete },
+                    ]}
+                    onAccessibilityAction={(e) => {
+                      const action = e.nativeEvent.actionName;
+                      if (action === 'complete') complete(k.id, true);
+                      if (action === 'unblock') unblock(k.id);
+                      if (action === 'delete') remove(k.id);
+                    }}
+                  />
+                </SwipeableRow>
+              ))}
+            </>
+          ) : null}
+
           {someday.length ? (
             <>
               <SectionLabel label={t.someday} />
@@ -170,7 +209,7 @@ export function UnfiledScreen({
             </>
           ) : null}
 
-          <EmptyRules count={unfiled.length || someday.length ? 4 : 2} />
+          <EmptyRules count={unfiled.length || someday.length || waiting.length ? 4 : 2} />
         </Ledger>
       </ScrollView>
     </Screen>

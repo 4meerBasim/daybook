@@ -19,6 +19,7 @@ import { Checkbox, rowContent, useRuling } from '../components/Ledger';
 import { Chip } from '../components/Chip';
 import { Segmented } from '../components/Segmented';
 import { ProjectPickerSheet } from './ProjectPickerSheet';
+import { WaitingSheet } from '../components/WaitingSheet';
 import { ChevronBackIcon, EllipsisIcon } from '../components/Icon';
 
 function SubtaskRow({ task, onToggle }: { task: SubtaskRowData; onToggle: () => void }) {
@@ -108,11 +109,12 @@ export function TaskDetailScreen({
   onFocus: () => void;
 }) {
   const { c, t, ui, mono, display, rtl } = useTheme();
-  const { projects, complete, completeSubtask, edit } = useStore();
+  const { projects, complete, completeSubtask, edit, block, unblock } = useStore();
   const { task, subtasks } = useTaskDetail(taskId);
   const top = useHeaderTop();
   const bottom = useScreenBottom();
   const [filing, setFiling] = useState(false);
+  const [blocking, setBlocking] = useState(false);
 
   if (!task) return <Screen />;
 
@@ -243,6 +245,25 @@ export function TaskDetailScreen({
             </Field>
           </Pressable>
 
+          <Pressable
+            onPress={() => setBlocking(true)}
+            android_ripple={null}
+            accessibilityRole="button"
+            accessibilityLabel={t.waitingOn}
+          >
+            <Field label={t.waitingOn}>
+              <Text
+                style={[ui(15), { lineHeight: undefined, color: task.blockedBy ? c.ink : c.ink3 }]}
+              >
+                {task.blockedBy ?? t.notWaiting}
+              </Text>
+              <View style={{ flex: 1 }} />
+              {task.nudgeAt ? (
+                <Text style={[mono(12, 500), { color: c.ink3 }]}>{longDate(task.nudgeAt, t)}</Text>
+              ) : null}
+            </Field>
+          </Pressable>
+
           <Field label={t.estimate}>
             <Segmented
               options={[
@@ -328,6 +349,15 @@ export function TaskDetailScreen({
       </ScrollView>
 
       {filing ? <ProjectPickerSheet task={task} onClose={() => setFiling(false)} /> : null}
+
+      {blocking ? (
+        <WaitingSheet
+          task={task}
+          onClose={() => setBlocking(false)}
+          onSubmit={(who, nudgeAt) => block(task.id, who, nudgeAt)}
+          onClear={() => unblock(task.id)}
+        />
+      ) : null}
     </Screen>
   );
 }

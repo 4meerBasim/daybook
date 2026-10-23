@@ -44,6 +44,7 @@ export function selectToday(db: SQLiteDatabase, now: number): Promise<DatedTask[
         AND dueDate IS NOT NULL
         AND dueDate < $dayEnd
         AND (snoozedUntil IS NULL OR snoozedUntil <= $now)
+        AND (blockedBy IS NULL OR nudgeAt IS NULL OR nudgeAt <= $now)
         AND (dueDate >= $dayStart OR completedAt IS NULL)
       ORDER BY sortOrder`,
     { $now: now, $dayStart: startOfDay(now), $dayEnd: startOfDay(addDays(now, 1)) }
@@ -56,8 +57,9 @@ export function selectUpcoming(db: SQLiteDatabase, now: number): Promise<DatedTa
       WHERE deletedAt IS NULL
         AND completedAt IS NULL
         AND dueDate >= $dayEnd
+        AND (blockedBy IS NULL OR nudgeAt IS NULL OR nudgeAt <= $now)
       ORDER BY dueDate, sortOrder`,
-    { $dayEnd: startOfDay(addDays(now, 1)) }
+    { $now: now, $dayEnd: startOfDay(addDays(now, 1)) }
   );
 }
 
@@ -77,6 +79,16 @@ export function selectUnfiled(db: SQLiteDatabase): Promise<TaskRow[]> {
         AND projectId IS NULL
         AND somedayAt IS NULL
       ORDER BY sortOrder`
+  );
+}
+
+export function selectWaiting(db: SQLiteDatabase): Promise<TaskRow[]> {
+  return db.getAllAsync<TaskRow>(
+    `SELECT * FROM tasks
+      WHERE deletedAt IS NULL
+        AND completedAt IS NULL
+        AND blockedBy IS NOT NULL
+      ORDER BY nudgeAt IS NULL, nudgeAt`
   );
 }
 
@@ -270,6 +282,21 @@ export async function setSubtaskCompleted(
   });
 }
 
+export async function setTaskBlocked(
+  db: SQLiteDatabase,
+  id: string,
+  blockedBy: string | null,
+  nudgeAt: number | null,
+  now: number
+): Promise<void> {
+  await db.runAsync(
+    `UPDATE tasks SET blockedBy = $blockedBy, nudgeAt = $nudgeAt,
+      blockedAt = CASE WHEN $blockedBy IS NULL THEN NULL ELSE COALESCE(blockedAt, $now) END
+      WHERE id = $id`,
+    { $blockedBy: blockedBy, $nudgeAt: nudgeAt, $now: now, $id: id }
+  );
+}
+
 export async function setTaskSomeday(
   db: SQLiteDatabase,
   id: string,
@@ -354,8 +381,13 @@ export async function closeDay(
   await db.withTransactionAsync(async () => {
     for (const d of decisions) {
       if (d.outcome === 'carried') {
+        // a blocked row is waiting on someone else, so carrying it must not count against the user
         await db.runAsync(
-          `UPDATE tasks SET dueDate = $dueDate, carryCount = carryCount + 1 WHERE id = $id`,
+          `UPDATE tasks SET
+            dueDate = $dueDate,
+            carryCount = carryCount + (blockedBy IS NULL),
+            nudgeAt = CASE WHEN blockedBy IS NULL THEN nudgeAt ELSE $dueDate END
+            WHERE id = $id`,
           { $dueDate: d.dueDate ?? startOfDay(addDays(stamp, 1)), $id: d.task.id }
         );
       }

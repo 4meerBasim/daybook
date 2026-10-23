@@ -94,7 +94,6 @@ function MainTabs({ navigation }: NativeStackScreenProps<RootParams, 'Main'>) {
             onClose={() => navigation.navigate('ClosePage')}
             onOpenClosed={(day) => navigation.navigate('PageClosed', { day })}
             onOpenTask={(taskId) => navigation.navigate('TaskDetail', { taskId })}
-            onPickDate={() => navigation.navigate('Calendar')}
           />
         </Pane>
         <Pane width={width} shown={tab === 'upcoming'}>

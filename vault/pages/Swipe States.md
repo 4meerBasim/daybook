@@ -5,7 +5,7 @@ Summary: A gesture reference page showing each swipe threshold held open — com
 
 ## Related
 - Connects to: [[Settings]], [[Profile]] — reached from the Shortcuts row on either; returns via the system back gesture, [[Main Tabs]], [[Project Picker]] — what long-press actually does now
-- Features: [[Swipe Row Actions]], [[Ledger Paper Chrome]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]], [[Lift The Ink]]
+- Features: [[Swipe Row Actions]], [[Ledger Paper Chrome]], [[In-App RTL and Arabic Typography]], [[Light and Dark Paper Palettes]], [[Lift The Ink]], [[Waiting On Follow-Ups]]
 - Bugs: [[Swipe Actions Not Wired Into Task Lists]], [[Stack Screens Ignore The Bottom Safe Area]] — latent here; nothing on this screen reaches the gesture area yet, [[Stack Screens Reserve Tab Bar Space]], [[Ink Stroke Spans The Whole Title Column]] — not affected; the demo rows draw no strike, [[Native Layout Direction Is Not Pinned]]
 - Enhancements: [[Waiting On Follow-Ups]]
 

@@ -39,9 +39,11 @@ import {
   selectUndated,
   selectUnfiled,
   selectUpcoming,
+  selectWaiting,
   setPref,
   setSubtaskCompleted,
   setTaskCompleted,
+  setTaskBlocked,
   setTaskSnoozedUntil,
   setTaskSomeday,
   snoozeTask,
@@ -67,6 +69,7 @@ type Snapshot = {
   assigned: TaskRow[];
   unfiled: TaskRow[];
   someday: TaskRow[];
+  waiting: TaskRow[];
   projects: ProjectRow[];
   month: DatedTask[];
   closedToday: ClosedDayRow | null;
@@ -87,6 +90,8 @@ type Store = Snapshot & {
   snooze: (id: string, offset: SnoozeOffset) => void;
   reschedule: (id: string, dueDate: number | null) => void;
   shelve: (id: string) => void;
+  block: (id: string, blockedBy: string, nudgeAt: number) => void;
+  unblock: (id: string) => void;
   unshelve: (id: string, dueDate: number | null) => void;
   remove: (id: string) => void;
   restore: (id: string) => void;
@@ -115,6 +120,7 @@ const EMPTY: Snapshot = {
   assigned: [],
   unfiled: [],
   someday: [],
+  waiting: [],
   projects: [],
   month: [],
   closedToday: null,
@@ -145,6 +151,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         assigned,
         unfiled,
         someday,
+        waiting,
         projects,
         month,
         closedToday,
@@ -159,6 +166,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         selectAssigned(db),
         selectUnfiled(db),
         selectSomeday(db),
+        selectWaiting(db),
         selectProjects(db),
         selectMonth(db, now),
         selectClosedDay(db, now),
@@ -174,6 +182,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         assigned,
         unfiled,
         someday,
+        waiting,
         projects,
         month,
         closedToday,
@@ -206,6 +215,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         snapshot.assigned,
         snapshot.unfiled,
         snapshot.someday,
+        snapshot.waiting,
         snapshot.month,
       ]
         .flat()
@@ -239,6 +249,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         after(setTaskSomeday(db, id, Date.now(), null));
       },
       unshelve: (id, dueDate) => after(setTaskSomeday(db, id, null, dueDate)),
+      block: (id, blockedBy, nudgeAt) =>
+        after(setTaskBlocked(db, id, blockedBy, nudgeAt, Date.now())),
+      unblock: (id) => after(setTaskBlocked(db, id, null, null, Date.now())),
       remove: (id) => {
         offer({ kind: 'deleted', taskId: id });
         after(deleteTask(db, id, Date.now()));
