@@ -1,10 +1,14 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useSQLiteContext } from 'expo-sqlite';
 import { addDays, atTime, dayOfMonth, startOfDay } from '../lib/date';
+import { fromShared } from '../lib/capture';
+import { draft as toDraft, parse } from '../lib/parse';
+import { EN } from '../i18n/strings';
 import type { SnoozeOffset } from '../db/reminders';
 import {
   CAPACITY,
   DEFAULT_CAPACITY_MINUTES,
+  PRIORITY_HIGH,
   DEFAULT_REMINDER_HOUR,
   DISPLAY_NAME,
   INK_DECAY,
@@ -107,6 +111,7 @@ type Store = Snapshot & {
   loaded: boolean;
   revision: number;
   create: (task: NewTask) => void;
+  captureShared: (text: string) => void;
   edit: (id: string, patch: TaskPatch) => void;
   complete: (id: string, done: boolean) => void;
   completeSubtask: (id: string, done: boolean) => void;
@@ -294,6 +299,28 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       loaded,
       revision,
       create: (task) => after(insertTask(db, task, Date.now())),
+      captureShared: (text) => {
+        const { title, link } = fromShared(text);
+        if (!title && !link) return;
+        // parse() matches both scripts' date words regardless of the flag, which only
+        // picks the language of the chip labels this path never renders
+        const draft = toDraft(parse(title, false, EN), Date.now());
+        const bare = !draft.title && link !== null;
+        after(
+          insertTask(
+            db,
+            {
+              title: bare ? link : draft.title,
+              tags: draft.tags,
+              dueDate: draft.dueDate,
+              duration: draft.duration,
+              priority: draft.high ? PRIORITY_HIGH : null,
+              notes: bare ? null : link,
+            },
+            Date.now()
+          )
+        );
+      },
       edit: (id, patch) => after(updateTask(db, id, patch)),
       complete: (id, done) => {
         if (done) offer({ kind: 'struck', taskId: id });

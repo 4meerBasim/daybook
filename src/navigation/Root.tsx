@@ -1,8 +1,14 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { View, useWindowDimensions } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import * as Linking from 'expo-linking';
 import * as Notifications from 'expo-notifications';
-import { NavigationContainer, DefaultTheme, useNavigationState } from '@react-navigation/native';
+import {
+  NavigationContainer,
+  DefaultTheme,
+  useNavigationContainerRef,
+  useNavigationState,
+} from '@react-navigation/native';
 import {
   createNativeStackNavigator,
   type NativeStackScreenProps,
@@ -194,6 +200,27 @@ function Pane({
   );
 }
 
+function SharedCapture({ onCaptured }: { onCaptured: () => void }) {
+  const { captureShared } = useStore();
+
+  useEffect(() => {
+    const take = (url: string | null) => {
+      if (!url) return;
+      const { queryParams } = Linking.parse(url);
+      const text = queryParams?.text;
+      if (typeof text !== 'string' || !text.trim()) return;
+      captureShared(text);
+      onCaptured();
+    };
+
+    Linking.getInitialURL().then(take);
+    const opened = Linking.addEventListener('url', (event) => take(event.url));
+    return () => opened.remove();
+  }, [captureShared, onCaptured]);
+
+  return null;
+}
+
 function Reminders() {
   const { t } = useTheme();
   const { reminders, remindersOn, revision, escaping, escape, closeEscape, openEscape } =
@@ -233,6 +260,7 @@ function Reminders() {
 export function Root() {
   const { c } = useTheme();
   const { loaded, onboarded, markOnboarded } = useStore();
+  const rootRef = useNavigationContainerRef<RootParams>();
 
   const navTheme = useMemo(
     () => ({
@@ -246,7 +274,7 @@ export function Root() {
   if (!loaded) return null;
 
   return (
-    <NavigationContainer theme={navTheme}>
+    <NavigationContainer ref={rootRef} theme={navTheme}>
       <Stack.Navigator
         initialRouteName={onboarded ? 'Main' : 'Onboarding'}
         screenOptions={{ headerShown: false, contentStyle: { backgroundColor: c.paper } }}
@@ -371,6 +399,7 @@ export function Root() {
       </Stack.Navigator>
       <GlobalSlip />
       <Reminders />
+      <SharedCapture onCaptured={() => rootRef.current?.navigate('Unfiled')} />
     </NavigationContainer>
   );
 }

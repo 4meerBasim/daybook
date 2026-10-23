@@ -25,6 +25,7 @@ export type NewTask = {
   dueDate: number | null;
   duration: number | null;
   priority: number | null;
+  notes?: string | null;
 };
 
 export type TaskPatch = {
@@ -204,12 +205,15 @@ export async function insertTask(db: SQLiteDatabase, task: NewTask, now: number)
     'SELECT COALESCE(MAX(sortOrder), 0) + 1 AS next FROM tasks'
   );
   await db.runAsync(
-    `INSERT INTO tasks (id, title, tags, color, dueDate, createdAt, duration, priority, sortOrder)
-      VALUES ($id, $title, $tags, $color, $dueDate, $createdAt, $duration, $priority, $sortOrder)`,
+    `INSERT INTO tasks
+      (id, title, tags, notes, color, dueDate, createdAt, duration, priority, sortOrder)
+      VALUES
+      ($id, $title, $tags, $notes, $color, $dueDate, $createdAt, $duration, $priority, $sortOrder)`,
     {
       $id: newId(),
       $title: task.title,
       $tags: task.tags.length ? task.tags.join(',') : null,
+      $notes: task.notes ?? null,
       $color: DEFAULT_TASK_COLOR,
       $dueDate: task.dueDate,
       $createdAt: now,
